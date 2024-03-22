@@ -1,3 +1,67 @@
+# General ignores
+.DS_Store
+/.idea/
+.externalNativeBuild
+
+# Gradle specific ignores from https://github.com/github/gitignore/blob/main/Gradle.gitignore
+.gradle
+**/build/
+/build
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Android Studio specific ignores from https://github.com/github/gitignore/blob/main/Android.gitignore
+# Local configuration file (sdk path, etc)
+local.properties
+/local.properties
+
+# Log/OS Files
+*.log
+
+# Android Studio generated files and folders
+captures/
+/captures
+.externalNativeBuild/
+.cxx/
+*.apk
+output.json
+
+# IntelliJ
+*.iml
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Android Profiling
+*.hprof
+
+
+# Kotlin (Java) specific specific ignores from https://github.com/github/gitignore/blob/main/Kotlin.gitignore
 # Compiled class file
 *.class
 
