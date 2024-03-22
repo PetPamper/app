@@ -97,7 +97,7 @@ sonar {
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.login", "247705431f5d5670dba9e8c733714f99d4a0c5f0")
+        property("sonar.token", System.getenv("SONAR_TOKEN"))
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
