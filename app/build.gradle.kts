@@ -1,17 +1,19 @@
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
     id("jacoco")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.android.sample"
+    namespace = "com.android.PetPamper"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.android.sample"
+        applicationId = "com.android.PetPamper"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -119,6 +121,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -149,6 +152,18 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
+    implementation("com.google.gms:google-services:4.4.1")
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    implementation("com.google.firebase:firebase-database-ktx:20.3.1")
+    implementation("com.google.firebase:firebase-firestore:24.11.0")
+    implementation("com.google.android.play:core-ktx:1.8.1")
+
+    implementation ("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.google.android.gms:play-services-auth:20.1.0")
+    implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
+    // Use the latest version
 }
 
 tasks.withType<Test> {
