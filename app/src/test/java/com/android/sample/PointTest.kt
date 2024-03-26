@@ -1,5 +1,6 @@
 package com.android.sample
 
+import com.android.PetPamper.Point
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
