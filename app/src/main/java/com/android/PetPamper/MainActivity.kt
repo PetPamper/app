@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -56,15 +55,7 @@ class MainActivity : ComponentActivity() {
     if (result.resultCode == RESULT_OK) {
       // Successfully signed in
       val user = FirebaseAuth.getInstance().currentUser
-      //            val intent = Intent(this, HomePage::class.java).apply {
-      //                // Passer l'ID utilisateur à HomePageActivity
-      //                putExtra("USER_ID", user?.uid)
-      //            }
-      //            startActivity(intent)
-      //            finish()
       updateUI(true, user?.displayName ?: "Unknown")
-
-      // ...
     } else {
       updateUI(false, "")
     }
