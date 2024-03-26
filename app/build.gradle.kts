@@ -152,17 +152,16 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
-    implementation("com.google.gms:google-services:4.4.1")
-    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.google.services)
 
-    implementation("com.google.firebase:firebase-database-ktx:20.3.1")
-    implementation("com.google.firebase:firebase-firestore:24.11.0")
-    implementation("com.google.android.play:core-ktx:1.8.1")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore)
+    implementation (libs.firebase.ui.auth)
 
-    implementation ("com.google.firebase:firebase-auth-ktx")
-    implementation ("com.google.android.gms:play-services-auth:20.1.0")
-    implementation ("com.firebaseui:firebase-ui-auth:8.0.0")
+    implementation(libs.core.ktx)
+
+    implementation (libs.play.services.auth)
     // Use the latest version
 }
 
