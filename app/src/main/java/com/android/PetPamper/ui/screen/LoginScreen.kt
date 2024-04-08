@@ -172,7 +172,7 @@ fun SignIn(navController: NavHostController) {
                 }
 
             Spacer(modifier = Modifier.height(15.dp))
-            CustomTextButton() { navController.navigate("RegisterScreen") }
+            CustomTextButton() { navController.navigate("RegisterScreen1") }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -203,9 +203,9 @@ fun SignIn(navController: NavHostController) {
                   Button(
                       onClick = { /* Implement register as a groomer logic */},
                       colors = ButtonDefaults.buttonColors(Color.Black),
-                      modifier = Modifier.width(300.dp).height(48.dp)) {
+                      modifier = Modifier.width(200.dp).height(48.dp)) {
                         Text(
-                            "Register / SignIn as a Groomer", color = Color.White, fontSize = 16.sp)
+                            "I am a Groomer", color = Color.White, fontSize = 16.sp)
                       }
                 }
           }
