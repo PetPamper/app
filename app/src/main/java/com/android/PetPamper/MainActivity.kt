@@ -31,22 +31,16 @@ class MainActivity : ComponentActivity() {
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
-      composable("HomeScreen/{email}") {backStackEntry ->
+      composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
-        var nameUser = remember {
-          mutableStateOf("")
-        }
+        var nameUser = remember { mutableStateOf("") }
         firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
           val uid = documents.documents[0]?.id.toString()
           val UserViewModel = UserViewModel(uid)
           UserViewModel.getNameFromFirebase { name -> nameUser.value = name }
         }
         Text(text = "Welcome ${nameUser.value}")
-
       }
     }
   }
-
 }
-
-

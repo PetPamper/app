@@ -1,8 +1,6 @@
 package com.android.PetPamper.ui.screen.RegisterScreen
 
-import android.graphics.Rect
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,10 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -30,13 +25,8 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.User
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.DpRect
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.navigationBarsWithImePadding
 
 class SignUpViewModel() {
 
@@ -134,9 +124,9 @@ fun SignUpScreen(viewModel: SignUpViewModel, navController: NavController) {
                             viewModel.phoneNumber,
                             viewModel.address),
                         onSuccess = { currentStep++ },
-                        onFailure = { error -> Log.e("SignUp", "Registration failed", error)})
+                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
                   },
-                  onFailure = { error -> Log.e("SignUp", "Registration failed", error)})
+                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
             } else {
               // Show error message
             }
@@ -168,14 +158,12 @@ fun SignUpScreenLayout(
   var postaleCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
 
-    val imeVisible = LocalWindowInsets.current.ime.isVisible
-    val keyboardOpenState = remember { mutableStateOf(false) }
+  val imeVisible = LocalWindowInsets.current.ime.isVisible
+  val keyboardOpenState = remember { mutableStateOf(false) }
 
-    keyboardOpenState.value = imeVisible
+  keyboardOpenState.value = imeVisible
 
-
-
-    val proceedWithNext = {
+  val proceedWithNext = {
     var isValidInput = true
 
     when (fieldname) {
@@ -319,28 +307,31 @@ fun SignUpScreenLayout(
                     Modifier.fillMaxSize() // Apply background for the entire screen if necessary
                 ) {
                   Column(
-
                       modifier =
-                        if (textField.isNotBlank()){
-                          Modifier.align(
-                                  Alignment
-                                      .Center) // Align the Column to the bottom-center of the
-                              // Box
-                              .fillMaxWidth() // The Column should fill the maximum width of the Box
-                              .navigationBarsWithImePadding() // Apply padding for navigation bar
-                              // and IME // The light gray
-                              // background for the Column
-                              .padding(16.dp) } else {
-                                Modifier.align(
-                                Alignment
-                                    .BottomCenter) // Align the Column to the bottom-center of the
+                          if (textField.isNotBlank()) {
+                            Modifier.align(
+                                    Alignment
+                                        .Center) // Align the Column to the bottom-center of the
                                 // Box
-                                .fillMaxWidth() // The Column should fill the maximum width of the Box
+                                .fillMaxWidth() // The Column should fill the maximum width of the
+                                                // Box
                                 .navigationBarsWithImePadding() // Apply padding for navigation bar
                                 // and IME // The light gray
                                 // background for the Column
-                                .padding(16.dp)},
-
+                                .padding(16.dp)
+                          } else {
+                            Modifier.align(
+                                    Alignment
+                                        .BottomCenter) // Align the Column to the bottom-center of
+                                                       // the
+                                // Box
+                                .fillMaxWidth() // The Column should fill the maximum width of the
+                                                // Box
+                                .navigationBarsWithImePadding() // Apply padding for navigation bar
+                                // and IME // The light gray
+                                // background for the Column
+                                .padding(16.dp)
+                          },
                       verticalArrangement = Arrangement.Center,
                       horizontalAlignment = Alignment.End) {
                         Button(

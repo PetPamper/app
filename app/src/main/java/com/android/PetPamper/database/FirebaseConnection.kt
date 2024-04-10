@@ -21,13 +21,14 @@ class FirebaseConnection {
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
-    fun getUserData(uid: String): Task<DocumentSnapshot> {
-        return db.collection("users").document(uid).get()
-    }
+  fun getUserData(uid: String): Task<DocumentSnapshot> {
+    return db.collection("users").document(uid).get()
+  }
 
-    fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
-        return db.collection("users").whereEqualTo("email", email).get()
-    }
+  fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
+    return db.collection("users").whereEqualTo("email", email).get()
+  }
+
   fun registerUser(
       email: String,
       password: String,

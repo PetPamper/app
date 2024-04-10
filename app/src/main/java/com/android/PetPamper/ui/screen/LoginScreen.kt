@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -51,12 +50,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
-import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.C
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.firebase.ui.auth.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 
 private fun OnSignInResult(
@@ -78,9 +75,8 @@ fun SignIn(navController: NavHostController) {
   var displayName by remember { mutableStateOf("") }
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-    var firebaseConnection = FirebaseConnection()
-    var login by remember { mutableStateOf(true) }
-
+  var firebaseConnection = FirebaseConnection()
+  var login by remember { mutableStateOf(true) }
 
   val signInLauncher =
       rememberLauncherForActivityResult(
@@ -99,16 +95,12 @@ fun SignIn(navController: NavHostController) {
 
   if (!signedIn) {
 
-    Surface(modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())) {
+    Surface(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
       Column(horizontalAlignment = Alignment.End) {
         Image(
             painter = painterResource(id = R.mipmap.dog_rounded_foreground),
             contentDescription = "App Logo",
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape))
+            modifier = Modifier.size(120.dp).clip(CircleShape))
       }
 
       Spacer(modifier = Modifier.height(5.dp))
@@ -116,9 +108,7 @@ fun SignIn(navController: NavHostController) {
       Column(
           horizontalAlignment = Alignment.Start,
           verticalArrangement = Arrangement.Center,
-          modifier = Modifier
-              .fillMaxWidth()
-              .padding(16.dp)) {
+          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Spacer(modifier = Modifier.height(5.dp))
 
             Text(
@@ -144,7 +134,7 @@ fun SignIn(navController: NavHostController) {
 
             OutlinedTextField(
                 value = email, // Bind to state in real implementation
-                onValueChange = {email = it }, // Implement logic in real implementation
+                onValueChange = { email = it }, // Implement logic in real implementation
                 label = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth())
@@ -153,7 +143,7 @@ fun SignIn(navController: NavHostController) {
 
             OutlinedTextField(
                 value = password, // Bind to state in real implementation
-                onValueChange = {password = it}, // Implement logic in real implementation
+                onValueChange = { password = it }, // Implement logic in real implementation
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -166,11 +156,9 @@ fun SignIn(navController: NavHostController) {
                   text = "Login failed, email or password is incorrect",
                   color = Color.Red,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth()
-              )
-                Spacer(modifier = Modifier.height(4.dp))
+                  modifier = Modifier.fillMaxWidth())
+              Spacer(modifier = Modifier.height(4.dp))
             }
-
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
               Text(
@@ -189,22 +177,21 @@ fun SignIn(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        login = false
-                    } else {
-                        firebaseConnection.loginUser(email, password,
-                            {
-                                login = true
-                                navController.navigate("HomeScreen/${email}")
-                            },
-                            { login = false })
-                    }
+                  if (email.isBlank() || password.isBlank()) {
+                    login = false
+                  } else {
+                    firebaseConnection.loginUser(
+                        email,
+                        password,
+                        {
+                          login = true
+                          navController.navigate("HomeScreen/${email}")
+                        },
+                        { login = false })
+                  }
                 },
-
                 colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)) {
+                modifier = Modifier.fillMaxWidth().height(48.dp)) {
                   Text("LOG IN", fontSize = 18.sp)
                 }
 
@@ -240,9 +227,7 @@ fun SignIn(navController: NavHostController) {
                   Button(
                       onClick = { /* Implement register as a groomer logic */},
                       colors = ButtonDefaults.buttonColors(Color.Black),
-                      modifier = Modifier
-                          .width(200.dp)
-                          .height(48.dp)) {
+                      modifier = Modifier.width(200.dp).height(48.dp)) {
                         Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
                       }
                 }
@@ -265,20 +250,17 @@ fun GoogleSignInButton() {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
       modifier =
-      Modifier
-          .height(80.dp)
-          .fillMaxWidth() // This will make the Column fill the entire screen
+          Modifier.height(80.dp).fillMaxWidth() // This will make the Column fill the entire screen
       ) {
         Image(
             painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
             contentDescription = "Google Logo",
             modifier =
-            Modifier
-                .size(80.dp) // Size of the image
-                .clip(CircleShape) // Clip image to circle shape
-                .clickable {
-                    // TODO: Implement Google Sign-In logic
-                })
+                Modifier.size(80.dp) // Size of the image
+                    .clip(CircleShape) // Clip image to circle shape
+                    .clickable {
+                      // TODO: Implement Google Sign-In logic
+                    })
       }
 }
 
