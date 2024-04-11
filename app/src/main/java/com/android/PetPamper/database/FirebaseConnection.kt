@@ -1,9 +1,13 @@
 package com.android.PetPamper.database
 
 import com.android.PetPamper.model.User
+
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 
 class FirebaseConnection {
@@ -11,12 +15,22 @@ class FirebaseConnection {
   private val db: FirebaseFirestore = Firebase.firestore
 
 
-    fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        db.collection("users").document(user.email)
-            .set(user)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { exception -> onFailure(exception) }
-    }
+  fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    db.collection("users")
+        .document(user.email)
+        .set(user)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  fun getUserData(uid: String): Task<DocumentSnapshot> {
+    return db.collection("users").document(uid).get()
+  }
+
+  fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
+    return db.collection("users").whereEqualTo("email", email).get()
+  }
+
 
   fun registerUser(
       email: String,

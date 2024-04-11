@@ -115,6 +115,7 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     testImplementation(dep)
 }
 
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -129,9 +130,10 @@ dependencies {
     globalTestImplementation(libs.androidx.espresso.core)
 
     // ------------- Jetpack Compose ------------------
-    val composeBom = platform(libs.compose.bom)
-    implementation(composeBom)
-    globalTestImplementation(composeBom)
+
+    implementation(libs.androidx.ui)
+    implementation("androidx.compose.ui:ui:1.6.5")
+    implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -164,6 +166,7 @@ dependencies {
     implementation(libs.core.ktx)
 
     implementation (libs.play.services.auth)
+    implementation (libs.accompanist.insets)
     // Use the latest version
 }
 

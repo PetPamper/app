@@ -34,7 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
+simport androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -46,11 +48,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
+
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.android.PetPamper.R
+import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.resources.C
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -75,7 +79,11 @@ fun SignIn(navController: NavHostController) {
   var signedIn by remember { mutableStateOf(false) }
   var displayName by remember { mutableStateOf("") }
 
-  val context = LocalContext.current
+  val context = Local.current
+  var email by remember { mutableStateOf("") }
+  var password by remember { mutableStateOf("") }
+  var firebaseConnection = FirebaseConnection()
+  var login by remember { mutableStateOf(true) }
 
   val signInLauncher =
       rememberLauncherForActivityResult(
@@ -132,8 +140,9 @@ fun SignIn(navController: NavHostController) {
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = "", // Bind to state in real implementation
-                onValueChange = {}, // Implement logic in real implementation
+
+                value = email, // Bind to state in real implementation
+                onValueChange = { email = it }, // Implement logic in real implementation
                 label = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth())
@@ -141,8 +150,8 @@ fun SignIn(navController: NavHostController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = "", // Bind to state in real implementation
-                onValueChange = {}, // Implement logic in real implementation
+                value = password, // Bind to state in real implementation
+                onValueChange = { password = it }, // Implement logic in real implementation
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -150,9 +159,21 @@ fun SignIn(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(15.dp))
 
+
           CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
 
             /*Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+            if (!login) {
+              Text(
+                  text = "Login failed, email or password is incorrect",
+                  color = Color.Red,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.fillMaxWidth())
+              Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+
               Text(
                   text = "Forgot Password?",
                   style =
@@ -163,18 +184,36 @@ fun SignIn(navController: NavHostController) {
                           color = Color(0xFF2490DF),
                           textAlign = TextAlign.Center,
                       ))
+
             }*/
+            //}
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* Implement login logic */},
+
+                onClick = {
+                  if (email.isBlank() || password.isBlank()) {
+                    login = false
+                  } else {
+                    firebaseConnection.loginUser(
+                        email,
+                        password,
+                        {
+                          login = true
+                          navController.navigate("HomeScreen/${email}")
+                        },
+                        { login = false })
+                  }
+                },
+              
                 colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
                 modifier = Modifier.fillMaxWidth().height(48.dp)) {
                   Text("LOG IN", fontSize = 18.sp)
                 }
 
             Spacer(modifier = Modifier.height(15.dp))
+
             CustomTextButton("REGISTER","Don't have an account? ") { navController.navigate("RegisterScreen1") }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -209,6 +248,7 @@ fun SignIn(navController: NavHostController) {
                       modifier = Modifier.width(200.dp).height(48.dp)) {
                         Text(
                             "I am a Groomer", color = Color.White, fontSize = 16.sp)
+
                       }
                 }
           }
@@ -245,6 +285,7 @@ fun GoogleSignInButton() {
 }
 
 @Composable
+
 fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Unit) {
   Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
     val annotatedString = buildAnnotatedString {
@@ -252,11 +293,13 @@ fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Un
 
       // Attach an annotation tag to the "REGISTER" text
       pushStringAnnotation(tag = tag, annotation = tag.lowercase())
+
       withStyle(
           style =
               SpanStyle(
                   color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600))) {
             append(tag)
+
           }
       pop() // This call removes the last added style and/or annotation from the stack
     }
@@ -269,6 +312,7 @@ fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Un
           // Check if the click happened on the "REGISTER" text
           annotatedString
               .getStringAnnotations(tag = tag, start = offset, end = offset)
+
               .firstOrNull()
               ?.let { onRegisterClick() }
         },
@@ -276,7 +320,6 @@ fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Un
         )
   }
 }
-
 
 
 // Button(
