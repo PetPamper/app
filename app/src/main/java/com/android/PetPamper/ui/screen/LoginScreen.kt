@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 
-simport androidx.compose.ui.platform.LocalContext
+
 
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -79,7 +79,6 @@ fun SignIn(navController: NavHostController) {
   var signedIn by remember { mutableStateOf(false) }
   var displayName by remember { mutableStateOf("") }
 
-  val context = Local.current
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var firebaseConnection = FirebaseConnection()
