@@ -64,4 +64,23 @@ class FirebaseConnection {
       }
     }
   }
+
+    fun resetUserPassword( password: String,password2: String){
+
+    }
+
+    fun verifyObCode(oobCode:String):Boolean{
+        return FirebaseAuth.getInstance().verifyPasswordResetCode(oobCode).isSuccessful
+    }
+
+    fun restPasswordSendEmail(email: String) :Boolean {
+        var res = false
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    res = true
+                }
+            }
+        return res
+    }
 }
