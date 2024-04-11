@@ -134,6 +134,9 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation("androidx.compose.ui:ui:1.6.5")
     implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation ("androidx.test:runner:1.4.0")
+    androidTestImplementation ("androidx.test:rules:1.4.0")
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)

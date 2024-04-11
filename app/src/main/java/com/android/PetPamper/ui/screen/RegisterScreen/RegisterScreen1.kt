@@ -314,7 +314,7 @@ fun SignUpScreenLayout(
                                         .Center) // Align the Column to the bottom-center of the
                                 // Box
                                 .fillMaxWidth() // The Column should fill the maximum width of the
-                                                // Box
+                                // Box
                                 .navigationBarsWithImePadding() // Apply padding for navigation bar
                                 // and IME // The light gray
                                 // background for the Column
@@ -323,10 +323,10 @@ fun SignUpScreenLayout(
                             Modifier.align(
                                     Alignment
                                         .BottomCenter) // Align the Column to the bottom-center of
-                                                       // the
+                                // the
                                 // Box
                                 .fillMaxWidth() // The Column should fill the maximum width of the
-                                                // Box
+                                // Box
                                 .navigationBarsWithImePadding() // Apply padding for navigation bar
                                 // and IME // The light gray
                                 // background for the Column

@@ -1,5 +1,6 @@
 package com.android.PetPamper.ui.screen
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -78,6 +80,7 @@ fun SignIn(navController: NavHostController) {
   var firebaseConnection = FirebaseConnection()
   var login by remember { mutableStateOf(true) }
 
+
   val signInLauncher =
       rememberLauncherForActivityResult(
           FirebaseAuthUIActivityResultContract(),
@@ -95,7 +98,7 @@ fun SignIn(navController: NavHostController) {
 
   if (!signedIn) {
 
-    Surface(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Surface(modifier = Modifier.fillMaxSize().semantics { testTag = "LoginScreen" }.verticalScroll(rememberScrollState())) {
       Column(horizontalAlignment = Alignment.End) {
         Image(
             painter = painterResource(id = R.mipmap.dog_rounded_foreground),
@@ -119,7 +122,9 @@ fun SignIn(navController: NavHostController) {
                         lineHeight = 34.sp,
                         fontWeight = FontWeight(800),
                         color = Color(0xFF2490DF),
-                    ))
+                    ),
+                modifier = Modifier.testTag("LoginTitle")
+            )
             Text(
                 text = "Login to start with PetPamper 👋",
                 style =
@@ -156,7 +161,9 @@ fun SignIn(navController: NavHostController) {
                   text = "Login failed, email or password is incorrect",
                   color = Color.Red,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth())
+                  modifier = Modifier.fillMaxWidth()
+                      .semantics { testTag = "ErrorMessage" })
+
               Spacer(modifier = Modifier.height(4.dp))
             }
 
@@ -191,7 +198,7 @@ fun SignIn(navController: NavHostController) {
                   }
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier.fillMaxWidth().height(48.dp)) {
+                modifier = Modifier.testTag("loginButton").fillMaxWidth().height(48.dp)) {
                   Text("LOG IN", fontSize = 18.sp)
                 }
 
