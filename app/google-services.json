@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "776231202916-9u4t9kaeugvi7mfpmeitnn8b5v76r9cl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "14cb33c3640a28bda0bba889ad5fc0571bf1a729"
+          }
+        },
+        {
+          "client_id": "776231202916-c21s3ojt5m483ci7t95k19o77sltjekf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "6ca8d4202460dc1b3caf2a27a55ed976916528f7"
+          }
+        },
+        {
           "client_id": "776231202916-bb96b68r7b4poviq2jfrorgig1csc1gf.apps.googleusercontent.com",
           "client_type": 3
         }

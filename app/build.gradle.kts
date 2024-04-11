@@ -115,6 +115,7 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     testImplementation(dep)
 }
 
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -122,14 +123,20 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
 
     // ------------- Jetpack Compose ------------------
-    val composeBom = platform(libs.compose.bom)
-    implementation(composeBom)
-    globalTestImplementation(composeBom)
+
+    implementation(libs.androidx.ui)
+    implementation("androidx.compose.ui:ui:1.6.5")
+    implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation ("androidx.test:runner:1.4.0")
+    androidTestImplementation ("androidx.test:rules:1.4.0")
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -162,6 +169,7 @@ dependencies {
     implementation(libs.core.ktx)
 
     implementation (libs.play.services.auth)
+    implementation (libs.accompanist.insets)
     // Use the latest version
 }
 
