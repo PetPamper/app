@@ -95,7 +95,97 @@ fun SignUpScreen(viewModel: SignUpViewModel, navController: NavController) {
 
 
   // Add more steps as needed
-  }
+}
+
+@Composable
+fun GoogleSignUpScreen(viewModel: SignUpViewModel, navController: NavController) {
+    var currentStep by remember { mutableStateOf(1) }
+
+    // Determine the initial step based on data provided by Google Auth
+    LaunchedEffect(key1 = viewModel.name, key2 = viewModel.email) {
+        if (viewModel.name.isNotEmpty() && viewModel.email.isNotEmpty()) {
+            // Assuming phone number is the next required field
+            currentStep = 3
+        }
+    }
+
+    when (currentStep) {
+        3 -> SignUpScreenLayout(
+            currentStep = currentStep,
+            isAddress = false,
+            textShown = "What’s your phone number?",
+            fieldname = "Phone Number",
+            viewModel = viewModel,
+            onNext = { newPhoneNumber ->
+                viewModel.phoneNumber = newPhoneNumber
+                currentStep++
+            }
+        )
+        4 -> SignUpScreenLayout(
+            currentStep = currentStep,
+            isAddress = true,
+            textShown = "Enter your Address?",
+            fieldname = "Street",
+            viewModel = viewModel,
+            onNextAddress = { street, city, state, postalCode ->
+                viewModel.address.apply {
+                    this.street = street
+                    this.city = city
+                    this.state = state
+                    this.postalCode = postalCode
+                }
+                currentStep++
+            }
+        )
+        5 -> SignUpScreenLayout(
+            currentStep = currentStep,
+            isAddress = false,
+            textShown = "Great! Create your password",
+            fieldname = "Password",
+            viewModel = viewModel,
+            onNext = { password ->
+                viewModel.password = password
+                currentStep++
+            }
+        )
+        6 -> SignUpScreenLayout(
+            currentStep = currentStep,
+            isAddress = false,
+            textShown = "Confirm your password",
+            fieldname = "Confirm Password",
+            viewModel = viewModel,
+            confirmPassword = viewModel.password,
+            onNext = { confirmedPassword ->
+                if (viewModel.password == confirmedPassword) {
+                    val firebaseConnection = FirebaseConnection()
+                    firebaseConnection.registerUser(
+                        viewModel.email,
+                        viewModel.password,
+                        onSuccess = {
+                            firebaseConnection.addUser(
+                                User(
+                                    viewModel.name,
+                                    viewModel.email,
+                                    viewModel.phoneNumber,
+                                    viewModel.address
+                                ),
+                                onSuccess = { navController.navigate("LoginScreen") },
+                                onFailure = { error -> Log.e("SignUp", "User addition failed", error) }
+                            )
+                        },
+                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
+                    )
+                } else {
+                    Log.e("SignUp", "Passwords do not match")
+                }
+            }
+        )
+    }
+}
+
+
+
+
 
 
 
