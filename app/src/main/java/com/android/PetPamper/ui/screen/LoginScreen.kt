@@ -1,6 +1,8 @@
 package com.android.PetPamper.ui.screen
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -22,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -192,7 +195,7 @@ fun SignIn(navController: NavHostController) {
                           ))
                 }
 
-            GoogleSignInButton() // Define this composable to match the style
+            GoogleSignInButton(signInLauncher = signInLauncher) // Define this composable to match the style
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -221,25 +224,31 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun GoogleSignInButton() {
-  // Create a button that looks like the Google Sign-In button
-  Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier =
-          Modifier.height(80.dp).fillMaxWidth() // This will make the Column fill the entire screen
-      ) {
-        Image(
+fun GoogleSignInButton(signInLauncher: ManagedActivityResultLauncher<Intent, FirebaseAuthUIAuthenticationResult>) {
+    Button(
+        onClick = {
+            // Here we launch the sign-in intent which will open the Google sign-in UI
+            val signInIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build()))
+                .setIsSmartLockEnabled(false)
+                .build()
+            signInLauncher.launch(signInIntent)
+        },
+        modifier = Modifier
+            .height(50.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        colors = ButtonDefaults.buttonColors(Color(0xFF4285F4))
+    ) {
+        Icon(
             painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
             contentDescription = "Google Logo",
-            modifier =
-                Modifier.size(80.dp) // Size of the image
-                    .clip(CircleShape) // Clip image to circle shape
-                    .clickable {
-                      // TODO: Implement Google Sign-In logic
-                    })
-      }
+            tint = Color.Unspecified
+        )
+    }
 }
+
 
 @Composable
 fun CustomTextButton(onRegisterClick: () -> Unit) {
