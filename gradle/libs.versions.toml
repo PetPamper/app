@@ -26,7 +26,9 @@ sonar = "4.4.1.3373"
 firebaseAuthKtx = "22.3.1"
 navigationCompose = "2.7.7"
 navigationRuntimeKtx = "2.7.7"
+
 ui = "1.6.5"
+
 
 [libraries]
 accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanistInsets" }

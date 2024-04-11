@@ -3,6 +3,10 @@ package com.android.PetPamper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+
+import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
+import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
+
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +20,7 @@ import com.android.PetPamper.ui.screen.RegisterScreen.SignUpScreen
 import com.android.PetPamper.ui.screen.RegisterScreen.SignUpViewModel
 import com.android.PetPamper.ui.screen.SignIn
 
+
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -26,11 +31,15 @@ class MainActivity : ComponentActivity() {
   fun AppNavigation() {
     val navController = rememberNavController() // Create the NavHostController
     val signUp = SignUpViewModel()
+    val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
+
 
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
+
+      composable("EmailScreen") { EmailScreen(emailViewModel,navController) }
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         var nameUser = remember { mutableStateOf("") }

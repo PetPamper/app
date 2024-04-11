@@ -34,6 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+
+simport androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -44,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toLowerCase
+
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +78,8 @@ private fun OnSignInResult(
 fun SignIn(navController: NavHostController) {
   var signedIn by remember { mutableStateOf(false) }
   var displayName by remember { mutableStateOf("") }
+
+  val context = Local.current
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var firebaseConnection = FirebaseConnection()
@@ -133,6 +140,7 @@ fun SignIn(navController: NavHostController) {
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
+
                 value = email, // Bind to state in real implementation
                 onValueChange = { email = it }, // Implement logic in real implementation
                 label = { Text("Email") },
@@ -151,6 +159,10 @@ fun SignIn(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(15.dp))
 
+
+          CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
+
+            /*Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             if (!login) {
               Text(
                   text = "Login failed, email or password is incorrect",
@@ -161,6 +173,7 @@ fun SignIn(navController: NavHostController) {
             }
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+
               Text(
                   text = "Forgot Password?",
                   style =
@@ -171,11 +184,14 @@ fun SignIn(navController: NavHostController) {
                           color = Color(0xFF2490DF),
                           textAlign = TextAlign.Center,
                       ))
-            }
+
+            }*/
+            //}
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
+
                 onClick = {
                   if (email.isBlank() || password.isBlank()) {
                     login = false
@@ -190,13 +206,15 @@ fun SignIn(navController: NavHostController) {
                         { login = false })
                   }
                 },
+              
                 colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
                 modifier = Modifier.fillMaxWidth().height(48.dp)) {
                   Text("LOG IN", fontSize = 18.sp)
                 }
 
             Spacer(modifier = Modifier.height(15.dp))
-            CustomTextButton() { navController.navigate("RegisterScreen1") }
+
+            CustomTextButton("REGISTER","Don't have an account? ") { navController.navigate("RegisterScreen1") }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -228,7 +246,9 @@ fun SignIn(navController: NavHostController) {
                       onClick = { /* Implement register as a groomer logic */},
                       colors = ButtonDefaults.buttonColors(Color.Black),
                       modifier = Modifier.width(200.dp).height(48.dp)) {
-                        Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
+                        Text(
+                            "I am a Groomer", color = Color.White, fontSize = 16.sp)
+
                       }
                 }
           }
@@ -265,18 +285,21 @@ fun GoogleSignInButton() {
 }
 
 @Composable
-fun CustomTextButton(onRegisterClick: () -> Unit) {
+
+fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Unit) {
   Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
     val annotatedString = buildAnnotatedString {
-      append("Don't have an account? ")
+      append(annotated)
 
       // Attach an annotation tag to the "REGISTER" text
-      pushStringAnnotation(tag = "REGISTER", annotation = "register")
+      pushStringAnnotation(tag = tag, annotation = tag.lowercase())
+
       withStyle(
           style =
               SpanStyle(
                   color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600))) {
-            append("REGISTER")
+            append(tag)
+
           }
       pop() // This call removes the last added style and/or annotation from the stack
     }
@@ -288,7 +311,8 @@ fun CustomTextButton(onRegisterClick: () -> Unit) {
         onClick = { offset ->
           // Check if the click happened on the "REGISTER" text
           annotatedString
-              .getStringAnnotations(tag = "REGISTER", start = offset, end = offset)
+              .getStringAnnotations(tag = tag, start = offset, end = offset)
+
               .firstOrNull()
               ?.let { onRegisterClick() }
         },
@@ -296,6 +320,7 @@ fun CustomTextButton(onRegisterClick: () -> Unit) {
         )
   }
 }
+
 
 // Button(
 // onClick = {
