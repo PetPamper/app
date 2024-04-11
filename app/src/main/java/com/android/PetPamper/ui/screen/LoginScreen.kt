@@ -51,8 +51,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.android.PetPamper.R
+import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.resources.C
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -63,67 +65,73 @@ private fun OnSignInResult(
     result: FirebaseAuthUIAuthenticationResult,
     updateUI: (Boolean, String) -> Unit
 ) {
-  if (result.resultCode == ComponentActivity.RESULT_OK) {
-    // Successfully signed in
-    val user = FirebaseAuth.getInstance().currentUser
-    updateUI(true, user?.displayName ?: "Unknown")
-  } else {
-    updateUI(false, "")
-  }
+    if (result.resultCode == ComponentActivity.RESULT_OK) {
+        // Successfully signed in
+        val user = FirebaseAuth.getInstance().currentUser
+        updateUI(true, user?.displayName ?: "Unknown")
+    } else {
+        updateUI(false, "")
+    }
 }
 
 @Composable
 fun SignIn(navController: NavHostController) {
-  var signedIn by remember { mutableStateOf(false) }
-  var displayName by remember { mutableStateOf("") }
+    var signedIn by remember { mutableStateOf(false) }
+    var displayName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var firebaseConnection = FirebaseConnection()
+    var login by remember { mutableStateOf(true) }
 
-  val context = LocalContext.current
-
-  val signInLauncher =
-      rememberLauncherForActivityResult(
-          FirebaseAuthUIActivityResultContract(),
-      ) { res ->
+    val context = LocalContext.current
+    val signInLauncher = rememberLauncherForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { res ->
         OnSignInResult(res) { success, name ->
-          signedIn = success
-          displayName = name
+            signedIn = success
+            displayName = name
+            if (success) {
+                // Navigate to a specific screen upon successful login
+                navController.navigate("HomeScreen")
+            }
         }
-      }
+    }
 
-  val providers =
-      arrayListOf(
-          AuthUI.IdpConfig.GoogleBuilder().build(),
-      )
+    val providers =
+        arrayListOf(
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+        )
 
-  if (!signedIn) {
+    if (!signedIn) {
 
-    Surface(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-      Column(horizontalAlignment = Alignment.End) {
-        Image(
-            painter = painterResource(id = R.mipmap.dog_rounded_foreground),
-            contentDescription = "App Logo",
-            modifier = Modifier.size(120.dp).clip(CircleShape))
-      }
+        Surface(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            Column(horizontalAlignment = Alignment.End) {
+                Image(
+                    painter = painterResource(id = R.mipmap.dog_rounded_foreground),
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(120.dp).clip(CircleShape))
+            }
 
-      Spacer(modifier = Modifier.height(5.dp))
-
-      Column(
-          horizontalAlignment = Alignment.Start,
-          verticalArrangement = Arrangement.Center,
-          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Spacer(modifier = Modifier.height(5.dp))
 
-            Text(
-                text = "Welcome,",
-                style =
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "Welcome,",
+                    style =
                     TextStyle(
                         fontSize = 40.sp,
                         lineHeight = 34.sp,
                         fontWeight = FontWeight(800),
                         color = Color(0xFF2490DF),
                     ))
-            Text(
-                text = "Login to start with PetPamper 👋",
-                style =
+                Text(
+                    text = "Login to start with PetPamper 👋",
+                    style =
                     TextStyle(
                         fontSize = 20.sp,
                         lineHeight = 34.sp,
@@ -131,71 +139,189 @@ fun SignIn(navController: NavHostController) {
                         color = Color.Black,
                     ))
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-            OutlinedTextField(
-                value = "", // Bind to state in real implementation
-                onValueChange = {}, // Implement logic in real implementation
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = email, // Bind to state in real implementation
+                    onValueChange = { email = it }, // Implement logic in real implementation
+                    label = { Text("Email") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth())
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = "", // Bind to state in real implementation
-                onValueChange = {}, // Implement logic in real implementation
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = password, // Bind to state in real implementation
+                    onValueChange = { password = it }, // Implement logic in real implementation
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth())
 
-            Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-              Text(
-                  text = "Forgot Password?",
-                  style =
-                      TextStyle(
-                          fontSize = 16.sp,
-                          lineHeight = 24.sp,
-                          fontWeight = FontWeight(800),
-                          color = Color(0xFF2490DF),
-                          textAlign = TextAlign.Center,
-                      ))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { /* Implement login logic */},
-                colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier.fillMaxWidth().height(48.dp)) {
-                  Text("LOG IN", fontSize = 18.sp)
+                if (!login) {
+                    Text(
+                        text = "Login failed, email or password is incorrect",
+                        color = Color.Red,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
 
+                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Forgot Password?",
+                        style =
+                        TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                            fontWeight = FontWeight(800),
+                            color = Color(0xFF2490DF),
+                            textAlign = TextAlign.Center,
+                        ))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        if (email.isBlank() || password.isBlank()) {
+                            login = false
+                        } else {
+                            firebaseConnection.loginUser(
+                                email,
+                                password,
+                                {
+                                    login = true
+                                    navController.navigate("HomeScreen/${email}")
+                                },
+                                { login = false })
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+                    modifier = Modifier.fillMaxWidth().height(48.dp)) {
+                    Text("LOG IN", fontSize = 18.sp)
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+                CustomTextButton() { navController.navigate("RegisterScreen1") }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "or sign in with",
+                        style =
+                        TextStyle(
+                            fontSize = 14.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight(800),
+                            color = Color(0xFF52525B),
+                            textAlign = TextAlign.Center,
+                        ))
+                }
+
+                GoogleSignInButton(signInLauncher=signInLauncher) // Define this composable to match the style
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { /* Implement register as a groomer logic */},
+                        colors = ButtonDefaults.buttonColors(Color.Black),
+                        modifier = Modifier.width(200.dp).height(48.dp)) {
+                        Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
+                    }
+                }
+            }
+        }
+    } else {
+        Greeting(name = "PetPamper")
+    }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(text = "Hello $name!", modifier = modifier.semantics { testTag = C.Tag.greeting })
+}
+
+@Composable
+fun LoginButton(
+    navController: NavController,
+    email: String,
+    password: String,
+    setLogin: (Boolean) -> Unit,
+    firebaseConnection: FirebaseConnection
+) {
+    Button(
+        onClick = {
+            if (email.isBlank() || password.isBlank()) {
+                setLogin(false) // Update UI to show login failed if fields are blank
+            } else {
+                firebaseConnection.loginUser(
+                    email,
+                    password,
+                    onSuccess = {
+                        setLogin(true)
+                        navController.navigate("HomeScreen/${email}") // Navigate to HomeScreen on success
+                    },
+                    onFailure = {
+                        setLogin(false) // Set login false if authentication fails
+                    }
+                )
+            }
+        },
+        colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+        modifier = Modifier.fillMaxWidth().height(48.dp)
+    ) {
+        Text("LOG IN", fontSize = 18.sp)
+    }
+}
+
+@Composable
+fun LoginScreenContent(
+    navController: NavHostController,
+    signInLauncher: ManagedActivityResultLauncher<Intent, FirebaseAuthUIAuthenticationResult>,
+    providers: List<AuthUI.IdpConfig>,
+    email: String,
+    setEmail: (String) -> Unit,
+    password: String,
+    setPassword: (String) -> Unit,
+    login: Boolean,
+    setLogin: (Boolean) -> Unit,
+    firebaseConnection: FirebaseConnection
+) {
+    Surface(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(id = R.mipmap.dog_rounded_foreground),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(120.dp).clip(CircleShape)
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text("Welcome,", style = TextStyle(fontSize = 40.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF)))
+            Text("Login to start with PetPamper 👋", style = TextStyle(fontSize = 20.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold, color = Color.Black))
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            EmailAndPasswordFields(email, setEmail, password, setPassword)
+
             Spacer(modifier = Modifier.height(15.dp))
-            CustomTextButton() { navController.navigate("RegisterScreen1") }
+
+            LoginButton(navController, email, password, setLogin, firebaseConnection)
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()) {
-                  Text(
-                      text = "or sign in with",
-                      style =
-                          TextStyle(
-                              fontSize = 14.sp,
-                              lineHeight = 22.sp,
-                              fontWeight = FontWeight(800),
-                              color = Color(0xFF52525B),
-                              textAlign = TextAlign.Center,
-                          ))
-                }
-
-            GoogleSignInButton(signInLauncher = signInLauncher) // Define this composable to match the style
+            GoogleSignInButton(signInLauncher)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -203,31 +329,44 @@ fun SignIn(navController: NavHostController) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()) {
-                  Button(
-                      onClick = { /* Implement register as a groomer logic */},
-                      colors = ButtonDefaults.buttonColors(Color.Black),
-                      modifier = Modifier.width(200.dp).height(48.dp)) {
-                        Text(
-                            "I am a Groomer", color = Color.White, fontSize = 16.sp)
-                      }
+                Button(
+                    onClick = { /* Implement register as a groomer logic */ },
+                    colors = ButtonDefaults.buttonColors(Color.Black),
+                    modifier = Modifier.width(200.dp).height(48.dp)) {
+                    Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
                 }
-          }
+            }
+        }
     }
-  } else {
-    Greeting(name = "PetPamper")
-  }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-  Text(text = "Hello $name!", modifier = modifier.semantics { testTag = C.Tag.greeting })
+fun EmailAndPasswordFields(email: String, setEmail: (String) -> Unit, password: String, setPassword: (String) -> Unit) {
+    OutlinedTextField(
+        value = email,
+        onValueChange = setEmail,
+        label = { Text("Email") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    OutlinedTextField(
+        value = password,
+        onValueChange = setPassword,
+        label = { Text("Password") },
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        modifier = Modifier.fillMaxWidth()
+    )
 }
+
 
 @Composable
 fun GoogleSignInButton(signInLauncher: ManagedActivityResultLauncher<Intent, FirebaseAuthUIAuthenticationResult>) {
     Button(
         onClick = {
-            // Here we launch the sign-in intent which will open the Google sign-in UI
             val signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build()))
@@ -235,52 +374,44 @@ fun GoogleSignInButton(signInLauncher: ManagedActivityResultLauncher<Intent, Fir
                 .build()
             signInLauncher.launch(signInIntent)
         },
-        modifier = Modifier
-            .height(50.dp)
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
         colors = ButtonDefaults.buttonColors(Color(0xFF4285F4))
     ) {
-        Icon(
-            painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
-            contentDescription = "Google Logo",
-            tint = Color.Unspecified
-        )
+        Text("Sign in with Google", color = Color.White)
     }
 }
 
-
 @Composable
 fun CustomTextButton(onRegisterClick: () -> Unit) {
-  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-    val annotatedString = buildAnnotatedString {
-      append("Don't have an account? ")
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+        val annotatedString = buildAnnotatedString {
+            append("Don't have an account? ")
 
-      // Attach an annotation tag to the "REGISTER" text
-      pushStringAnnotation(tag = "REGISTER", annotation = "register")
-      withStyle(
-          style =
-              SpanStyle(
-                  color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600))) {
-            append("REGISTER")
-          }
-      pop() // This call removes the last added style and/or annotation from the stack
-    }
+            // Attach an annotation tag to the "REGISTER" text
+            pushStringAnnotation(tag = "REGISTER", annotation = "register")
+            withStyle(
+                style =
+                SpanStyle(
+                    color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600))) {
+                append("REGISTER")
+            }
+            pop() // This call removes the last added style and/or annotation from the stack
+        }
 
-    ClickableText(
-        text = annotatedString,
-        style =
+        ClickableText(
+            text = annotatedString,
+            style =
             TextStyle(textAlign = TextAlign.Center, fontSize = 16.sp, fontWeight = FontWeight(600)),
-        onClick = { offset ->
-          // Check if the click happened on the "REGISTER" text
-          annotatedString
-              .getStringAnnotations(tag = "REGISTER", start = offset, end = offset)
-              .firstOrNull()
-              ?.let { onRegisterClick() }
-        },
-        modifier = Modifier.padding(horizontal = 16.dp) // Optional: for better text wrapping
+            onClick = { offset ->
+                // Check if the click happened on the "REGISTER" text
+                annotatedString
+                    .getStringAnnotations(tag = "REGISTER", start = offset, end = offset)
+                    .firstOrNull()
+                    ?.let { onRegisterClick() }
+            },
+            modifier = Modifier.padding(horizontal = 16.dp) // Optional: for better text wrapping
         )
-  }
+    }
 }
 
 // Button(
