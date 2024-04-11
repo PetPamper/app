@@ -44,8 +44,6 @@ class MainActivity : ComponentActivity() {
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
 
 
-
-
       composable("EmailScreen") { EmailScreen(emailViewModel,navController) }
 
       composable("HomeScreen/{email}") { backStackEntry ->
