@@ -22,6 +22,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -142,13 +145,26 @@ fun SignIn(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            var textVisible by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = password, // Bind to state in real implementation
                 onValueChange = { password = it }, // Implement logic in real implementation
                 label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation =
+                    if (!textVisible) PasswordVisualTransformation() // Hide text if password
+                    else VisualTransformation.None,
+                trailingIcon = {
+                  val image =
+                      if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                      else painterResource(id = R.drawable.baseline_visibility_off_24)
+                  val description = if (textVisible) "Hide password" else "Show password"
+                  // Icon to toggle password visibility
+                  IconButton(onClick = { textVisible = !textVisible }) {
+                    Icon(painter = image, contentDescription = description)
+                  }
+                })
             Spacer(modifier = Modifier.height(15.dp))
 
             CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
