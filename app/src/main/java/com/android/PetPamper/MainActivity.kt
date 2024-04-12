@@ -17,7 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.ui.screen.RegisterScreen.SignUpScreen
+import com.android.PetPamper.ui.screen.RegisterScreen.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.RegisterScreen.SignUpViewModel
+import com.android.PetPamper.ui.screen.RegisterScreen.SignUpViewModelGoogle
 import com.android.PetPamper.ui.screen.SignIn
 
 
@@ -42,6 +44,14 @@ class MainActivity : ComponentActivity() {
 
 
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
+
+      composable("RegisterScreenGoogle/{email}") { backStackEntry ->
+
+        val email = backStackEntry.arguments?.getString("email")
+        val signUp1 = SignUpViewModelGoogle()
+        SignUpScreenGoogle(signUp1, navController, email!!)
+
+      }
 
 
       composable("EmailScreen") { EmailScreen(emailViewModel,navController) }
