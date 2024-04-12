@@ -182,9 +182,15 @@ fun SignUpScreenLayout(
             errorText = "Please enter a valid email."
             isValidInput = false
           }
+      "Phone Number" ->
+          if (!isValidPhoneNumber(textField)) {
+            errorText = "Please enter a valid phone number."
+            isValidInput = false
+          }
       "Password" ->
           if (!isValidPassword(textField)) {
-            errorText = "Password must be at least 8 characters."
+            errorText =
+                "Password must contain at least 8 characters\n" + "and include a number and letter"
             isValidInput = false
           }
       "Confirm Password" ->
@@ -397,10 +403,30 @@ fun SignUpScreenLayout(
 
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
 
-fun isValidEmail(email: String) =
-    email.contains('@') && email.contains('.') // Simplified validation
+fun isValidEmail(email: String): Boolean {
+  // Valid email must contain characters followed by @,
+  // followed by characters separated by a dot
+  val regex = ".+@.+[.].+".toRegex()
+  return email.matches(regex)
+}
 
-fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
+fun isValidPhoneNumber(phoneNumber: String): Boolean {
+  // Phone number must have at least 10 characters,
+  // can start with a +, followed by only numbers
+  // Can make it more precise
+  val cond1 = phoneNumber.length >= 10
+  val regex = "[+]?[0-9]+".toRegex()
+  val cond2 = phoneNumber.matches(regex)
+  return cond1 && cond2
+}
+
+fun isValidPassword(password: String): Boolean {
+  // Password must have >=8 characters and include a number and letter
+  val cond1 = password.length >= 8
+  val cond2 = password.contains("[a-z]|[A-Z]".toRegex())
+  val cond3 = password.contains("[0-9]".toRegex())
+  return cond1 && cond2 && cond3
+}
 
 @Preview
 @Composable
