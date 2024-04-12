@@ -40,7 +40,7 @@ class RegisterTest : TestCase() {
           assertTextEquals("Hello John, enter your email")
         }
 
-        NameTextInput { performTextInput("alitennis131800@gmal.com") }
+        NameTextInput { performTextInput("alikawazaki@gmail.com") }
 
         arrowButton { performClick() }
 
@@ -67,6 +67,22 @@ class RegisterTest : TestCase() {
         postalTag { performTextInput("1026") }
 
         arrowButton { performClick() }
+
+        EmailText {
+          assertIsDisplayed()
+          assertTextEquals("Great! Create your password")
+        }
+
+        NameTextInput { performTextInput("12345678") }
+
+        arrowButton { performClick() }
+
+        EmailText {
+          assertIsDisplayed()
+          assertTextEquals("Confirm your password")
+        }
+
+        NameTextInput { performTextInput("12345678") }
       }
     }
   }
