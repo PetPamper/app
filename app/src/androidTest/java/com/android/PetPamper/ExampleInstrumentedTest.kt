@@ -1,6 +1,7 @@
 package com.android.PetPamper
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.PetPamper.screen.MainScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -22,15 +23,32 @@ class MainActivityTest : TestCase() {
 
   @Test
   fun test() = run {
-    step("Start Main Activity") {
+    step("Start Login Screen") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         loginTitle {
           assertIsDisplayed()
-          assertTextEquals("Welcome")
+          assertTextEquals("Welcome,")
         }
         loginButton {
+          performScrollTo()
           assertIsDisplayed()
           assertHasClickAction()
+        }
+        // Add a new check for the error message
+        errorMessage {
+          assertIsNotDisplayed()
+        }
+      }
+    }
+    step("Attempt to log in with empty credentials") {
+      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+        loginButton {
+          click()
+        }
+        // Check if the error message is displayed
+        errorMessage {
+          assertIsDisplayed()
+          assertTextEquals("Login failed, email or password is incorrect")
         }
       }
     }

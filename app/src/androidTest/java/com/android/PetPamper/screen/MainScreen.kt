@@ -10,4 +10,7 @@ class MainScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
 
   val loginTitle: KNode = child { hasTestTag("LoginTitle") }
   val loginButton: KNode = child { hasTestTag("LoginButton") }
-}
+  val errorMessage: KNode = child { hasTestTag("ErrorMessage") } // Add this line
+
+  }
+

@@ -32,11 +32,17 @@ class MainActivity : ComponentActivity() {
     val firebaseConnection = FirebaseConnection()
 
     NavHost(navController = navController, startDestination = "LoginScreen") {
+
+
       composable("LoginScreen") { SignIn(navController) }
+
+
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
 
       composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
+
       composable("HomeScreen/{email}") { backStackEntry ->
+
         val email = backStackEntry.arguments?.getString("email")
         var nameUser = remember { mutableStateOf("") }
         firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
