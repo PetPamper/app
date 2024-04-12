@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.PetPamper"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

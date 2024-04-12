@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -70,73 +71,88 @@ fun EmailScreenLayout(
   BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-      Text(
-          text = textShown,
-          style =
-              TextStyle(
-                  fontSize = 20.sp,
-                  lineHeight = 24.sp,
-                  fontWeight = FontWeight(800),
-                  color = Color(0xFF2490DF),
-                  textAlign = TextAlign.Center,
-              ))
 
-      Spacer(modifier = Modifier.height(10.dp))
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().testTag("ForgetPassword")) {
+          Text(
+              text = textShown,
+              style =
+                  TextStyle(
+                      fontSize = 20.sp,
+                      lineHeight = 24.sp,
+                      fontWeight = FontWeight(800),
+                      color = Color(0xFF2490DF),
+                      textAlign = TextAlign.Center,
+                  ),
+              modifier = Modifier.testTag("emailForgot"))
 
-      OutlinedTextField(
-          value = textField,
-          onValueChange = { textField = it },
-          label = { Text(fieldname) },
-          singleLine = true,
-          keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-          keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-          modifier = Modifier.fillMaxWidth(),
-          colors =
-              TextFieldDefaults.outlinedTextFieldColors(
-                  focusedBorderColor =
-                      Color(0xFF2491DF), // Border color when the TextField is focused
-                  focusedLabelColor =
-                      Color(0xFF2491DF), // Label color when the TextField is focused
-                  unfocusedBorderColor = Color.Gray, // Additional customization for other states
-                  unfocusedLabelColor = Color.Gray))
+          Spacer(modifier = Modifier.height(10.dp))
 
-      Spacer(modifier = Modifier.height(8.dp))
+          OutlinedTextField(
+              value = textField,
+              onValueChange = { textField = it },
+              label = { Text(fieldname) },
+              singleLine = true,
+              keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+              keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
+              modifier = Modifier.fillMaxWidth().testTag("emailfield"),
+              colors =
+                  TextFieldDefaults.outlinedTextFieldColors(
+                      focusedBorderColor =
+                          Color(0xFF2491DF), // Border color when the TextField is focused
+                      focusedLabelColor =
+                          Color(0xFF2491DF), // Label color when the TextField is focused
+                      unfocusedBorderColor =
+                          Color.Gray, // Additional customization for other states
+                      unfocusedLabelColor = Color.Gray))
 
-      Column(
-          modifier = Modifier.fillMaxSize().padding(16.dp),
-          verticalArrangement = Arrangement.Bottom,
-          horizontalAlignment = Alignment.End) {
-            Button(
-                onClick = { onNext(textField) },
-                modifier = Modifier.wrapContentWidth(), // Make the button wrap its content
-                colors =
-                    ButtonDefaults.buttonColors( // Set the button's background color
-                        containerColor = Color(0xFF2491DF))) {
-                  Icon(
-                      imageVector = Icons.Filled.ArrowForward,
-                      contentDescription = "Go forward",
-                      tint = Color.White // Set the icon color to blue
-                      )
-                }
+          Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(
+          Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier =
-                    Modifier.height(
-                        16.dp)) // This adds space between the button and the progress bar
+                    if (textField.isNotBlank()) {
+                      Modifier.align(Alignment.Center).fillMaxWidth().padding(16.dp)
+                    } else {
+                      Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                    },
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End) {
+                  Button(
+                      onClick = { onNext(textField) },
+                      modifier =
+                          Modifier.wrapContentWidth()
+                              .testTag("FinishButton"), // Make the button wrap its content
+                      colors =
+                          ButtonDefaults.buttonColors( // Set the button's background color
+                              containerColor = Color(0xFF2491DF))) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowForward,
+                            contentDescription = "Go forward",
+                            tint = Color.White // Set the icon color to blue
+                            )
+                      }
 
-            LinearProgressIndicator(
-                progress = 0.2f,
-                color = Color(0xFF2491DF),
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                  Spacer(
+                      modifier =
+                          Modifier.height(
+                              16.dp)) // This adds space between the button and the progress bar
+
+                  LinearProgressIndicator(
+                      progress = 0.5f,
+                      color = Color(0xFF2491DF),
+                      modifier =
+                          Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                }
           }
-    }
+        }
   }
 }
 
 @Composable
 fun EmailSentSuccessScreen(navController: NavController, isEmailBlank: Boolean) {
-  BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+  BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ForgetPassword")) {
     val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -149,7 +165,8 @@ fun EmailSentSuccessScreen(navController: NavController, isEmailBlank: Boolean) 
                   fontWeight = FontWeight(800),
                   color = Color(0xFF2490DF),
                   textAlign = TextAlign.Center,
-              ))
+              ),
+          modifier = Modifier.testTag("SuccessfullMessage"))
       Spacer(modifier = Modifier.height(20.dp))
       Spacer(modifier = Modifier.height(10.dp))
       Image(
