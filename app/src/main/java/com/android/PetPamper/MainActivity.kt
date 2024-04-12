@@ -3,10 +3,6 @@ package com.android.PetPamper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-
-import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
-import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
-
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +15,8 @@ import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.ui.screen.RegisterScreen.SignUpScreen
 import com.android.PetPamper.ui.screen.RegisterScreen.SignUpViewModel
 import com.android.PetPamper.ui.screen.SignIn
-
+import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
+import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,12 +31,11 @@ class MainActivity : ComponentActivity() {
     val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
 
-
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
       composable("RegisterScreen1") { SignUpScreen(signUp, navController) }
 
-      composable("EmailScreen") { EmailScreen(emailViewModel,navController) }
+      composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         var nameUser = remember { mutableStateOf("") }

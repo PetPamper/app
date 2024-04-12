@@ -1,4 +1,3 @@
 package com.android.PetPamper.ui.screen
 
-class testFile {
-}
+class testFile {}
