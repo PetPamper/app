@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,19 +38,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toLowerCase
-
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.resources.C
@@ -83,7 +80,6 @@ fun SignIn(navController: NavHostController) {
   var firebaseConnection = FirebaseConnection()
   var login by remember { mutableStateOf(true) }
 
-
   val signInLauncher =
       rememberLauncherForActivityResult(
           FirebaseAuthUIActivityResultContract(),
@@ -101,191 +97,190 @@ fun SignIn(navController: NavHostController) {
 
   if (!signedIn) {
 
-    Surface(modifier = Modifier.fillMaxSize().semantics { testTag = "LoginScreen" }.verticalScroll(rememberScrollState())) {
-      Column(horizontalAlignment = Alignment.End) {
-        Image(
-            painter = painterResource(id = R.mipmap.dog_rounded_foreground),
-            contentDescription = "App Logo",
-            modifier = Modifier.size(120.dp).clip(CircleShape))
-      }
-
-      Spacer(modifier = Modifier.height(5.dp))
-
-      Column(
-          horizontalAlignment = Alignment.Start,
-          verticalArrangement = Arrangement.Center,
-          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Welcome,",
-                style =
-                    TextStyle(
-                        fontSize = 40.sp,
-                        lineHeight = 34.sp,
-                        fontWeight = FontWeight(800),
-                        color = Color(0xFF2490DF),
-                    ),
-                modifier = Modifier.testTag("LoginTitle")
-            )
-            Text(
-                text = "Login to start with PetPamper 👋",
-                style =
-                    TextStyle(
-                        fontSize = 20.sp,
-                        lineHeight = 34.sp,
-                        fontWeight = FontWeight(800),
-                        color = Color.Black,
-                    ))
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OutlinedTextField(
-
-                value = email, // Bind to state in real implementation
-                onValueChange = { email = it }, // Implement logic in real implementation
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth())
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = password, // Bind to state in real implementation
-                onValueChange = { password = it }, // Implement logic in real implementation
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth())
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-          if (!login) {
-              Text(
-                  text = "Login failed, email or password is incorrect",
-                  color = Color.Red,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth()
-                      .semantics { testTag = "ErrorMessage" })
-
-              Spacer(modifier = Modifier.height(4.dp))
+    Surface(
+        modifier =
+            Modifier.fillMaxSize().testTag("LoginScreen").verticalScroll(rememberScrollState())) {
+          Column(horizontalAlignment = Alignment.End) {
+            Image(
+                painter = painterResource(id = R.mipmap.dog_rounded_foreground),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(120.dp).clip(CircleShape))
           }
 
-
-          CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
-
-
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-
-                onClick = {
-                  if (email.isBlank() || password.isBlank()) {
-                    login = false
-                  } else {
-                    firebaseConnection.loginUser(
-                        email,
-                        password,
-                        {
-                          login = true
-                          navController.navigate("HomeScreen/${email}")
-                        },
-                        { login = false })
-                  }
-                },
-              
-                colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier.testTag("loginButton").fillMaxWidth().height(48.dp)) {
-                  Text("LOG IN", fontSize = 18.sp)
-                }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            CustomTextButton("REGISTER","Don't have an account? ") { navController.navigate("RegisterScreen1") }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()) {
-                  Text(
-                      text = "or sign in with",
-                      style =
-                          TextStyle(
-                              fontSize = 14.sp,
-                              lineHeight = 22.sp,
-                              fontWeight = FontWeight(800),
-                              color = Color(0xFF52525B),
-                              textAlign = TextAlign.Center,
-                          ))
-                }
+          Spacer(modifier = Modifier.height(5.dp))
 
           Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
+              horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Center,
-              modifier =
-              Modifier.height(80.dp).fillMaxWidth() // This will make the Column fill the entire screen
-          ) {
-              Image(
-                  painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
-                  contentDescription = "Google Logo",
-                  modifier =
-                  Modifier.size(80.dp) // Size of the image
-                      .clip(CircleShape) // Clip image to circle shape
-                      .clickable {
+              modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Spacer(modifier = Modifier.height(5.dp))
 
+                Text(
+                    text = "Welcome,",
+                    style =
+                        TextStyle(
+                            fontSize = 40.sp,
+                            lineHeight = 34.sp,
+                            fontWeight = FontWeight(800),
+                            color = Color(0xFF2490DF),
+                        ),
+                    modifier = Modifier.testTag("LoginTitle"))
+                Text(
+                    text = "Login to start with PetPamper 👋",
+                    style =
+                        TextStyle(
+                            fontSize = 20.sp,
+                            lineHeight = 34.sp,
+                            fontWeight = FontWeight(800),
+                            color = Color.Black,
+                        ))
 
-                          val signInIntent =
-                              AuthUI.getInstance()
-                                  .createSignInIntentBuilder()
-                                  .setAvailableProviders(providers)
-                                  .setIsSmartLockEnabled(false)
-                                  .build()
-                          signInLauncher.launch(signInIntent)
-                      })
-          } // Define this composable to match the style
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = email, // Bind to state in real implementation
+                    onValueChange = { email = it }, // Implement logic in real implementation
+                    label = { Text("Email") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth())
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()) {
-                  Button(
-                      onClick = { /* Implement register as a groomer logic */},
-                      colors = ButtonDefaults.buttonColors(Color.Black),
-                      modifier = Modifier.width(200.dp).height(48.dp)) {
-                        Text(
-                            "I am a Groomer", color = Color.White, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
 
-                      }
+                OutlinedTextField(
+                    value = password, // Bind to state in real implementation
+                    onValueChange = { password = it }, // Implement logic in real implementation
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth())
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                if (!login) {
+                  Text(
+                      text = "Login failed, email or password is incorrect",
+                      color = Color.Red,
+                      textAlign = TextAlign.Center,
+                      modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+
+                  Spacer(modifier = Modifier.height(4.dp))
                 }
-          }
-    }
-  } else {
-      firebaseConnection.getUserUidByEmail(GoogleEmail).addOnCompleteListener { task ->
-          if (task.isSuccessful) {
-              // Check if the query found any documents
-              val documents = task.result?.documents
-              if (documents != null && documents.isNotEmpty()) {
-                  // If documents are found, it means there is a user ID associated with the email
-                  // Navigate to the home screen
-                  navController.navigate("HomeScreen/$GoogleEmail")
-              } else {
-                  // If no documents are found, it means no user ID is associated with the email
-                  // Navigate to the register screen
-                  navController.navigate("RegisterScreenGoogle/$GoogleEmail")
+
+                CustomTextButton(
+                    "Forgot password?",
+                    "",
+                    "forgetButton",
+                    { navController.navigate("EmailScreen") })
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                      if (email.isBlank() || password.isBlank()) {
+                        login = false
+                      } else {
+                        firebaseConnection.loginUser(
+                            email,
+                            password,
+                            {
+                              login = true
+                              navController.navigate("HomeScreen/${email}")
+                            },
+                            { login = false })
+                      }
+                    },
+                    colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+                    modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
+                      Text("LOG IN", fontSize = 18.sp)
+                    }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                CustomTextButton("REGISTER", "Don't have an account? ", "registerButton") {
+                  navController.navigate("RegisterScreen1")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                          text = "or sign in with",
+                          style =
+                              TextStyle(
+                                  fontSize = 14.sp,
+                                  lineHeight = 22.sp,
+                                  fontWeight = FontWeight(800),
+                                  color = Color(0xFF52525B),
+                                  textAlign = TextAlign.Center,
+                              ))
+                    }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier =
+                        Modifier.height(80.dp)
+                            .fillMaxWidth() // This will make the Column fill the entire screen
+                    ) {
+                      Image(
+                          painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
+                          contentDescription = "Google Logo",
+                          modifier =
+                              Modifier.size(80.dp) // Size of the image
+                                  .clip(CircleShape) // Clip image to circle shape
+                                  .clickable {
+                                    val signInIntent =
+                                        AuthUI.getInstance()
+                                            .createSignInIntentBuilder()
+                                            .setAvailableProviders(providers)
+                                            .setIsSmartLockEnabled(false)
+                                            .build()
+                                    signInLauncher.launch(signInIntent)
+                                  }
+                                  .testTag("googleSignInButton"))
+                    } // Define this composable to match the style
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()) {
+                      Button(
+                          onClick = { /* Implement register as a groomer logic */},
+                          colors = ButtonDefaults.buttonColors(Color.Black),
+                          modifier = Modifier.width(200.dp).height(48.dp)) {
+                            Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
+                          }
+                    }
               }
-          } else {
-              // If the task itself failed (e.g., due to network issues), you may want to handle this case as well.
-              // For example, you might want to show an error message or try again.
-              // Here, we'll just log the error.
-              Log.e("FirebaseQuery", "Error querying user by email: ${task.exception}")
-              // Optionally navigate to an error screen or show an error message
-          }
+        }
+  } else {
+    firebaseConnection.getUserUidByEmail(GoogleEmail).addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        // Check if the query found any documents
+        val documents = task.result?.documents
+        if (documents != null && documents.isNotEmpty()) {
+          // If documents are found, it means there is a user ID associated with the email
+          // Navigate to the home screen
+          navController.navigate("HomeScreen/$GoogleEmail")
+        } else {
+          // If no documents are found, it means no user ID is associated with the email
+          // Navigate to the register screen
+          navController.navigate("RegisterScreenGoogle/$GoogleEmail")
+        }
+      } else {
+        // If the task itself failed (e.g., due to network issues), you may want to handle this case
+        // as well.
+        // For example, you might want to show an error message or try again.
+        // Here, we'll just log the error.
+        Log.e("FirebaseQuery", "Error querying user by email: ${task.exception}")
+        // Optionally navigate to an error screen or show an error message
       }
+    }
   }
 }
 
@@ -295,66 +290,35 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun CustomTextButton(
+    tag: String,
+    annotated: String = "",
+    testTag: String,
+    onRegisterClick: () -> Unit
+) {
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center) {
+        Text(
+            text = annotated,
+            style =
+                TextStyle(
+                    textAlign = TextAlign.Center, fontSize = 16.sp, fontWeight = FontWeight(600)))
 
-fun CustomTextButton(tag:String,annotated:String = "", onRegisterClick: () -> Unit) {
-  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-    val annotatedString = buildAnnotatedString {
-      append(annotated)
-
-      // Attach an annotation tag to the "REGISTER" text
-      pushStringAnnotation(tag = tag, annotation = tag.lowercase())
-
-      withStyle(
-          style =
-              SpanStyle(
-                  color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600))) {
-            append(tag)
-
-          }
-      pop() // This call removes the last added style and/or annotation from the stack
-    }
-
-    ClickableText(
-        text = annotatedString,
-        style =
-            TextStyle(textAlign = TextAlign.Center, fontSize = 16.sp, fontWeight = FontWeight(600)),
-        onClick = { offset ->
-          // Check if the click happened on the "REGISTER" text
-          annotatedString
-              .getStringAnnotations(tag = tag, start = offset, end = offset)
-
-              .firstOrNull()
-              ?.let { onRegisterClick() }
-        },
-        modifier = Modifier.padding(horizontal = 16.dp) // Optional: for better text wrapping
-        )
-  }
+        ClickableText(
+            text = AnnotatedString(text = tag),
+            style =
+                TextStyle(
+                    color = Color(0xFF2491DF), fontSize = 16.sp, fontWeight = FontWeight(600)),
+            modifier = Modifier.testTag(testTag),
+            onClick = { onRegisterClick() })
+      }
 }
 
-
-// Button(
-// onClick = {
-//    val signInIntent =
-//        AuthUI.getInstance()
-//            .createSignInIntentBuilder()
-//            .setAvailableProviders(providers)
-//            .setIsSmartLockEnabled(false)
-//            .build()
-//    signInLauncher.launch(signInIntent)
-// }
-
-// OutlinedButton(
-// onClick = {
-//    // Sign out logic
-//    AuthUI.getInstance().delete(context)
-//    signedIn =
-//        false // Update the UI state to reflect that the user is no longer
-//    // signed in
-// },
-// modifier =
-// Modifier.height(50.dp).fillMaxWidth().padding(horizontal = 32.dp)) {
-//    Text(
-//        "Forget Google Account",
-//        color = Color.Blue,
-//        fontWeight = FontWeight.Medium)
-// }
+@Preview
+@Composable
+fun PreviewRegisterScreen() {
+  val navController = rememberNavController()
+  CustomTextButton("REGISTER", "Don't have an account? ", "registerButton") {}
+}
