@@ -1,4 +1,5 @@
 [versions]
+accompanistInsets = "0.16.0"
 agp = "8.3.0"
 coreKtxVersion = "1.8.1"
 firebaseBom = "32.8.0"
@@ -26,8 +27,13 @@ firebaseAuthKtx = "22.3.1"
 navigationCompose = "2.7.7"
 navigationRuntimeKtx = "2.7.7"
 
+ui = "1.6.5"
+
+
 [libraries]
+accompanist-insets = { module = "com.google.accompanist:accompanist-insets", version.ref = "accompanistInsets" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 core-ktx = { module = "com.google.android.play:core-ktx", version.ref = "coreKtxVersion" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
