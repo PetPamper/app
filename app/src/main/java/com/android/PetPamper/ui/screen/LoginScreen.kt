@@ -160,11 +160,7 @@ fun SignIn(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(15.dp))
 
-
-          CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
-
-            /*Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-            if (!login) {
+          if (!login) {
               Text(
                   text = "Login failed, email or password is incorrect",
                   color = Color.Red,
@@ -173,23 +169,12 @@ fun SignIn(navController: NavHostController) {
                       .semantics { testTag = "ErrorMessage" })
 
               Spacer(modifier = Modifier.height(4.dp))
-            }
+          }
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
 
-              Text(
-                  text = "Forgot Password?",
-                  style =
-                      TextStyle(
-                          fontSize = 16.sp,
-                          lineHeight = 24.sp,
-                          fontWeight = FontWeight(800),
-                          color = Color(0xFF2490DF),
-                          textAlign = TextAlign.Center,
-                      ))
+          CustomTextButton("Forgot password?") { navController.navigate("EmailScreen") }
 
-            }*/
-            //}
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
