@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -157,6 +158,7 @@ fun Register(viewModel: SignUpViewModel, navController: NavController) {
   // Add more steps as needed
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterLayout(
     currentStep: Int,
@@ -188,9 +190,15 @@ fun RegisterLayout(
             errorText = "Please enter a valid email."
             isValidInput = false
           }
+        "Phone Number" ->
+            if (!isValidPhoneNumber(textField)) {
+                errorText = "Please enter a valid phone number."
+                isValidInput = false
+            }
       "Password" ->
           if (!isValidPassword(textField)) {
-            errorText = "Password must be at least 8 characters."
+            errorText = "Password must be at least 8 characters\n" +
+                    "and contain a number and a letter."
             isValidInput = false
           }
       "Confirm Password" ->
@@ -380,6 +388,8 @@ fun RegisterLayout(
             }
       }
 }
+
+fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
 
 fun isValidEmail(email: String): Boolean {
     // Valid email must contain characters followed by @,
