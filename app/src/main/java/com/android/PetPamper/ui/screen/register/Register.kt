@@ -11,16 +11,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,8 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.User
@@ -150,6 +158,7 @@ fun Register(viewModel: SignUpViewModel, navController: NavController) {
   // Add more steps as needed
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterLayout(
     currentStep: Int,
@@ -181,9 +190,15 @@ fun RegisterLayout(
             errorText = "Please enter a valid email."
             isValidInput = false
           }
+        "Phone Number" ->
+            if (!isValidPhoneNumber(textField)) {
+                errorText = "Please enter a valid phone number."
+                isValidInput = false
+            }
       "Password" ->
           if (!isValidPassword(textField)) {
-            errorText = "Password must be at least 8 characters."
+            errorText = "Password must be at least 8 characters\n" +
+                    "and contain a number and a letter."
             isValidInput = false
           }
       "Confirm Password" ->
@@ -222,25 +237,50 @@ fun RegisterLayout(
                       ),
                   modifier = Modifier.testTag("EmailText"))
 
-              OutlinedTextField(
-                  value = textField,
-                  onValueChange = { textField = it },
-                  label = { Text(fieldName) },
-                  singleLine = true,
-                  visualTransformation =
-                      if (fieldName == "Password" || fieldName == "Confirm Password")
-                          PasswordVisualTransformation()
-                      else VisualTransformation.None,
-                  modifier = Modifier.fillMaxWidth().testTag("NameTextInput"),
-                  colors =
-                      OutlinedTextFieldDefaults.colors(
-                          focusedBorderColor =
-                              Color(0xFF2491DF), // Border color when the TextField is focused
-                          focusedLabelColor =
-                              Color(0xFF2491DF), // Label color when the TextField is focused
-                          unfocusedBorderColor =
-                              Color.Gray, // Additional customization for other states
-                          unfocusedLabelColor = Color.Gray))
+            var textVisible by remember {
+                mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
+            }
+            OutlinedTextField(
+                value = textField,
+                onValueChange = { textField = it },
+                label = { Text(fieldName) },
+                singleLine = true,
+                keyboardOptions =
+                (when (fieldName) {
+                    "Password",
+                    "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
+                    "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                    else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                }),
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor =
+                    Color(0xFF2491DF), // Border color when the TextField is focused
+                    focusedLabelColor =
+                    Color(0xFF2491DF), // Label color when the TextField is focused
+                    unfocusedBorderColor =
+                    Color.Gray, // Additional customization for other states
+                    unfocusedLabelColor = Color.Gray),
+                visualTransformation =
+                if (!textVisible) PasswordVisualTransformation() // Hide text if password
+                else VisualTransformation.None,
+                trailingIcon = {
+                    when (fieldName) {
+                        "Password",
+                        "Confirm Password" -> {
+                            val image =
+                                if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                                else painterResource(id = R.drawable.baseline_visibility_off_24)
+                            val description = if (textVisible) "Hide password" else "Show password"
+                            // Icon to toggle password visibility
+                            IconButton(onClick = { textVisible = !textVisible }) {
+                                Icon(painter = image, contentDescription = description)
+                            }
+                        }
+                        else -> {}
+                    }
+                })
 
               Text(
                   text = errorText,
@@ -351,10 +391,30 @@ fun RegisterLayout(
 
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
 
-fun isValidEmail(email: String) =
-    email.contains('@') && email.contains('.') // Simplified validation
+fun isValidEmail(email: String): Boolean {
+    // Valid email must contain characters followed by @,
+    // followed by characters separated by a dot
+    val regex = ".+@.+[.].+".toRegex()
+    return email.matches(regex)
+}
 
-fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
+fun isValidPhoneNumber(phoneNumber: String): Boolean {
+    // Phone number must have at least 10 characters,
+    // can start with a +, followed by only numbers
+    // Can make it more precise
+    val cond1 = phoneNumber.length >= 10
+    val regex = "[+]?[0-9]+".toRegex()
+    val cond2 = phoneNumber.matches(regex)
+    return cond1 && cond2
+}
+
+fun isValidPassword(password: String): Boolean {
+    // Password must have >=8 characters and include a number and letter
+    val cond1 = password.length >= 8
+    val cond2 = password.contains("[a-z]|[A-Z]".toRegex())
+    val cond3 = password.contains("[0-9]".toRegex())
+    return cond1 && cond2 && cond3
+}
 
 @Preview
 @Composable

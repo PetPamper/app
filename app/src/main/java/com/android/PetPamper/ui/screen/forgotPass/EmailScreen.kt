@@ -71,6 +71,7 @@ fun EmailScreenLayout(
   BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().testTag("ForgetPassword")) {
