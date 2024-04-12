@@ -67,7 +67,7 @@ private fun OnSignInResult(
   if (result.resultCode == ComponentActivity.RESULT_OK) {
     // Successfully signed in
     val user = FirebaseAuth.getInstance().currentUser
-    updateUI(true, user?.displayName ?: "Unknown")
+    updateUI(true, user?.email ?: "Unknown")
   } else {
     updateUI(false, "")
   }
@@ -76,7 +76,7 @@ private fun OnSignInResult(
 @Composable
 fun SignIn(navController: NavHostController) {
   var signedIn by remember { mutableStateOf(false) }
-  var displayName by remember { mutableStateOf("") }
+  var GoogleEmail by remember { mutableStateOf("") }
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
@@ -88,9 +88,9 @@ fun SignIn(navController: NavHostController) {
       rememberLauncherForActivityResult(
           FirebaseAuthUIActivityResultContract(),
       ) { res ->
-        OnSignInResult(res) { success, name ->
+        OnSignInResult(res) { success, email ->
           signedIn = success
-          displayName = name
+          GoogleEmail = email
         }
       }
 
@@ -222,7 +222,30 @@ fun SignIn(navController: NavHostController) {
                           ))
                 }
 
-            GoogleSignInButton() // Define this composable to match the style
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
+              modifier =
+              Modifier.height(80.dp).fillMaxWidth() // This will make the Column fill the entire screen
+          ) {
+              Image(
+                  painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
+                  contentDescription = "Google Logo",
+                  modifier =
+                  Modifier.size(80.dp) // Size of the image
+                      .clip(CircleShape) // Clip image to circle shape
+                      .clickable {
+
+
+                          val signInIntent =
+                              AuthUI.getInstance()
+                                  .createSignInIntentBuilder()
+                                  .setAvailableProviders(providers)
+                                  .setIsSmartLockEnabled(false)
+                                  .build()
+                          signInLauncher.launch(signInIntent)
+                      })
+          } // Define this composable to match the style
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -242,34 +265,33 @@ fun SignIn(navController: NavHostController) {
           }
     }
   } else {
-    Greeting(name = "PetPamper")
+      firebaseConnection.getUserUidByEmail(GoogleEmail).addOnCompleteListener { task ->
+          if (task.isSuccessful) {
+              // Check if the query found any documents
+              val documents = task.result?.documents
+              if (documents != null && documents.isNotEmpty()) {
+                  // If documents are found, it means there is a user ID associated with the email
+                  // Navigate to the home screen
+                  navController.navigate("HomeScreen/$GoogleEmail")
+              } else {
+                  // If no documents are found, it means no user ID is associated with the email
+                  // Navigate to the register screen
+                  navController.navigate("RegisterScreenGoogle/$GoogleEmail")
+              }
+          } else {
+              // If the task itself failed (e.g., due to network issues), you may want to handle this case as well.
+              // For example, you might want to show an error message or try again.
+              // Here, we'll just log the error.
+              Log.e("FirebaseQuery", "Error querying user by email: ${task.exception}")
+              // Optionally navigate to an error screen or show an error message
+          }
+      }
   }
 }
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
   Text(text = "Hello $name!", modifier = modifier.semantics { testTag = C.Tag.greeting })
-}
-
-@Composable
-fun GoogleSignInButton() {
-  // Create a button that looks like the Google Sign-In button
-  Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier =
-          Modifier.height(80.dp).fillMaxWidth() // This will make the Column fill the entire screen
-      ) {
-        Image(
-            painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
-            contentDescription = "Google Logo",
-            modifier =
-                Modifier.size(80.dp) // Size of the image
-                    .clip(CircleShape) // Clip image to circle shape
-                    .clickable {
-                      // TODO: Implement Google Sign-In logic
-                    })
-      }
 }
 
 @Composable
