@@ -35,113 +35,113 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 
 class SignUpViewModel() {
 
-  var name by mutableStateOf("")
-  var email by mutableStateOf("")
-  var phoneNumber by mutableStateOf("")
-  var address by mutableStateOf(Address("", "", "", ""))
-  var password by mutableStateOf("")
+    var name by mutableStateOf("")
+    var email by mutableStateOf("")
+    var phoneNumber by mutableStateOf("")
+    var address by mutableStateOf(Address("", "", "", ""))
+    var password by mutableStateOf("")
 }
 
 @Composable
 fun SignUpScreen(viewModel: SignUpViewModel, navController: NavController) {
-  var currentStep by remember { mutableStateOf(1) }
+    var currentStep by remember { mutableStateOf(1) }
 
-  var confirmPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
-  when (currentStep) {
-    1 ->
-        SignUpScreenLayout(
-            1,
-            false,
-            "Let’s start with your name",
-            "Name",
-            viewModel,
-            onNext = { newName ->
-              viewModel.name = newName
-              currentStep++
-            })
-    2 ->
-        SignUpScreenLayout(
-            2,
-            false,
-            "Hello ${viewModel.name}, enter your email",
-            "Email",
-            viewModel,
-            onNext = { newEmail ->
-              viewModel.email = newEmail
-              currentStep++
-            })
-    3 ->
-        SignUpScreenLayout(
-            3,
-            false,
-            "What’s your phone number?",
-            "Phone Number",
-            viewModel,
-            onNext = { newPhoneNumber ->
-              viewModel.phoneNumber = newPhoneNumber
-              currentStep++
-            })
-    4 ->
-        SignUpScreenLayout(
-            4,
-            true,
-            "Enter your Address?",
-            "Street",
-            viewModel,
-            onNextAddress = { street, city, state, postalcode ->
-              viewModel.address.city = city
-              viewModel.address.state = state
-              viewModel.address.street = street
-              viewModel.address.postalCode = postalcode
-              currentStep++
-            })
-    5 ->
-        SignUpScreenLayout(
-            5,
-            false,
-            "Great! Create your password",
-            "Password",
-            viewModel,
-            onNext = { password ->
-              viewModel.password = password
-              currentStep++
-            })
-    6 ->
-        SignUpScreenLayout(
-            6,
-            false,
-            "Confirm your password",
-            "Confirm Password",
-            viewModel,
-            confirmPassword = viewModel.password,
-            onNext = { confirmedPassword ->
-              if (viewModel.password == confirmedPassword) {
+    when (currentStep) {
+        1 ->
+            SignUpScreenLayout(
+                1,
+                false,
+                "Let’s start with your name",
+                "Name",
+                viewModel,
+                onNext = { newName ->
+                    viewModel.name = newName
+                    currentStep++
+                })
+        2 ->
+            SignUpScreenLayout(
+                2,
+                false,
+                "Hello ${viewModel.name}, enter your email",
+                "Email",
+                viewModel,
+                onNext = { newEmail ->
+                    viewModel.email = newEmail
+                    currentStep++
+                })
+        3 ->
+            SignUpScreenLayout(
+                3,
+                false,
+                "What’s your phone number?",
+                "Phone Number",
+                viewModel,
+                onNext = { newPhoneNumber ->
+                    viewModel.phoneNumber = newPhoneNumber
+                    currentStep++
+                })
+        4 ->
+            SignUpScreenLayout(
+                4,
+                true,
+                "Enter your Address?",
+                "Street",
+                viewModel,
+                onNextAddress = { street, city, state, postalcode ->
+                    viewModel.address.city = city
+                    viewModel.address.state = state
+                    viewModel.address.street = street
+                    viewModel.address.postalCode = postalcode
+                    currentStep++
+                })
+        5 ->
+            SignUpScreenLayout(
+                5,
+                false,
+                "Great! Create your password",
+                "Password",
+                viewModel,
+                onNext = { password ->
+                    viewModel.password = password
+                    currentStep++
+                })
+        6 ->
+            SignUpScreenLayout(
+                6,
+                false,
+                "Confirm your password",
+                "Confirm Password",
+                viewModel,
+                confirmPassword = viewModel.password,
+                onNext = { confirmedPassword ->
+                    if (viewModel.password == confirmedPassword) {
 
-                val firebaseConnection = FirebaseConnection()
+                        val firebaseConnection = FirebaseConnection()
 
-                firebaseConnection.registerUser(
-                    viewModel.email,
-                    viewModel.password,
-                    onSuccess = {
-                      firebaseConnection.addUser(
-                          User(
-                              viewModel.name,
-                              viewModel.email,
-                              viewModel.phoneNumber,
-                              viewModel.address),
-                          onSuccess = { currentStep++ },
-                          onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-                    },
-                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-              } else {
-                // Show error message
-              }
-            })
-    7 -> navController.navigate("LoginScreen")
-  }
+                        firebaseConnection.registerUser(
+                            viewModel.email,
+                            viewModel.password,
+                            onSuccess = {
+                                firebaseConnection.addUser(
+                                    User(
+                                        viewModel.name,
+                                        viewModel.email,
+                                        viewModel.phoneNumber,
+                                        viewModel.address),
+                                    onSuccess = { currentStep++ },
+                                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                            },
+                            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                    } else {
+                        // Show error message
+                    }
+                })
+        7 -> navController.navigate("LoginScreen")
+    }
 
-  // Add more steps as needed
+    // Add more steps as needed
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,61 +158,61 @@ fun SignUpScreenLayout(
     onNextAddress: ((String, String, String, String) -> Unit)? = null
 ) {
 
-  var textField by remember { mutableStateOf("") }
-  var city by remember { mutableStateOf("") }
-  var state by remember { mutableStateOf("") }
-  var postalCode by remember { mutableStateOf("") }
-  var errorText by remember { mutableStateOf("") }
+    var textField by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var state by remember { mutableStateOf("") }
+    var postalCode by remember { mutableStateOf("") }
+    var errorText by remember { mutableStateOf("") }
 
-  val imeVisible = LocalWindowInsets.current.ime.isVisible
-  val keyboardOpenState = remember { mutableStateOf(false) }
+    val imeVisible = LocalWindowInsets.current.ime.isVisible
+    val keyboardOpenState = remember { mutableStateOf(false) }
 
-  keyboardOpenState.value = imeVisible
-  val proceedWithNext = {
-    var isValidInput = true
+    keyboardOpenState.value = imeVisible
+    val proceedWithNext = {
+        var isValidInput = true
 
-    when (fieldname) {
-      "Name" ->
-          if (!isValidName(textField)) {
-            errorText = "Please enter a valid name."
-            isValidInput = false
-          }
-      "Email" ->
-          if (!isValidEmail(textField)) {
-            errorText = "Please enter a valid email."
-            isValidInput = false
-          }
-      "Password" ->
-          if (!isValidPassword(textField)) {
-            errorText = "Password must be at least 8 characters."
-            isValidInput = false
-          }
-      "Confirm Password" ->
-          if (textField != confirmPassword) {
-            errorText = "Passwords do not match."
-            isValidInput = false
-          }
-    // Add more cases as necessary for other fields
+        when (fieldname) {
+            "Name" ->
+                if (!isValidName(textField)) {
+                    errorText = "Please enter a valid name."
+                    isValidInput = false
+                }
+            "Email" ->
+                if (!isValidEmail(textField)) {
+                    errorText = "Please enter a valid email."
+                    isValidInput = false
+                }
+            "Password" ->
+                if (!isValidPassword(textField)) {
+                    errorText = "Password must be at least 8 characters."
+                    isValidInput = false
+                }
+            "Confirm Password" ->
+                if (textField != confirmPassword) {
+                    errorText = "Passwords do not match."
+                    isValidInput = false
+                }
+            // Add more cases as necessary for other fields
+        }
+
+        if (isValidInput) {
+            errorText = ""
+            if (isAddress) {
+                onNextAddress?.invoke(textField, city, state, postalCode)
+            } else {
+                onNext?.invoke(textField)
+            }
+        }
     }
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
-    if (isValidInput) {
-      errorText = ""
-      if (isAddress) {
-        onNextAddress?.invoke(textField, city, state, postalCode)
-      } else {
-        onNext?.invoke(textField)
-      }
-    }
-  }
-  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-      val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
-
-      Column(
-          horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = textShown,
-                style =
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = textShown,
+                    style =
                     TextStyle(
                         fontSize = 20.sp,
                         lineHeight = 24.sp,
@@ -221,125 +221,125 @@ fun SignUpScreenLayout(
                         textAlign = TextAlign.Center,
                     ))
 
-            var textVisible by remember {
-              mutableStateOf(fieldname != "Password" && fieldname != "Confirm Password")
-            }
-            OutlinedTextField(
-                value = textField,
-                onValueChange = { textField = it },
-                label = { Text(fieldname) },
-                singleLine = true,
-                keyboardOptions =
+                var textVisible by remember {
+                    mutableStateOf(fieldname != "Password" && fieldname != "Confirm Password")
+                }
+                OutlinedTextField(
+                    value = textField,
+                    onValueChange = { textField = it },
+                    label = { Text(fieldname) },
+                    singleLine = true,
+                    keyboardOptions =
                     (when (fieldname) {
-                      "Password",
-                      "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
-                      "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
-                      else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                        "Password",
+                        "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
+                        "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                        else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
                     }),
-                modifier = Modifier.fillMaxWidth(),
-                colors =
+                    modifier = Modifier.fillMaxWidth(),
+                    colors =
                     TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor =
-                            Color(0xFF2491DF), // Border color when the TextField is focused
+                        Color(0xFF2491DF), // Border color when the TextField is focused
                         focusedLabelColor =
-                            Color(0xFF2491DF), // Label color when the TextField is focused
+                        Color(0xFF2491DF), // Label color when the TextField is focused
                         unfocusedBorderColor =
-                            Color.Gray, // Additional customization for other states
+                        Color.Gray, // Additional customization for other states
                         unfocusedLabelColor = Color.Gray),
-                visualTransformation =
+                    visualTransformation =
                     if (!textVisible) PasswordVisualTransformation() // Hide text if password
                     else VisualTransformation.None,
-                trailingIcon = {
-                  when (fieldname) {
-                    "Password",
-                    "Confirm Password" -> {
-                      val image =
-                          if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
-                          else painterResource(id = R.drawable.baseline_visibility_off_24)
-                      val description = if (textVisible) "Hide password" else "Show password"
-                      // Icon to toggle password visibility
-                      IconButton(onClick = { textVisible = !textVisible }) {
-                        Icon(painter = image, contentDescription = description)
-                      }
-                    }
-                    else -> {}
-                  }
-                })
+                    trailingIcon = {
+                        when (fieldname) {
+                            "Password",
+                            "Confirm Password" -> {
+                                val image =
+                                    if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                                    else painterResource(id = R.drawable.baseline_visibility_off_24)
+                                val description = if (textVisible) "Hide password" else "Show password"
+                                // Icon to toggle password visibility
+                                IconButton(onClick = { textVisible = !textVisible }) {
+                                    Icon(painter = image, contentDescription = description)
+                                }
+                            }
+                            else -> {}
+                        }
+                    })
 
-            if (errorText.isNotBlank()) {
-              Text(
-                  text = errorText,
-                  color = MaterialTheme.colorScheme.error,
-                  style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.padding(top = 4.dp))
-            }
+                if (errorText.isNotBlank()) {
+                    Text(
+                        text = errorText,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp))
+                }
 
-            if (isAddress) {
+                if (isAddress) {
 
-              OutlinedTextField(
-                  value = city,
-                  onValueChange = { city = it },
-                  label = { Text("city") },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth(),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor =
-                              Color(0xFF2491DF), // Border color when the TextField is focused
-                          focusedLabelColor =
-                              Color(0xFF2491DF), // Label color when the TextField is focused
-                          unfocusedBorderColor =
-                              Color.Gray, // Additional customization for other states
-                          unfocusedLabelColor = Color.Gray))
-              Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = city,
+                        onValueChange = { city = it },
+                        label = { Text("city") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                        TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                            focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                            unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                            unfocusedLabelColor = Color.Gray))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-              OutlinedTextField(
-                  value = state,
-                  onValueChange = { state = it },
-                  label = { Text("State") },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth(),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor =
-                              Color(0xFF2491DF), // Border color when the TextField is focused
-                          focusedLabelColor =
-                              Color(0xFF2491DF), // Label color when the TextField is focused
-                          unfocusedBorderColor =
-                              Color.Gray, // Additional customization for other states
-                          unfocusedLabelColor = Color.Gray))
+                    OutlinedTextField(
+                        value = state,
+                        onValueChange = { state = it },
+                        label = { Text("State") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                        TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                            focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                            unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                            unfocusedLabelColor = Color.Gray))
 
-              Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-              OutlinedTextField(
-                  value = postalCode,
-                  onValueChange = { postalCode = it },
-                  label = { Text("Postal Code") },
-                  singleLine = true,
-                  modifier = Modifier.fillMaxWidth(),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor =
-                              Color(0xFF2491DF), // Border color when the TextField is focused
-                          focusedLabelColor =
-                              Color(0xFF2491DF), // Label color when the TextField is focused
-                          unfocusedBorderColor =
-                              Color.Gray, // Additional customization for other states
-                          unfocusedLabelColor = Color.Gray))
-            }
+                    OutlinedTextField(
+                        value = postalCode,
+                        onValueChange = { postalCode = it },
+                        label = { Text("Postal Code") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                        TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                            focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                            unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                            unfocusedLabelColor = Color.Gray))
+                }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            Box(
-                modifier =
+                Box(
+                    modifier =
                     Modifier.fillMaxSize() // Apply background for the entire screen if necessary
                 ) {
-                  Column(
-                      modifier =
-                          if (textField.isNotBlank()) {
+                    Column(
+                        modifier =
+                        if (textField.isNotBlank()) {
                             Modifier.align(
-                                    Alignment
-                                        .Center) // Align the Column to the bottom-center of the
+                                Alignment
+                                    .Center) // Align the Column to the bottom-center of the
                                 // Box
                                 .fillMaxWidth() // The Column should fill the maximum width of the
                                 // Box
@@ -347,53 +347,53 @@ fun SignUpScreenLayout(
                                 // and IME // The light gray
                                 // background for the Column
                                 .padding(16.dp)
-                          } else {
+                        } else {
                             Modifier.align(
-                                    Alignment
-                                        .BottomCenter) // Align the Column to the bottom-center of
-                                                       // the Box
+                                Alignment
+                                    .BottomCenter) // Align the Column to the bottom-center of
+                                // the Box
                                 .fillMaxWidth() // The Column should fill the maximum width of the
                                 // Box
                                 .navigationBarsWithImePadding() // Apply padding for navigation bar
                                 // and IME the light gray background for the Column
                                 .padding(16.dp)
-                          },
-                      verticalArrangement = Arrangement.Center,
-                      horizontalAlignment = Alignment.End) {
+                        },
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.End) {
                         Button(
                             onClick = proceedWithNext,
                             modifier =
-                                Modifier.wrapContentWidth(), // Make the button wrap its content
+                            Modifier.wrapContentWidth(), // Make the button wrap its content
                             colors =
-                                ButtonDefaults.buttonColors( // Set the button's background color
-                                    containerColor = Color(0xFF2491DF))) {
-                              Icon(
-                                  imageVector = Icons.Filled.ArrowForward,
-                                  contentDescription = "Go forward",
-                                  tint = Color.White // Set the icon color to blue
-                                  )
-                            }
+                            ButtonDefaults.buttonColors( // Set the button's background color
+                                containerColor = Color(0xFF2491DF))) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowForward,
+                                contentDescription = "Go forward",
+                                tint = Color.White // Set the icon color to blue
+                            )
+                        }
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    16
-                                        .dp)) // This adds space between the button and the progress
-                                              // bar
+                            Modifier.height(
+                                16
+                                    .dp)) // This adds space between the button and the progress
+                        // bar
 
                         val progress = currentStep.toFloat() / 5
                         LinearProgressIndicator(
                             progress = { progress },
                             color = Color(0xFF2491DF),
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(10.dp)))
-                      }
+                            Modifier.fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(10.dp)))
+                    }
                 }
-          }
+            }
+        }
     }
-  }
 }
 
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
@@ -406,8 +406,8 @@ fun isValidPassword(password: String) = password.length >= 8 // Basic condition 
 @Preview
 @Composable
 fun SignUpScreenPreview() {
-  val viewModel = remember { SignUpViewModel() } // In actual app, provide this via ViewModel
+    val viewModel = remember { SignUpViewModel() } // In actual app, provide this via ViewModel
 
-  val navController = rememberNavController()
-  SignUpScreen(viewModel, navController)
+    val navController = rememberNavController()
+    SignUpScreen(viewModel, navController)
 }
