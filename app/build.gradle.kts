@@ -6,6 +6,11 @@ plugins {
     alias(libs.plugins.sonar)
     id("jacoco")
     id("com.google.gms.google-services")
+    alias(libs.plugins.googleAndroidLibrariesMapsplatformSecretsGradlePlugin)
+
+}
+if (!plugins.hasPlugin("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")) {
+    plugins.apply("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -46,6 +51,7 @@ android {
 
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 
     composeOptions {
@@ -125,6 +131,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.play.services.maps)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -209,4 +217,19 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.defaults.properties"
+
+    // Configure which keys should be ignored by the plugin by providing regular expressions.
+    // "sdk.dir" is ignored by default.
+    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
