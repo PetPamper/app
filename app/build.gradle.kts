@@ -133,6 +133,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.play.services.maps)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.maps)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -145,6 +146,8 @@ dependencies {
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
+    implementation("com.google.maps.android:maps-compose:2.5.0")
+
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -179,6 +182,7 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.accompanist.insets)
     // Use the latest version
+
 }
 
 tasks.withType<Test> {
