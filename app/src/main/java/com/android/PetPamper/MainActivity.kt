@@ -19,6 +19,8 @@ import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.android.PetPamper.ui.screen.register.GroomerRegister
+import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +32,7 @@ class MainActivity : ComponentActivity() {
   fun AppNavigation() {
     val navController = rememberNavController() // Create the NavHostController
     val signUp = SignUpViewModel()
+    val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
 
@@ -43,6 +46,9 @@ class MainActivity : ComponentActivity() {
         val signUp1 = SignUpViewModelGoogle()
         SignUpScreenGoogle(signUp1, navController, email!!)
       }
+
+      composable("GroomerRegisterScreen") {
+        GroomerRegister(groomerSignUp, navController) }
 
       composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 

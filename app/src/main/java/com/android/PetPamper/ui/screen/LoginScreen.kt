@@ -250,7 +250,7 @@ fun SignIn(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
                       Button(
-                          onClick = { /* Implement register as a groomer logic */},
+                          onClick = { navController.navigate("GroomerRegisterScreen") },
                           colors = ButtonDefaults.buttonColors(Color.Black),
                           modifier = Modifier.width(200.dp).height(48.dp)) {
                             Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
