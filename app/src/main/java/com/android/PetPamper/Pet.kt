@@ -1,24 +1,36 @@
 package com.android.PetPamper
 
 import java.time.LocalDate
-import java.util.Date
 
 sealed class Pet(
-    protected open var name: String = "unnamed",
-    protected open var birthDate: LocalDate = LocalDate.of(0,0,1),
-    protected open var description: String = "",
-    protected open var pictures: List<String> = listOf(""),) {
-
+    protected open var _name: String = "Unnamed",
+    protected open var _birthDate: LocalDate = LocalDate.of(0, 1, 1),
+    protected open var _description: String = "",
+    protected open var _pictures: List<String> = listOf(""),
+    protected open var _owner: String = "PetPamper"
+) {
+    fun addPic(value:String){_pictures = _pictures+value}
 }
-/*
-* var name: String = "unnamed",
-               var birthDate: LocalDate = LocalDate.of(0,0,1),
-               var description: String = "",
-               var pictures: List<String> = listOf(""),
-* */
-class Dog(override var name: String,
-          override var birthDate: LocalDate,
-          override var description: String,
-          override var pictures: List<String>) : Pet() {
+class Dog(name: String = "Unnamed",
+          birthDate: LocalDate = LocalDate.of(0,1,1),
+          description: String = "",
+          pictures: List<String> = listOf(""),
+          owner: String = "PetPamper",
+          var requiresPermit:Boolean = false) : Pet(name,birthDate, description, pictures, owner) {
 
+    var name
+        get() = _name
+        set(value){_name = value}
+    var birthDate
+        get() = _birthDate
+        set(value){if(!value.isAfter(LocalDate.now()))_birthDate = value}
+    var description
+        get() = _description
+        set(value){_description = value}
+    var pictures
+        get() = _pictures
+        set(value){_pictures = value}
+    var owner
+        get() = _owner
+        set(value){_owner = value}
 }
