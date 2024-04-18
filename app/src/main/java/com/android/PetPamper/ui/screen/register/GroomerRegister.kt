@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -37,8 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.User
@@ -251,13 +257,22 @@ fun GroomerRegisterLayout(
             ),
             modifier = Modifier.testTag("DisplayText"))
 
+        var textVisible by remember {
+            mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
+        }
         OutlinedTextField(
             value = textField,
             onValueChange = { textField = it },
             label = { Text(fieldName) },
             singleLine = true,
+            keyboardOptions =
+            when (fieldName) {
+                "Password",
+                "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
+                "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done) },
             visualTransformation =
-            if (fieldName == "Password" || fieldName == "Confirm Password")
+            if (!textVisible)
                 PasswordVisualTransformation()
             else VisualTransformation.None,
             modifier = Modifier
@@ -271,7 +286,24 @@ fun GroomerRegisterLayout(
                 Color(0xFF2491DF), // Label color when the TextField is focused
                 unfocusedBorderColor =
                 Color.Gray, // Additional customization for other states
-                unfocusedLabelColor = Color.Gray))
+                unfocusedLabelColor = Color.Gray),
+            trailingIcon = {
+                when (fieldName) {
+                    "Password",
+                    "Confirm Password" -> {
+                        val image =
+                            if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                            else painterResource(id = R.drawable.baseline_visibility_off_24)
+                        val description = if (textVisible) "Hide password" else "Show password"
+                        // Icon to toggle password visibility
+                        IconButton(onClick = { textVisible = !textVisible }) {
+                            Icon(painter = image, contentDescription = description)
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        )
 
         Text(
             text = shownErrorText,
@@ -392,10 +424,7 @@ fun GroomerRegisterMultipleLayout(
                 onValueChange = { textFields[i] = it },
                 label = { Text(fieldNames[i]) },
                 singleLine = true,
-                visualTransformation =
-                if (fieldNames[i] == "Password" || fieldNames[i] == "Confirm Password")
-                    PasswordVisualTransformation()
-                else VisualTransformation.None,
+                visualTransformation = VisualTransformation.None,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("InputText")
