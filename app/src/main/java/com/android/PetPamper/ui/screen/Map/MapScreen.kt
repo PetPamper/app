@@ -6,6 +6,8 @@ import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -20,6 +22,12 @@ fun MapScreen() {
 
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
+        uiSettings = MapUiSettings(
+            zoomGesturesEnabled = true,  // Enable zoom gestures (pinch-to-zoom)
+            scrollGesturesEnabled = true,  // Enable scroll gestures to pan the map
+            rotationGesturesEnabled = true,  // Enable rotate gestures
+            tiltGesturesEnabled = true  // Enable tilt gestures
+        ),
         cameraPositionState = cameraPositionState
     ) {
         Marker(
