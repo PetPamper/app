@@ -21,4 +21,26 @@ class UserViewModel(uid: String) {
       }
     }
   }
+
+  fun getAddressFromFirebase(onComplete: (Address) -> Unit) {
+    firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val document = task.result
+        if (document != null) {
+          // Fetch each part of the address from the document
+          val street = document.getString("address.street") ?: ""
+          val city = document.getString("address.city") ?: ""
+          val state = document.getString("address.state") ?: ""
+          val postalCode = document.getString("address.postalCode") ?: ""
+
+          // Construct an Address object
+          val address = Address(street, city, state, postalCode)
+          onComplete(address)
+        }
+      } else {
+        // Handle the error or complete with a default Address
+        onComplete(Address("", "", "", ""))
+      }
+    }
+  }
 }

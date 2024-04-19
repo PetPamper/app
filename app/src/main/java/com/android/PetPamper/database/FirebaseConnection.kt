@@ -1,5 +1,6 @@
 package com.android.PetPamper.database
 
+import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.User
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -20,6 +21,13 @@ class FirebaseConnection {
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { exception -> onFailure(exception) }
   }
+  fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        db.collection("groomers")
+            .document(groomer.email) // Using email as a unique identifier; adjust if needed
+            .set(groomer)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onFailure(exception) }
+    }
 
   fun getUserData(uid: String): Task<DocumentSnapshot> {
     return db.collection("users").document(uid).get()
