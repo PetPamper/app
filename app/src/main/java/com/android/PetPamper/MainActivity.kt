@@ -36,6 +36,7 @@ import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.github.se.bootcamp.map.MapView
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 
 class MainActivity : ComponentActivity() {
@@ -91,7 +92,7 @@ fun AppNavigation(email : String?) {
     bottomBar = {
       BottomNavigation(
         backgroundColor = Color.White,
-        modifier = Modifier.height(80.dp).fillMaxWidth()
+        modifier = Modifier.height(60.dp).fillMaxWidth()
       ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -101,7 +102,7 @@ fun AppNavigation(email : String?) {
             icon = { Icon(
               painterResource(id = screen.icon),
               contentDescription = null,
-              modifier = Modifier.size(45.dp).padding(bottom = 4.dp, top = 7.dp),
+              modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
               tint = iconColor)
                    },
             label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -140,7 +141,7 @@ fun AppNavigation(email : String?) {
       }
 
       composable(BarScreen.Chat.route) { /* Search screen content */ }
-      composable(BarScreen.Map.route) { /* Notifications screen content */ }
+      composable(BarScreen.Map.route) { MapView() }
       composable(BarScreen.Profile.route) { /* Profile screen content */ }
       composable(BarScreen.Groomers.route) { /* Settings screen content */ }
       // Define other composable screens for your app
@@ -149,7 +150,3 @@ fun AppNavigation(email : String?) {
 }
 
 
-@Composable
-fun BottomNavigation(content: @Composable () -> Unit) {
-  TODO("Not yet implemented")
-}

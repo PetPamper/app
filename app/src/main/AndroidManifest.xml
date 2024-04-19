@@ -19,6 +19,10 @@
 
         <uses-library android:name="com.google.android.maps" />
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyASf99uTm_MB0AxDKm7MrBYOY6-q1rA9t4"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

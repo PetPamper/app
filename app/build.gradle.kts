@@ -142,6 +142,11 @@ dependencies {
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
 
+    implementation("com.google.maps.android:maps-compose:4.3.0")
+    implementation("com.google.maps.android:maps-compose-utils:4.3.0")
+
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     // Material Design 3
