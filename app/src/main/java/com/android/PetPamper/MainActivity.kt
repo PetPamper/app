@@ -56,6 +56,8 @@ class MainActivity : ComponentActivity() {
         }
         Text(text = "Welcome ${nameUser.value}")
       }
+      composable("MapScreen") { MapScreen() } // Adding the map screen
+
     }
   }
 }
