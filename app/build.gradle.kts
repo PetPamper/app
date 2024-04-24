@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.PetPamper"
-        minSdk = 29
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -121,7 +121,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(platform(libs.compose.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -133,15 +132,25 @@ dependencies {
 
     implementation(libs.androidx.ui)
     implementation("androidx.compose.ui:ui:1.6.5")
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.navigation:navigation-compose:2.7.0-rc01")
+    implementation ("androidx.compose.material:material:1.3.0")
+
+
     implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
 
+    implementation("com.google.maps.android:maps-compose:4.3.0")
+    implementation("com.google.maps.android:maps-compose-utils:4.3.0")
+
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation ("io.coil-kt:coil-compose:1.4.0")
+
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     // Material Design 3
-    implementation(libs.compose.material3)
     // Integration with activities
     implementation(libs.compose.activity)
     // Integration with ViewModels
@@ -170,6 +179,8 @@ dependencies {
 
     implementation (libs.play.services.auth)
     implementation (libs.accompanist.insets)
+    implementation ("com.google.android.gms:play-services-auth:19.0.0")
+
     // Use the latest version
 }
 

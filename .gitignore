@@ -4,13 +4,14 @@
 .externalNativeBuild
 
 # Gradle specific ignores from https://github.com/github/gitignore/blob/main/Gradle.gitignore
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
 .gradle
 **/build/
 /build
 !src/**/build/
-
-# Ignore Gradle GUI config
-gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -87,4 +88,4 @@ render.experimental.xml
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-replay_pid*
+replay_pid*.gradle/

@@ -55,6 +55,7 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.User
 
 class GroomerSignUpViewModel {
@@ -206,7 +207,20 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
 //                    }
 //                })
 //        }
-        9 -> navController.navigate("LoginScreen")
+        9 -> {
+            val firebaseConnection = FirebaseConnection()
+            firebaseConnection.addGroomer(Groomer(
+                viewModel.name,
+                viewModel.email,
+                viewModel.phoneNumber,
+                viewModel.address,
+                viewModel.experienceYears,
+                viewModel.groomerServices),
+                onSuccess = { navController.navigate("LoginScreen") },
+                onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+
+
+        }
     }
 
     // Add more steps as needed
