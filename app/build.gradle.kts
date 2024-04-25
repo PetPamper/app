@@ -95,6 +95,7 @@ android {
 
 sonar {
     properties {
+       // property("sonar.gradle.skipCompile", "true")
         property("sonar.projectKey", "PetPamper_PetPamper")
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")

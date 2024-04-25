@@ -36,6 +36,8 @@ import com.android.PetPamper.ui.screen.GroomerList
 import com.android.PetPamper.ui.screen.GroomerReview
 import com.android.PetPamper.ui.screen.GroomerTopBar
 import com.android.PetPamper.ui.screen.SignIn
+import com.android.PetPamper.ui.screen.UserProfile
+import com.android.PetPamper.ui.screen.UserProfileScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
 import com.android.PetPamper.ui.screen.register.Register
@@ -159,9 +161,12 @@ fun AppNavigation(email : String?) {
 
       }
 
+      val userProfile = UserProfile("Stanley","078787878", "stan@stanley.com",
+        "1024 Ecublens", 320, "rando")
+
       composable(BarScreen.Chat.route) { /* Search screen content */ }
       composable(BarScreen.Map.route) { MapView() }
-      composable(BarScreen.Profile.route) { /* Profile screen content */ }
+      composable(BarScreen.Profile.route) { UserProfileScreen(userProfile = userProfile) }
       composable(BarScreen.Groomers.route) {
 
         val address = remember { mutableStateOf(Address("", "", "", "")) }
