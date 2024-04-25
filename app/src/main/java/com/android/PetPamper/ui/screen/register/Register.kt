@@ -1,6 +1,12 @@
 package com.android.PetPamper.ui.screen.register
 
+import LocationViewModel
 import android.util.Log
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
+
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +24,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,12 +47,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -56,6 +73,7 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 
 class SignUpViewModel {
@@ -63,8 +81,9 @@ class SignUpViewModel {
   var name by mutableStateOf("")
   var email by mutableStateOf("")
   var phoneNumber by mutableStateOf("")
-  var address by mutableStateOf(Address("", "", "", ""))
+  var address by mutableStateOf(Address("", "", "", "", LocationMap()))
   var password by mutableStateOf("")
+  var locationMap: LocationMap = LocationMap()
 }
 
 @Composable
@@ -120,6 +139,9 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                     viewModel.address.state = state
                     viewModel.address.street = street
                     viewModel.address.postalCode = postalCode
+                    viewModel.address.location.latitude = viewModel.locationMap.latitude
+                    viewModel.address.location.longitude = viewModel.locationMap.longitude
+                    viewModel.address.location.name = viewModel.locationMap.name
                     currentStep++
                 })
 
@@ -241,6 +263,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
     }
 }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun RegisterLayout(
         viewModel: SignUpViewModel,
@@ -258,6 +281,12 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
         var state by remember { mutableStateOf("") }
         var postalCode by remember { mutableStateOf("") }
         var errorText by remember { mutableStateOf("") }
+        var locationViewModel = LocationViewModel()
+        var expandedState by remember { mutableStateOf(false) }
+        val locationOptions = remember { mutableStateListOf<LocationMap>() }
+        val focusRequester = remember { FocusRequester() }
+
+
 
         fun proceedWithNext() {
             var isValidInput = true
@@ -346,29 +375,82 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                OutlinedTextField(
-                    value = textField,
-                    onValueChange = { textField = it },
-                    label = { Text(fieldName) },
-                    singleLine = true,
-                    visualTransformation =
-                    if (fieldName == "Password" || fieldName == "Confirm Password")
-                        PasswordVisualTransformation()
-                    else VisualTransformation.None,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("NameTextInput"),
-                    colors =
-                    OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor =
-                        Color(0xFF2491DF), // Border color when the TextField is focused
-                        focusedLabelColor =
-                        Color(0xFF2491DF), // Label color when the TextField is focused
-                        unfocusedBorderColor =
-                        Color.Gray, // Additional customization for other states
-                        unfocusedLabelColor = Color.Gray
+                if (!isAddress) {
+
+                    OutlinedTextField(
+                        value = textField,
+                        onValueChange = { textField = it },
+                        label = { Text(fieldName) },
+                        singleLine = true,
+                        visualTransformation =
+                        if (fieldName == "Password" || fieldName == "Confirm Password")
+                            PasswordVisualTransformation()
+                        else VisualTransformation.None,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("NameTextInput"),
+                        colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                            focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                            unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                            unfocusedLabelColor = Color.Gray
+                        )
                     )
-                )
+                }
+                else {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedState && locationOptions.isNotEmpty(),
+                        onExpandedChange = { expandedState = it
+                            if (expandedState) {
+                                // Request focus again if the dropdown expands
+                                focusRequester.requestFocus()
+                            }
+                                           },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+
+                            value = textField,
+                            onValueChange = { newValue ->
+                                textField = newValue
+                                locationViewModel.fetchLocation(newValue) { locations ->
+                                    if (locations != null) {
+                                        locationOptions.clear()
+                                        locationOptions.addAll(locations)
+                                        Log.d("LocationInput", "Updated location options: ${locationOptions.joinToString { it.name }}")
+                                    }
+                                }
+
+                            },
+                            label = { Text("Location") },
+                            placeholder = { Text("Enter an address") },
+                            modifier = Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                            },
+                        )
+                        DropdownMenu(
+                            expanded = expandedState,
+                            onDismissRequest = { expandedState = false }
+                        ) {
+                            locationOptions.forEach { location ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        textField = location.name
+                                        viewModel.locationMap = location
+                                        expandedState = false
+                                    }
+                                ) {
+                                    Text(location.name)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Text(
                     text = errorText,
@@ -505,6 +587,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             }
         }
     }
+
 
 
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
