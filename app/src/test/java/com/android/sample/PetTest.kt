@@ -1,6 +1,5 @@
-package com.android.sample
+package com.android.PetPamper
 
-import com.android.PetPamper.Dog
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
