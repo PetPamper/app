@@ -2,7 +2,7 @@ package com.android.PetPamper
 
 import java.time.LocalDate
 
-sealed class Pet(
+abstract class Pet(
     protected open var _name: String = "Unnamed",
     protected open var _birthDate: LocalDate = LocalDate.of(0, 1, 1),
     protected open var _description: String = "",
