@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,7 +57,9 @@ import com.android.PetPamper.resources.C
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 private fun OnSignInResult(
     result: FirebaseAuthUIAuthenticationResult,
@@ -72,6 +76,9 @@ private fun OnSignInResult(
 
 @Composable
 fun SignIn(navController: NavHostController) {
+    var isGroomer by remember { mutableStateOf(false) }
+    val db = Firebase.firestore
+
   var signedIn by remember { mutableStateOf(false) }
   var GoogleEmail by remember { mutableStateOf("") }
 
@@ -99,12 +106,17 @@ fun SignIn(navController: NavHostController) {
 
     Surface(
         modifier =
-            Modifier.fillMaxSize().testTag("LoginScreen").verticalScroll(rememberScrollState())) {
+        Modifier
+            .fillMaxSize()
+            .testTag("LoginScreen")
+            .verticalScroll(rememberScrollState())) {
           Column(horizontalAlignment = Alignment.End) {
             Image(
                 painter = painterResource(id = R.mipmap.dog_rounded_foreground),
                 contentDescription = "App Logo",
-                modifier = Modifier.size(120.dp).clip(CircleShape))
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape))
           }
 
           Spacer(modifier = Modifier.height(5.dp))
@@ -112,7 +124,9 @@ fun SignIn(navController: NavHostController) {
           Column(
               horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Center,
-              modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(16.dp)) {
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
@@ -161,7 +175,9 @@ fun SignIn(navController: NavHostController) {
                       text = "Login failed, email or password is incorrect",
                       color = Color.Red,
                       textAlign = TextAlign.Center,
-                      modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+                      modifier = Modifier
+                          .fillMaxWidth()
+                          .testTag("ErrorMessage"))
 
                   Spacer(modifier = Modifier.height(4.dp))
                 }
@@ -183,21 +199,48 @@ fun SignIn(navController: NavHostController) {
                             email,
                             password,
                             {
-                              login = true
-                              navController.navigate("HomeScreen/${email}")
+                                if (!isGroomer) {
+                                    login = true
+                                    navController.navigate("HomeScreen/${email}")
+                                }
+                                else {
+                                    val groomerRef = db.collection("groomers")
+                                        .document(email)
+                                    groomerRef.get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                login = true
+                                                Log.d("Firebase query", "Groomer found," +
+                                                        " name is ${document.get("name")}")
+                                            }
+                                            else {
+                                                login = false
+                                                Log.e("Firebase query", "No such groomer")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            login = false
+                                            Log.e("Firebase query", "Get failed with ",
+                                                exception)
+                                        }
+                                }
                             },
                             { login = false })
                       }
                     },
                     colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                    modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .testTag("LoginButton")) {
                       Text("LOG IN", fontSize = 18.sp)
                     }
 
                 Spacer(modifier = Modifier.height(15.dp))
 
                 CustomTextButton("REGISTER", "Don't have an account? ", "registerButton") {
-                  navController.navigate("RegisterScreen1")
+                  if (!isGroomer) navController.navigate("RegisterScreen1")
+                  else navController.navigate("GroomerRegisterScreen")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -222,39 +265,59 @@ fun SignIn(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                     modifier =
-                        Modifier.height(80.dp)
-                            .fillMaxWidth() // This will make the Column fill the entire screen
+                    Modifier
+                        .height(80.dp)
+                        .fillMaxWidth() // This will make the Column fill the entire screen
                     ) {
                       Image(
                           painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
                           contentDescription = "Google Logo",
                           modifier =
-                              Modifier.size(80.dp) // Size of the image
-                                  .clip(CircleShape) // Clip image to circle shape
-                                  .clickable {
-                                    val signInIntent =
-                                        AuthUI.getInstance()
-                                            .createSignInIntentBuilder()
-                                            .setAvailableProviders(providers)
-                                            .setIsSmartLockEnabled(false)
-                                            .build()
-                                    signInLauncher.launch(signInIntent)
-                                  }
-                                  .testTag("googleSignInButton"))
+                          Modifier
+                              .size(80.dp) // Size of the image
+                              .clip(CircleShape) // Clip image to circle shape
+                              .clickable {
+                                  val signInIntent =
+                                      AuthUI
+                                          .getInstance()
+                                          .createSignInIntentBuilder()
+                                          .setAvailableProviders(providers)
+                                          .setIsSmartLockEnabled(false)
+                                          .build()
+                                  signInLauncher.launch(signInIntent)
+                              }
+                              .testTag("googleSignInButton"))
                     } // Define this composable to match the style
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
-                      Button(
-                          onClick = { navController.navigate("GroomerRegisterScreen") },
-                          colors = ButtonDefaults.buttonColors(Color.Black),
-                          modifier = Modifier.width(200.dp).height(48.dp)) {
-                            Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
-                          }
+                    Switch(
+                        checked = isGroomer,
+                        onCheckedChange = {
+                            isGroomer = it
+                        },
+                        modifier = Modifier.offset(x=100.dp)
+                    )
+                    Text(
+                        text = if (isGroomer) "I am a groomer" else "I am a user",
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = 16.sp, fontWeight = FontWeight(600)
+                        ),
+                        modifier = Modifier.offset(x=110.dp)
+                    )
+//                      Button(
+//                          onClick = { navController.navigate("GroomerRegisterScreen") },
+//                          colors = ButtonDefaults.buttonColors(Color.Black),
+//                          modifier = Modifier
+//                              .width(200.dp)
+//                              .height(48.dp)) {
+//                            Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
+//                          }
                     }
               }
         }

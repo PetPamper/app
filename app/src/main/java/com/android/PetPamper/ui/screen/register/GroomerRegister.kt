@@ -163,19 +163,6 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                     }
                     currentStep++
                 })
-//        9 -> {
-//            var checkServices = ""
-//            for (service in viewModel.groomerServices)
-//            {
-//                checkServices += "$service "
-//            }
-//            GroomerRegisterLayout(
-//                currentStep = 7,
-//                textShown = checkServices,
-//                fieldName = "test",
-//                onNext = {_ ->
-//                    currentStep++
-//                })
 //        999 -> {
 //            GroomerRegisterLayout(
 //                6,
@@ -209,17 +196,22 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
 //        }
         9 -> {
             val firebaseConnection = FirebaseConnection()
-            firebaseConnection.addGroomer(Groomer(
-                viewModel.name,
+            firebaseConnection.registerUser(
                 viewModel.email,
-                viewModel.phoneNumber,
-                viewModel.address,
-                viewModel.experienceYears,
-                viewModel.groomerServices),
-                onSuccess = { navController.navigate("LoginScreen") },
-                onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-
-
+                viewModel.password,
+                onSuccess = {
+                    firebaseConnection.addGroomer(Groomer(
+                        viewModel.name,
+                        viewModel.email,
+                        viewModel.phoneNumber,
+                        viewModel.address,
+                        viewModel.experienceYears,
+                        viewModel.groomerServices),
+                        onSuccess = { navController.navigate("LoginScreen") },
+                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                },
+                onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
+            )
         }
     }
 
