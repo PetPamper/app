@@ -35,7 +35,16 @@ class UserViewModel(uid: String) {
           val location = document.get("address.location") as HashMap<*, *>
 
           // Construct an Address object
-          val address = Address(street, city, state, postalCode, LocationMap(location["latitude"] as Double, location["longitude"] as Double, location["name"] as String))
+          val address =
+              Address(
+                  street,
+                  city,
+                  state,
+                  postalCode,
+                  LocationMap(
+                      location["latitude"] as Double,
+                      location["longitude"] as Double,
+                      location["name"] as String))
           onComplete(address)
         }
       } else {

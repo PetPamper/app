@@ -4,7 +4,6 @@ import LocationViewModel
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import com.google.firebase.storage.FirebaseStorage
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -67,256 +66,237 @@ import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.model.User
 import com.android.PetPamper.ui.screen.CustomTextButton
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 
 class GroomerSignUpViewModel {
 
-    var name by mutableStateOf("")
-    var email by mutableStateOf("")
-    var phoneNumber by mutableStateOf("")
-    var password by mutableStateOf("")
-    var address by mutableStateOf(Address("", "", "", "", LocationMap()))
-    var experienceYears by mutableStateOf("")
-    var groomerServices = mutableStateListOf<String>()
-    var petTypes = mutableStateListOf<String>()
-    var profilePicture by mutableStateOf("")
-    var price by mutableStateOf<Int>(0)
+  var name by mutableStateOf("")
+  var email by mutableStateOf("")
+  var phoneNumber by mutableStateOf("")
+  var password by mutableStateOf("")
+  var address by mutableStateOf(Address("", "", "", "", LocationMap()))
+  var experienceYears by mutableStateOf("")
+  var groomerServices = mutableStateListOf<String>()
+  var petTypes = mutableStateListOf<String>()
+  var profilePicture by mutableStateOf("")
+  var price by mutableStateOf<Int>(0)
 }
 
 const val NUM_STEPS = 12
 
 @Composable
 fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController) {
-    val firebaseConnection = FirebaseConnection()
-    val db = Firebase.firestore
+  val firebaseConnection = FirebaseConnection()
+  val db = Firebase.firestore
 
-    var currentStep by remember { mutableIntStateOf(1) }
+  var currentStep by remember { mutableIntStateOf(1) }
 
-    var registeredAsUser by remember { mutableStateOf(false) }
+  var registeredAsUser by remember { mutableStateOf(false) }
 
-    when (currentStep) {
-        1 -> {
-            Column {
-                CustomTextButton(
-                    tag = "I already have a user account",
-                    testTag = "AlreadyUserButton") {
-                    currentStep = 20
-                }
-                GroomerRegisterLayout(
-                    1,
-                    "Let’s start with your name",
-                    "Name",
-                    isValidInput = ::isValidName,
-                    errorText = "Please enter a valid name.",
-                    onNext = { newName ->
-                        viewModel.name = newName
-                        currentStep++
-                    })
-            }
+  when (currentStep) {
+    1 -> {
+      Column {
+        CustomTextButton(tag = "I already have a user account", testTag = "AlreadyUserButton") {
+          currentStep = 20
         }
-        2 ->
-            GroomerRegisterLayout(
-                2,
-                "Hello ${viewModel.name}, enter your email",
-                "Email",
-                isValidInput = ::isValidEmail,
-                errorText = "Please enter a valid email.",
-                onNext = { newEmail ->
-                    viewModel.email = newEmail
-                    currentStep++
-                })
-        3 ->
-            GroomerRegisterLayout(
-                3,
-                "What’s your phone number?",
-                "Phone Number",
-                onNext = { newPhoneNumber ->
-                    viewModel.phoneNumber = newPhoneNumber
-                    currentStep++
-                })
-        4 ->
-            GroomerRegisterLayout(
-                4,
-                "Great! Create your password",
-                "Password",
-                isValidInput = ::isValidPassword,
-                errorText = "Password must be at least 8 characters.",
-                onNext = { password ->
-                    viewModel.password = password
-                    currentStep++
-                })
-        5 -> {
-            GroomerRegisterLayout(
-                5,
-                "Confirm your password",
-                "Confirm Password",
-                isValidInput = { confirmedPassword -> confirmedPassword == viewModel.password},
-                errorText = "Passwords do not match.",
-                onNext = { _ ->
-                    currentStep++
-                })
-        }
-        6 ->
-            GroomerRegisterMultipleLayout(
-                viewModel,
-                6,
-                "Enter your address",
-                listOf("Street", "City", "State", "Postal Code"),
-                onNext = { fieldsList ->
-                    viewModel.address.city = fieldsList[0]
-                    viewModel.address.state = fieldsList[1]
-                    viewModel.address.street = fieldsList[2]
-                    viewModel.address.postalCode = fieldsList[3]
-                    currentStep++
-                })
-        7 ->
-            GroomerRegisterLayout(
-                7,
-                "How many years of experience do you have as a groomer?",
-                "Experience Years",
-                onNext = { experienceYears ->
-                    viewModel.experienceYears = experienceYears
-                    currentStep++
-                })
-
-        8 ->
-            GroomerRegisterLayout(
+        GroomerRegisterLayout(
+            1,
+            "Let’s start with your name",
+            "Name",
+            isValidInput = ::isValidName,
+            errorText = "Please enter a valid name.",
+            onNext = { newName ->
+              viewModel.name = newName
+              currentStep++
+            })
+      }
+    }
+    2 ->
+        GroomerRegisterLayout(
+            2,
+            "Hello ${viewModel.name}, enter your email",
+            "Email",
+            isValidInput = ::isValidEmail,
+            errorText = "Please enter a valid email.",
+            onNext = { newEmail ->
+              viewModel.email = newEmail
+              currentStep++
+            })
+    3 ->
+        GroomerRegisterLayout(
+            3,
+            "What’s your phone number?",
+            "Phone Number",
+            onNext = { newPhoneNumber ->
+              viewModel.phoneNumber = newPhoneNumber
+              currentStep++
+            })
+    4 ->
+        GroomerRegisterLayout(
+            4,
+            "Great! Create your password",
+            "Password",
+            isValidInput = ::isValidPassword,
+            errorText = "Password must be at least 8 characters.",
+            onNext = { password ->
+              viewModel.password = password
+              currentStep++
+            })
+    5 -> {
+      GroomerRegisterLayout(
+          5,
+          "Confirm your password",
+          "Confirm Password",
+          isValidInput = { confirmedPassword -> confirmedPassword == viewModel.password },
+          errorText = "Passwords do not match.",
+          onNext = { _ -> currentStep++ })
+    }
+    6 ->
+        GroomerRegisterMultipleLayout(
+            viewModel,
+            6,
+            "Enter your address",
+            listOf("Street", "City", "State", "Postal Code"),
+            onNext = { fieldsList ->
+              viewModel.address.city = fieldsList[0]
+              viewModel.address.state = fieldsList[1]
+              viewModel.address.street = fieldsList[2]
+              viewModel.address.postalCode = fieldsList[3]
+              currentStep++
+            })
+    7 ->
+        GroomerRegisterLayout(
+            7,
+            "How many years of experience do you have as a groomer?",
+            "Experience Years",
+            onNext = { experienceYears ->
+              viewModel.experienceYears = experienceYears
+              currentStep++
+            })
+    8 ->
+        GroomerRegisterLayout(
             8,
             "What is your average service price for an Hour",
             "Price",
             onNext = { price ->
-                viewModel.price = price.toInt()
-                currentStep++
+              viewModel.price = price.toInt()
+              currentStep++
             })
+    9 ->
+        GroomerRegisterCheckboxLayout(
+            9,
+            "What types of services do you provide?",
+            listOf(
+                "Bath",
+                "Brushing",
+                "Eye/ear cleaning",
+                "Hair trimming",
+                "Nail trimming",
+                "Teeth brushing",
+                "De-shedding",
+                "Dematting"),
+            onNext = { groomerServices ->
+              for (service in groomerServices) {
+                viewModel.groomerServices.add(service)
+              }
+              currentStep++
+            })
+    10 -> {
 
-        9 ->
-            GroomerRegisterCheckboxLayout(
-                9,
-                "What types of services do you provide?",
-                listOf("Bath", "Brushing", "Eye/ear cleaning", "Hair trimming",
-                    "Nail trimming", "Teeth brushing", "De-shedding", "Dematting"),
-                onNext = { groomerServices ->
-                    for (service in groomerServices)
-                    {
-                        viewModel.groomerServices.add(service)
-                    }
-                    currentStep++
-                })
-
-        10 -> {
-
-            GroomerRegisterCheckboxLayout(10, "What types of pets do you groom?",
-                listOf("Dog", "Cat", "Bird", "Rabbit", "Hamster", "Guinea Pig", "Ferret", "Reptile", "Fish"),
-                onNext = { petTypes ->
-                    for (petType in petTypes)
-                    {
-                        viewModel.petTypes.add(petType)
-                    }
-                    currentStep++
-                })
-
-        }
-
-        11 -> {
-            GroomerProfilePicture(viewModel) { proceed ->
-                if (proceed) {
-                    currentStep++
-                }
+      GroomerRegisterCheckboxLayout(
+          10,
+          "What types of pets do you groom?",
+          listOf(
+              "Dog", "Cat", "Bird", "Rabbit", "Hamster", "Guinea Pig", "Ferret", "Reptile", "Fish"),
+          onNext = { petTypes ->
+            for (petType in petTypes) {
+              viewModel.petTypes.add(petType)
             }
+            currentStep++
+          })
+    }
+    11 -> {
+      GroomerProfilePicture(viewModel) { proceed ->
+        if (proceed) {
+          currentStep++
         }
-
-        12 -> {
-            if (!registeredAsUser) {
-                firebaseConnection.addGroomer(Groomer(
-                    viewModel.name,
-                    viewModel.email,
-                    viewModel.phoneNumber,
-                    viewModel.address,
-                    viewModel.experienceYears,
-                    viewModel.groomerServices,
-                    viewModel.petTypes,
-                    viewModel.profilePicture,
-                    viewModel.price),
+      }
+    }
+    12 -> {
+      if (!registeredAsUser) {
+        firebaseConnection.addGroomer(
+            Groomer(
+                viewModel.name,
+                viewModel.email,
+                viewModel.phoneNumber,
+                viewModel.address,
+                viewModel.experienceYears,
+                viewModel.groomerServices,
+                viewModel.petTypes,
+                viewModel.profilePicture,
+                viewModel.price),
+            onSuccess = {
+              firebaseConnection.addGroomerReview(
+                  GroomerReviews(viewModel.email, 5.0, 0),
+                  onSuccess = { navController.navigate("LoginScreen") },
+                  onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+            },
+            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+      } else {
+        // Need to check that groomer wasn't already registered to avoid duplicate accounts
+        val groomerRef = db.collection("groomers").document(viewModel.email)
+        groomerRef
+            .get()
+            .addOnSuccessListener { document ->
+              if (!document.exists()) {
+                firebaseConnection.addGroomer(
+                    Groomer(
+                        viewModel.name,
+                        viewModel.email,
+                        viewModel.phoneNumber,
+                        viewModel.address,
+                        viewModel.experienceYears,
+                        viewModel.groomerServices,
+                        viewModel.petTypes,
+                        viewModel.profilePicture,
+                        viewModel.price),
                     onSuccess = {
-                        firebaseConnection.addGroomerReview(GroomerReviews(
-                            viewModel.email,
-                            5.0,
-                            0),
-                            onSuccess = {
-                                navController.navigate("LoginScreen")
-                            },
-                            onFailure = { error -> Log.e("SignUp", "Review failed", error) }
-                            )
-                         },
-                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
-                )
-            } else {
-                // Need to check that groomer wasn't already registered to avoid duplicate accounts
-                val groomerRef = db.collection("groomers")
-                    .document(viewModel.email)
-                groomerRef.get()
-                    .addOnSuccessListener { document ->
-                        if (!document.exists()) {
-                            firebaseConnection.addGroomer(Groomer(
-                                viewModel.name,
-                                viewModel.email,
-                                viewModel.phoneNumber,
-                                viewModel.address,
-                                viewModel.experienceYears,
-                                viewModel.groomerServices,
-                                viewModel.petTypes,
-                                viewModel.profilePicture,
-                                viewModel.price),
-                                onSuccess = {
-                                    firebaseConnection.addGroomerReview(GroomerReviews(
-                                        viewModel.email,
-                                        5.0,
-                                        0),
-                                        onSuccess = {
-                                            navController.navigate("LoginScreen")
-                                        },
-                                        onFailure = { error -> Log.e("SignUp", "Review failed", error) }
-                                        )
-                                     },
-                                onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
-                            )
-                        } else {
-                            Log.e("AlreadyRegistered",
-                                "user was already registered as groomer")
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.e(
-                            "Firebase query", "Get failed with ",
-                            exception
-                        )
-                    }
+                      firebaseConnection.addGroomerReview(
+                          GroomerReviews(viewModel.email, 5.0, 0),
+                          onSuccess = { navController.navigate("LoginScreen") },
+                          onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+                    },
+                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+              } else {
+                Log.e("AlreadyRegistered", "user was already registered as groomer")
+              }
             }
-        }
-        
-        20 -> {
-            var email by remember { mutableStateOf("") }
-            var password by remember { mutableStateOf("") }
-            var login by remember { mutableStateOf(true) }
-
-            var errorMessage by remember {
-                mutableStateOf("Login failed, email or password is incorrect")
+            .addOnFailureListener { exception ->
+              Log.e("Firebase query", "Get failed with ", exception)
             }
+      }
+    }
+    20 -> {
+      var email by remember { mutableStateOf("") }
+      var password by remember { mutableStateOf("") }
+      var login by remember { mutableStateOf(true) }
 
-            Column (
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)) {
-                Spacer(modifier = Modifier.height(5.dp))
+      var errorMessage by remember {
+        mutableStateOf("Login failed, email or password is incorrect")
+      }
 
-                Text(
-                    text = "Please enter your user credentials",
-                    style =
+      Column(
+          horizontalAlignment = Alignment.Start,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                text = "Please enter your user credentials",
+                style =
                     TextStyle(
                         fontSize = 23.sp,
                         lineHeight = 24.sp,
@@ -324,201 +304,171 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                         color = Color(0xFF2490DF),
                         textAlign = TextAlign.Center,
                     ),
-                    modifier = Modifier.testTag("AlreadyUserText")
-                )
+                modifier = Modifier.testTag("AlreadyUserText"))
 
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth())
 
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth())
 
-                Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-                if (!login) {
-                    Text(
-                        text = errorMessage,
-                        color = Color.Red,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("ErrorMessage")
-                    )
+            if (!login) {
+              Text(
+                  text = errorMessage,
+                  color = Color.Red,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
 
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-
-                CustomTextButton(
-                    "Forgot password?",
-                    "",
-                    "forgetButton"
-                ) { navController.navigate("EmailScreen") }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        errorMessage = ""
-                        if (email.isBlank() || password.isBlank()) {
-                            login = false
-                        } else {
-                            firebaseConnection.loginUser(
-                                email,
-                                password,
-                                {
-                                    val userRef = db.collection("users")
-                                        .document(email)
-                                    userRef.get()
-                                        .addOnSuccessListener { document ->
-                                            if (document.exists()) {
-                                                login = true
-                                                Log.d(
-                                                    "Firebase query", "User found," +
-                                                            " name is ${document.get("name")}"
-                                                )
-                                                viewModel.name = document.get("name").toString()
-                                                viewModel.email = document.get("email").toString()
-                                                viewModel.phoneNumber =
-                                                    document.get("phoneNumber").toString()
-                                                registeredAsUser = true
-                                                currentStep = 6
-                                            } else {
-                                                login = false
-                                                errorMessage = "User is not registered"
-                                                Log.e("Firebase query", "No such user")
-                                            }
-                                        }
-                                        .addOnFailureListener { exception ->
-                                            login = false
-                                            errorMessage =
-                                                "Login failed, email or password is incorrect"
-                                            Log.e(
-                                                "Firebase query", "Get failed with ",
-                                                exception
-                                            )
-                                        }
-                                },
-                                { login = false })
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .testTag("LoginButton")
-                ) {
-                    Text("LOG IN", fontSize = 18.sp)
-                }
+              Spacer(modifier = Modifier.height(4.dp))
             }
-        }
-    }
 
-    // Add more steps as needed
+            CustomTextButton("Forgot password?", "", "forgetButton") {
+              navController.navigate("EmailScreen")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                  errorMessage = ""
+                  if (email.isBlank() || password.isBlank()) {
+                    login = false
+                  } else {
+                    firebaseConnection.loginUser(
+                        email,
+                        password,
+                        {
+                          val userRef = db.collection("users").document(email)
+                          userRef
+                              .get()
+                              .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                  login = true
+                                  Log.d(
+                                      "Firebase query",
+                                      "User found," + " name is ${document.get("name")}")
+                                  viewModel.name = document.get("name").toString()
+                                  viewModel.email = document.get("email").toString()
+                                  viewModel.phoneNumber = document.get("phoneNumber").toString()
+                                  registeredAsUser = true
+                                  currentStep = 6
+                                } else {
+                                  login = false
+                                  errorMessage = "User is not registered"
+                                  Log.e("Firebase query", "No such user")
+                                }
+                              }
+                              .addOnFailureListener { exception ->
+                                login = false
+                                errorMessage = "Login failed, email or password is incorrect"
+                                Log.e("Firebase query", "Get failed with ", exception)
+                              }
+                        },
+                        { login = false })
+                  }
+                },
+                colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+                modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
+                  Text("LOG IN", fontSize = 18.sp)
+                }
+          }
+    }
+  }
+
+  // Add more steps as needed
 }
 
-
 @Composable
-fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) -> Unit)?){
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var image by remember { mutableStateOf("") }
-    val context = LocalContext.current
+fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) -> Unit)?) {
+  var imageUri by remember { mutableStateOf<Uri?>(null) }
+  var image by remember { mutableStateOf("") }
+  val context = LocalContext.current
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("GroomerRegisterScreen")) {
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
         Text(
             text = "Upload a profile picture",
             style =
-            TextStyle(
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight(800),
-                color = Color(0xFF2490DF),
-                textAlign = TextAlign.Center,
-            ),
+                TextStyle(
+                    fontSize = 20.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight(800),
+                    color = Color(0xFF2490DF),
+                    textAlign = TextAlign.Center,
+                ),
             modifier = Modifier.testTag("DisplayText"))
 
         Spacer(modifier = Modifier.height(16.dp))
 
         GalleryImagePicker { uri ->
-            // Get a reference to the storage service
-            val storageRef = FirebaseStorage.getInstance().reference
+          // Get a reference to the storage service
+          val storageRef = FirebaseStorage.getInstance().reference
 
-            val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
-            val uploadTask = fileRef.putFile(uri)
+          val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
+          val uploadTask = fileRef.putFile(uri)
 
-            uploadTask.addOnSuccessListener { taskSnapshot ->
+          uploadTask
+              .addOnSuccessListener { taskSnapshot ->
                 taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
-                    imageUri = downloadUri  // Store download URI instead of local URI
-                    viewModel.profilePicture = downloadUri.toString()
+                  imageUri = downloadUri // Store download URI instead of local URI
+                  viewModel.profilePicture = downloadUri.toString()
                 }
-            }.addOnFailureListener {
+              }
+              .addOnFailureListener {
                 // Handle unsuccessful uploads
                 Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+              }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.End) {
+          Column(
+              modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+              verticalArrangement = Arrangement.Center,
+              horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = { onNext?.invoke(true) },
                     modifier =
-                    Modifier
-                        .wrapContentWidth()
-                        .testTag("arrowButton"), // Make the button wrap its content
+                        Modifier.wrapContentWidth()
+                            .testTag("arrowButton"), // Make the button wrap its content
                     colors =
-                    ButtonDefaults.buttonColors( // Set the button's background color
-                        containerColor = Color(0xFF2491DF))) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Go forward",
-                        tint = Color.White,
-                        // Set the icon color to blue
-                    )
-                }
+                        ButtonDefaults.buttonColors( // Set the button's background color
+                            containerColor = Color(0xFF2491DF))) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                          contentDescription = "Go forward",
+                          tint = Color.White,
+                          // Set the icon color to blue
+                      )
+                    }
 
                 Spacer(
-                    modifier =
-                    Modifier.height(16.dp)) // This adds space between the button and the
+                    modifier = Modifier.height(16.dp)) // This adds space between the button and the
                 // progress bar
 
                 val progress = 9f / NUM_STEPS
                 LinearProgressIndicator(
                     progress = { progress },
                     color = Color(0xFF2491DF),
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(10.dp)))
-            }
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+              }
         }
-    }
-
+      }
 }
 
 @Composable
@@ -531,44 +481,40 @@ fun GroomerRegisterLayout(
     onNext: ((String) -> Unit)? = null
 ) {
 
-    var textField by remember { mutableStateOf("") }
-    var shownErrorText by remember { mutableStateOf("") }
+  var textField by remember { mutableStateOf("") }
+  var shownErrorText by remember { mutableStateOf("") }
 
+  fun proceedWithNext() {
+    var proceed = true
 
-    fun proceedWithNext() {
-        var proceed = true
-
-        if (isValidInput?.invoke(textField) == false) {
-            println("what")
-            shownErrorText = errorText
-            proceed = false
-        }
-
-        if (proceed) {
-            shownErrorText = ""
-            onNext?.invoke(textField)
-        }
+    if (isValidInput?.invoke(textField) == false) {
+      println("what")
+      shownErrorText = errorText
+      proceed = false
     }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("GroomerRegisterScreen")) {
+
+    if (proceed) {
+      shownErrorText = ""
+      onNext?.invoke(textField)
+    }
+  }
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
         Text(
             text = textShown,
             style =
-            TextStyle(
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight(800),
-                color = Color(0xFF2490DF),
-                textAlign = TextAlign.Center,
-            ),
+                TextStyle(
+                    fontSize = 20.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight(800),
+                    color = Color(0xFF2490DF),
+                    textAlign = TextAlign.Center,
+                ),
             modifier = Modifier.testTag("DisplayText"))
 
         var textVisible by remember {
-            mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
+          mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
         }
         OutlinedTextField(
             value = textField,
@@ -576,97 +522,81 @@ fun GroomerRegisterLayout(
             label = { Text(fieldName) },
             singleLine = true,
             keyboardOptions =
-            when (fieldName) {
-                "Password",
-                "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
-                "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
-                else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done) },
-            visualTransformation =
-            if (!textVisible)
-                PasswordVisualTransformation()
-            else VisualTransformation.None,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("InputText"),
-            colors =
-            OutlinedTextFieldDefaults.colors(
-                focusedBorderColor =
-                Color(0xFF2491DF), // Border color when the TextField is focused
-                focusedLabelColor =
-                Color(0xFF2491DF), // Label color when the TextField is focused
-                unfocusedBorderColor =
-                Color.Gray, // Additional customization for other states
-                unfocusedLabelColor = Color.Gray),
-            trailingIcon = {
                 when (fieldName) {
-                    "Password",
-                    "Confirm Password" -> {
-                        val image =
-                            if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
-                            else painterResource(id = R.drawable.baseline_visibility_off_24)
-                        val description = if (textVisible) "Hide password" else "Show password"
-                        // Icon to toggle password visibility
-                        IconButton(onClick = { textVisible = !textVisible }) {
-                            Icon(painter = image, contentDescription = description)
-                        }
-                    }
-                    else -> {}
+                  "Password",
+                  "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
+                  "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                  else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                },
+            visualTransformation =
+                if (!textVisible) PasswordVisualTransformation() else VisualTransformation.None,
+            modifier = Modifier.fillMaxWidth().testTag("InputText"),
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor =
+                        Color(0xFF2491DF), // Border color when the TextField is focused
+                    focusedLabelColor =
+                        Color(0xFF2491DF), // Label color when the TextField is focused
+                    unfocusedBorderColor = Color.Gray, // Additional customization for other states
+                    unfocusedLabelColor = Color.Gray),
+            trailingIcon = {
+              when (fieldName) {
+                "Password",
+                "Confirm Password" -> {
+                  val image =
+                      if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                      else painterResource(id = R.drawable.baseline_visibility_off_24)
+                  val description = if (textVisible) "Hide password" else "Show password"
+                  // Icon to toggle password visibility
+                  IconButton(onClick = { textVisible = !textVisible }) {
+                    Icon(painter = image, contentDescription = description)
+                  }
                 }
-            }
-        )
+                else -> {}
+              }
+            })
 
         Text(
             text = shownErrorText,
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .testTag("errorText"))
+            modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.End) {
+          Column(
+              modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+              verticalArrangement = Arrangement.Center,
+              horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = { proceedWithNext() },
                     modifier =
-                    Modifier
-                        .wrapContentWidth()
-                        .testTag("arrowButton"), // Make the button wrap its content
+                        Modifier.wrapContentWidth()
+                            .testTag("arrowButton"), // Make the button wrap its content
                     colors =
-                    ButtonDefaults.buttonColors( // Set the button's background color
-                        containerColor = Color(0xFF2491DF))) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Go forward",
-                        tint = Color.White,
-                        // Set the icon color to blue
-                    )
-                }
+                        ButtonDefaults.buttonColors( // Set the button's background color
+                            containerColor = Color(0xFF2491DF))) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                          contentDescription = "Go forward",
+                          tint = Color.White,
+                          // Set the icon color to blue
+                      )
+                    }
 
                 Spacer(
-                    modifier =
-                    Modifier.height(16.dp)) // This adds space between the button and the
+                    modifier = Modifier.height(16.dp)) // This adds space between the button and the
                 // progress bar
 
                 val progress = currentStep.toFloat() / NUM_STEPS
                 LinearProgressIndicator(
                     progress = { progress },
                     color = Color(0xFF2491DF),
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(10.dp)))
-            }
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+              }
         }
-    }
+      }
 }
 
 @Composable
@@ -679,145 +609,124 @@ fun GroomerRegisterMultipleLayout(
     errorTexts: List<String>? = null,
     onNext: ((List<String>) -> Unit)? = null,
 ) {
-    val numFields = fieldNames.size
-    val textFields = remember { mutableStateListOf<String>() }
-    val shownErrorTexts = remember { mutableStateListOf<String>() }
-    var locationViewModel = LocationViewModel()
+  val numFields = fieldNames.size
+  val textFields = remember { mutableStateListOf<String>() }
+  val shownErrorTexts = remember { mutableStateListOf<String>() }
+  var locationViewModel = LocationViewModel()
 
-    for (i in 1..numFields)
-    {
-        textFields.add("")
-        shownErrorTexts.add("")
+  for (i in 1..numFields) {
+    textFields.add("")
+    shownErrorTexts.add("")
+  }
+
+  fun proceedWithNext() {
+    var isValidInput = true
+    val inputsValid = areValidInputs?.invoke(textFields)
+
+    for (i in 0 until numFields) {
+      if (inputsValid?.get(i) == false) {
+        isValidInput = false
+        shownErrorTexts[i] = errorTexts?.get(i) ?: ""
+      }
     }
 
-    fun proceedWithNext() {
-        var isValidInput = true
-        val inputsValid = areValidInputs?.invoke(textFields)
-
-        for (i in 0 until numFields)
-        {
-            if (inputsValid?.get(i) == false)
-            {
-                isValidInput = false
-                shownErrorTexts[i] = errorTexts?.get(i) ?: ""
-            }
-        }
-
-        if (isValidInput) {
-            for (i in 0 until numFields)
-            {
-                shownErrorTexts[i] = ""
-            }
-            onNext?.invoke(textFields)
-        }
+    if (isValidInput) {
+      for (i in 0 until numFields) {
+        shownErrorTexts[i] = ""
+      }
+      onNext?.invoke(textFields)
     }
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("RegisterScreen")) {
+  }
+  LazyColumn(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")) {
         item {
-            Text(
-                text = textShown,
-                style =
-                TextStyle(
-                    fontSize = 20.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight(800),
-                    color = Color(0xFF2490DF),
-                    textAlign = TextAlign.Center,
-                ),
-                modifier = Modifier.testTag("DisplayText"))
+          Text(
+              text = textShown,
+              style =
+                  TextStyle(
+                      fontSize = 20.sp,
+                      lineHeight = 24.sp,
+                      fontWeight = FontWeight(800),
+                      color = Color(0xFF2490DF),
+                      textAlign = TextAlign.Center,
+                  ),
+              modifier = Modifier.testTag("DisplayText"))
         }
-        itemsIndexed(fieldNames) {i, _ ->
-            OutlinedTextField(
-                value = textFields[i],
-                onValueChange = { textFields[i] = it },
-                label = { Text(fieldNames[i]) },
-                singleLine = true,
-                visualTransformation = VisualTransformation.None,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("InputText")
-                ,
-                colors =
-                OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor =
-                    Color(0xFF2491DF), // Border color when the TextField is focused
-                    focusedLabelColor =
-                    Color(0xFF2491DF), // Label color when the TextField is focused
-                    unfocusedBorderColor =
-                    Color.Gray, // Additional customization for other states
-                    unfocusedLabelColor = Color.Gray))
+        itemsIndexed(fieldNames) { i, _ ->
+          OutlinedTextField(
+              value = textFields[i],
+              onValueChange = { textFields[i] = it },
+              label = { Text(fieldNames[i]) },
+              singleLine = true,
+              visualTransformation = VisualTransformation.None,
+              modifier = Modifier.fillMaxWidth().testTag("InputText"),
+              colors =
+                  OutlinedTextFieldDefaults.colors(
+                      focusedBorderColor =
+                          Color(0xFF2491DF), // Border color when the TextField is focused
+                      focusedLabelColor =
+                          Color(0xFF2491DF), // Label color when the TextField is focused
+                      unfocusedBorderColor =
+                          Color.Gray, // Additional customization for other states
+                      unfocusedLabelColor = Color.Gray))
 
-            Text(
-                text = shownErrorTexts[i],
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .testTag("errorText")
-            )
+          Text(
+              text = shownErrorTexts[i],
+              color = MaterialTheme.colorScheme.error,
+              style = MaterialTheme.typography.bodySmall,
+              modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
 
-            Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.End) {
-                    Button(
-                        onClick = {
-                            locationViewModel.fetchLocation(textFields[0]) { locations ->
-                                if (locations != null) {
-                                    viewModel.address.location = locations[0]
-                                    proceedWithNext()
-                                } else {
-                                    shownErrorTexts[0] = "Invalid address"
-                                }
-                            }
-                                  },
-                        modifier =
-                        Modifier
-                            .wrapContentWidth()
-                            .testTag("ArrowButton"), // Make the button wrap its content
-                        colors =
-                        ButtonDefaults.buttonColors( // Set the button's background color
-                            containerColor = Color(0xFF2491DF))) {
+          Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.End) {
+                  Button(
+                      onClick = {
+                        locationViewModel.fetchLocation(textFields[0]) { locations ->
+                          if (locations != null) {
+                            viewModel.address.location = locations[0]
+                            proceedWithNext()
+                          } else {
+                            shownErrorTexts[0] = "Invalid address"
+                          }
+                        }
+                      },
+                      modifier =
+                          Modifier.wrapContentWidth()
+                              .testTag("ArrowButton"), // Make the button wrap its content
+                      colors =
+                          ButtonDefaults.buttonColors( // Set the button's background color
+                              containerColor = Color(0xFF2491DF))) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Go forward",
                             tint = Color.White,
                             // Set the icon color to blue
                         )
-                    }
+                      }
 
-                    Spacer(
-                        modifier =
-                        Modifier.height(16.dp)) // This adds space between the button and the
-                    // progress bar
+                  Spacer(
+                      modifier =
+                          Modifier.height(16.dp)) // This adds space between the button and the
+                  // progress bar
 
-                    val progress = currentStep.toFloat() / NUM_STEPS
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        color = Color(0xFF2491DF),
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(10.dp)))
+                  val progress = currentStep.toFloat() / NUM_STEPS
+                  LinearProgressIndicator(
+                      progress = { progress },
+                      color = Color(0xFF2491DF),
+                      modifier =
+                          Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
                 }
-            }
+          }
         }
-    }
+      }
 }
-
 
 @Composable
 fun GroomerRegisterCheckboxLayout(
@@ -826,145 +735,127 @@ fun GroomerRegisterCheckboxLayout(
     checkboxOptions: List<String>,
     onNext: ((List<String>) -> Unit)? = null
 ) {
-    val numOptions = checkboxOptions.size
+  val numOptions = checkboxOptions.size
 
-    val boxesChecked = remember { mutableStateListOf<Boolean>() }
-    val checkedOptions = remember { mutableStateListOf<String>() }
+  val boxesChecked = remember { mutableStateListOf<Boolean>() }
+  val checkedOptions = remember { mutableStateListOf<String>() }
 
-    for (i in 0 until numOptions)
-    {
-        boxesChecked.add(false)
-    }
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("GroomerRegisterScreen")) {
+  for (i in 0 until numOptions) {
+    boxesChecked.add(false)
+  }
+  LazyColumn(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
         item {
-            Text(
-                text = textShown,
-                style =
-                TextStyle(
-                    fontSize = 20.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight(800),
-                    color = Color(0xFF2490DF),
-                    textAlign = TextAlign.Center,
-                ),
-                modifier = Modifier.testTag("DisplayText"))
+          Text(
+              text = textShown,
+              style =
+                  TextStyle(
+                      fontSize = 20.sp,
+                      lineHeight = 24.sp,
+                      fontWeight = FontWeight(800),
+                      color = Color(0xFF2490DF),
+                      textAlign = TextAlign.Center,
+                  ),
+              modifier = Modifier.testTag("DisplayText"))
 
-            Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp))
         }
 
-        itemsIndexed(checkboxOptions) {i, _ ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("Checkbox")
-            ) {
+        itemsIndexed(checkboxOptions) { i, _ ->
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.fillMaxWidth().testTag("Checkbox")) {
                 Checkbox(
                     checked = boxesChecked[i],
-                    onCheckedChange = {
-                        isChecked -> boxesChecked[i] = isChecked
-                    })
+                    onCheckedChange = { isChecked -> boxesChecked[i] = isChecked })
                 Text(text = checkboxOptions[i])
-            }
+              }
 
-            Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier =
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.End) {
-                    Button(
-                        onClick = {
-                            checkedOptions.clear()
-                            for (i in 0 until numOptions)
-                            {
-                                if (boxesChecked[i])
-                                {
-                                    checkedOptions.add(checkboxOptions[i])
-                                }
-                            }
-                            onNext?.invoke(checkedOptions) },
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .testTag("arrowButton"), // Make the button wrap its content
-                        colors = ButtonDefaults.buttonColors( // Set the button's background color
-                            containerColor = Color(0xFF2491DF))) {
+          Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.End) {
+                  Button(
+                      onClick = {
+                        checkedOptions.clear()
+                        for (i in 0 until numOptions) {
+                          if (boxesChecked[i]) {
+                            checkedOptions.add(checkboxOptions[i])
+                          }
+                        }
+                        onNext?.invoke(checkedOptions)
+                      },
+                      modifier =
+                          Modifier.wrapContentWidth()
+                              .testTag("arrowButton"), // Make the button wrap its content
+                      colors =
+                          ButtonDefaults.buttonColors( // Set the button's background color
+                              containerColor = Color(0xFF2491DF))) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Go forward",
                             tint = Color.White,
                             // Set the icon color to blue
                         )
-                    }
+                      }
 
-                    Spacer(
-                        modifier =
-                        Modifier.height(16.dp)) // This adds space between the button and the
-                    // progress bar
+                  Spacer(
+                      modifier =
+                          Modifier.height(16.dp)) // This adds space between the button and the
+                  // progress bar
 
-                    val progress = currentStep.toFloat() / NUM_STEPS
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        color = Color(0xFF2491DF),
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(10.dp)))
+                  val progress = currentStep.toFloat() / NUM_STEPS
+                  LinearProgressIndicator(
+                      progress = { progress },
+                      color = Color(0xFF2491DF),
+                      modifier =
+                          Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
                 }
-            }
+          }
         }
-    }
+      }
 }
 
 @Composable
 fun GalleryImagePicker(onImagePicked: (Uri?) -> Unit) {
-    val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+  val context = LocalContext.current
+  var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Remember a launcher for picking an image from the gallery
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
+  // Remember a launcher for picking an image from the gallery
+  val galleryLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(),
+          onResult = { uri: Uri? ->
             imageUri = uri
             onImagePicked(uri)
-        }
-    )
+          })
 
-    Button(onClick = { galleryLauncher.launch("image/*") }) {
-        Text("Select Image from Gallery")
-    }
+  Button(onClick = { galleryLauncher.launch("image/*") }) { Text("Select Image from Gallery") }
 
-    imageUri?.let {
-        // Here you can use the URI to display the image or process it further
-        // Displaying a preview is often useful
-        ImagePreview(uri = it)
-    }
+  imageUri?.let {
+    // Here you can use the URI to display the image or process it further
+    // Displaying a preview is often useful
+    ImagePreview(uri = it)
+  }
 }
 
 @Composable
 fun ImagePreview(uri: Uri) {
-    // Using Accompanist's Coil to load and display an image from the URI
-    val painter = rememberImagePainter(data = uri)
-    Image(painter = painter, contentDescription = "Selected Image")
+  // Using Accompanist's Coil to load and display an image from the URI
+  val painter = rememberImagePainter(data = uri)
+  Image(painter = painter, contentDescription = "Selected Image")
 }
 
 @Preview
 @Composable
 fun GroomerRegisterPreview() {
-    val viewModel = remember { GroomerSignUpViewModel() }
-    val navController = rememberNavController()
-    GroomerRegister(viewModel, navController)
+  val viewModel = remember { GroomerSignUpViewModel() }
+  val navController = rememberNavController()
+  GroomerRegister(viewModel, navController)
 }
