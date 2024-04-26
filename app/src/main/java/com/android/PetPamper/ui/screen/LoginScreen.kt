@@ -87,6 +87,10 @@ fun SignIn(navController: NavHostController) {
   var firebaseConnection = FirebaseConnection()
   var login by remember { mutableStateOf(true) }
 
+    var errorMessage by remember {
+        mutableStateOf("Login failed, email or password is incorrect")
+    }
+
   val signInLauncher =
       rememberLauncherForActivityResult(
           FirebaseAuthUIActivityResultContract(),
@@ -172,7 +176,7 @@ fun SignIn(navController: NavHostController) {
 
                 if (!login) {
                   Text(
-                      text = "Login failed, email or password is incorrect",
+                      text = errorMessage,
                       color = Color.Red,
                       textAlign = TextAlign.Center,
                       modifier = Modifier
@@ -192,6 +196,7 @@ fun SignIn(navController: NavHostController) {
 
                 Button(
                     onClick = {
+                        errorMessage = "Login failed, email or password is incorrect"
                       if (email.isBlank() || password.isBlank()) {
                         login = false
                       } else {
@@ -215,6 +220,7 @@ fun SignIn(navController: NavHostController) {
                                             }
                                             else {
                                                 login = false
+                                                errorMessage = "User is not registered as a groomer"
                                                 Log.e("Firebase query", "No such groomer")
                                             }
                                         }
@@ -245,30 +251,32 @@ fun SignIn(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()) {
+              if (!isGroomer)
+              {
+                  Row(
+                      horizontalArrangement = Arrangement.Center,
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.fillMaxWidth()) {
                       Text(
                           text = "or sign in with",
                           style =
-                              TextStyle(
-                                  fontSize = 14.sp,
-                                  lineHeight = 22.sp,
-                                  fontWeight = FontWeight(800),
-                                  color = Color(0xFF52525B),
-                                  textAlign = TextAlign.Center,
-                              ))
-                    }
+                          TextStyle(
+                              fontSize = 14.sp,
+                              lineHeight = 22.sp,
+                              fontWeight = FontWeight(800),
+                              color = Color(0xFF52525B),
+                              textAlign = TextAlign.Center,
+                          ))
+                  }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier =
-                    Modifier
-                        .height(80.dp)
-                        .fillMaxWidth() // This will make the Column fill the entire screen
-                    ) {
+                  Column(
+                      horizontalAlignment = Alignment.CenterHorizontally,
+                      verticalArrangement = Arrangement.Center,
+                      modifier =
+                      Modifier
+                          .height(80.dp)
+                          .fillMaxWidth() // This will make the Column fill the entire screen
+                  ) {
                       Image(
                           painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
                           contentDescription = "Google Logo",
@@ -287,9 +295,10 @@ fun SignIn(navController: NavHostController) {
                                   signInLauncher.launch(signInIntent)
                               }
                               .testTag("googleSignInButton"))
-                    } // Define this composable to match the style
+                  } // Define this composable to match the style
 
-                Spacer(modifier = Modifier.height(16.dp))
+                  Spacer(modifier = Modifier.height(16.dp))
+              }
 
                 Row(
                     horizontalArrangement = Arrangement.Start,
