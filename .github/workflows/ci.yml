@@ -2,6 +2,7 @@ name: CI - Test Runner
 
 # Run the workflow when commits are pushed on main or when a PR is modified
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -11,6 +12,8 @@ on:
       - opened
       - synchronize
       - reopened
+
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Manual CI run started by {0}', github.triggering_actor) || '' }}
 
 jobs:
   ci:
