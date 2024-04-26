@@ -1,4 +1,4 @@
-package com.android.PetPamper
+package com.android.PetPamper.model
 
 import java.time.LocalDate
 
