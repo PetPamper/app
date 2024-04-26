@@ -28,6 +28,7 @@ navigationCompose = "2.7.7"
 navigationRuntimeKtx = "2.7.7"
 
 ui = "1.6.5"
+firebaseStorageKtx = "20.3.0"
 
 
 [libraries]
@@ -66,6 +67,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

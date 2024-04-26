@@ -1,5 +1,6 @@
 package com.android.PetPamper.ui.screen.register
 
+import LocationViewModel
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -25,16 +28,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 
 class SignUpViewModelGoogle() {
 
-  var name by mutableStateOf("")
+    var locationMap: LocationMap = LocationMap()
+    var name by mutableStateOf("")
   var email by mutableStateOf("")
   var phoneNumber by mutableStateOf("")
-  var address by mutableStateOf(Address("", "", "", ""))
+  var address by mutableStateOf(Address("", "", "", "", LocationMap()))
 }
 
 @Composable
@@ -84,6 +89,7 @@ fun SignUpScreenGoogle(
               viewModel.address.state = state
               viewModel.address.street = street
               viewModel.address.postalCode = postalcode
+              viewModel.address.location = viewModel.locationMap
 
               val firebaseConnection = FirebaseConnection()
               firebaseConnection.addUser(
@@ -116,6 +122,10 @@ fun SignUpScreenLayoutGoogle(
   var state by remember { mutableStateOf("") }
   var postaleCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
+  var expandedState by remember { mutableStateOf(false) }
+  val locationOptions = remember { mutableStateListOf<LocationMap>() }
+  val focusRequester = remember { FocusRequester() }
+  var locationViewModel = LocationViewModel()
 
   val imeVisible = LocalWindowInsets.current.ime.isVisible
   val keyboardOpenState = remember { mutableStateOf(false) }
@@ -180,25 +190,82 @@ fun SignUpScreenLayoutGoogle(
                         ),
                     modifier = Modifier.testTag("TextShownTag"))
 
-                OutlinedTextField(
-                    value = textField,
-                    onValueChange = { textField = it },
-                    label = { Text(fieldname) },
-                    singleLine = true,
-                    visualTransformation =
-                        if (fieldname == "Password" || fieldname == "Confirm Password")
-                            PasswordVisualTransformation()
-                        else VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("valueWritten"),
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor =
-                                Color(0xFF2491DF), // Border color when the TextField is focused
-                            focusedLabelColor =
-                                Color(0xFF2491DF), // Label color when the TextField is focused
-                            unfocusedBorderColor =
-                                Color.Gray, // Additional customization for other states
-                            unfocusedLabelColor = Color.Gray))
+              if (!isAddress) {
+
+                  OutlinedTextField(
+                      value = textField,
+                      onValueChange = { textField = it },
+                      label = { Text(fieldname) },
+                      singleLine = true,
+                      visualTransformation =
+                      if (fieldname == "Password" || fieldname == "Confirm Password")
+                          PasswordVisualTransformation()
+                      else VisualTransformation.None,
+                      modifier = Modifier
+                          .fillMaxWidth()
+                          .testTag("NameTextInput"),
+                      colors =
+                      OutlinedTextFieldDefaults.colors(
+                          focusedBorderColor =
+                          Color(0xFF2491DF), // Border color when the TextField is focused
+                          focusedLabelColor =
+                          Color(0xFF2491DF), // Label color when the TextField is focused
+                          unfocusedBorderColor =
+                          Color.Gray, // Additional customization for other states
+                          unfocusedLabelColor = Color.Gray
+                      )
+                  )
+              }
+              else {
+                  ExposedDropdownMenuBox(
+                      expanded = expandedState && locationOptions.isNotEmpty(),
+                      onExpandedChange = { expandedState = it
+                          if (expandedState) {
+                              // Request focus again if the dropdown expands
+                              focusRequester.requestFocus()
+                          }
+                      },
+                      modifier = Modifier.fillMaxWidth()
+                  ) {
+                      OutlinedTextField(
+
+                          value = textField,
+                          onValueChange = { newValue ->
+                              textField = newValue
+                              locationViewModel.fetchLocation(newValue) { locations ->
+                                  if (locations != null) {
+                                      locationOptions.clear()
+                                      locationOptions.addAll(locations)
+                                      Log.d("LocationInput", "Updated location options: ${locationOptions.joinToString { it.name }}")
+                                  }
+                              }
+
+                          },
+                          label = { Text("Location") },
+                          placeholder = { Text("Enter an address") },
+                          modifier = Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                          trailingIcon = {
+                              ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                          },
+                      )
+                      androidx.compose.material.DropdownMenu(
+                          expanded = expandedState,
+                          onDismissRequest = { expandedState = false }
+                      ) {
+                          locationOptions.forEach { location ->
+                              androidx.compose.material.DropdownMenuItem(
+                                  onClick = {
+                                      textField = location.name
+                                      viewModel.locationMap = location
+                                      expandedState = false
+                                  }
+                              ) {
+                                  Text(location.name)
+                              }
+                          }
+                      }
+                  }
+              }
 
                 if (errorText.isNotBlank()) {
                   Text(

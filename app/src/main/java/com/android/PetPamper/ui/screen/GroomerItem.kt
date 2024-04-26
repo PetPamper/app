@@ -2,7 +2,6 @@ package com.android.PetPamper.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,17 +28,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import coil.size.Scale
 import com.android.PetPamper.R
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.LocationMap
 
 data class GroomerReview(
+    val email: String,
     val name: String,
     val types: String,
     val price: String,
     val distance: String,
     val reviewCount: Int,
-    val rating: Double,
+    val rating: Number,
     val profilePictureUrl: String,
 )
 
@@ -61,8 +61,8 @@ fun GroomerItem(groomer: GroomerReview) {
                     painter = rememberImagePainter(
                         data = groomer.profilePictureUrl,
                         builder = {
+                            crossfade(true)
                             placeholder(R.drawable.bar_groomers)
-                            error(R.drawable.bar_groomers)
                         }
                     ),
                     contentDescription = "Profile Picture",
@@ -100,7 +100,7 @@ fun GroomerItem(groomer: GroomerReview) {
 //                    color = Color(0xFFFDD835),
 //                    modifier = Modifier.align(Alignment.CenterVertically) // Center vertically within the row
 //                )
-                RatingBox(rating = groomer.rating,
+                RatingBox(rating = groomer.rating.toDouble(),
                     starPainter = painterResource(id = R.drawable.star))
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -217,7 +217,11 @@ fun GroomerTopBar(address: Address) {
                    verticalAlignment = Alignment.CenterVertically
                ) {
                    Text(
-                       text = address.street,
+                       text = if (address.street.length < 30) {
+                           address.street
+                       }else{
+                            address.street.take(30) + "..."
+                       },
                        color = Color.Black,
                        fontSize = 18.sp,
                        fontWeight = FontWeight.Bold
@@ -258,9 +262,9 @@ fun GroomerTopBar(address: Address) {
 @Composable
 fun PreviewGroomerList() {
     val sampleGroomers = listOf(
-        GroomerReview("Will Parker", "Dog, Cat", "50$", "1,5 KM", 26, 4.4, "https://img.freepik.com/psd-gratuit/personne-celebrant-son-orientation-sexuelle_23-2150115662.jpg"),
-        GroomerReview("Kobe Bryant", "Dog, Cat, Hamster", "65$", "2 KM", 13, 4.5, "https://www.livreshebdo.fr/sites/default/files/styles/article_principal/public/assets/images/106092057_1566487914671gettyimages_1095029036.jpeg?itok=KQgvBUB3"),
-        GroomerReview("Cristiano Ronaldo", "Dog", "35$", "8 KM", 53, 4.8, "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg")
+        GroomerReview("@.", "Will Parker", "Dog, Cat", "50$", "1,5 KM", 26, 4.4, "https://img.freepik.com/psd-gratuit/personne-celebrant-son-orientation-sexuelle_23-2150115662.jpg"),
+        GroomerReview("@.","Kobe Bryant", "Dog, Cat, Hamster", "65$", "2 KM", 13, 4.5, "https://www.livreshebdo.fr/sites/default/files/styles/article_principal/public/assets/images/106092057_1566487914671gettyimages_1095029036.jpeg?itok=KQgvBUB3"),
+        GroomerReview("@.","Cristiano Ronaldo", "Dog", "35$", "8 KM", 53, 4.8, "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg")
     )
     MaterialTheme {
         GroomerList(groomers = sampleGroomers)
@@ -272,6 +276,6 @@ fun PreviewGroomerList() {
 @Composable
 fun PreviewGroomerTopBar() {
     MaterialTheme {
-        GroomerTopBar(address = Address("1234 Main St", "City", "State", "12345"))
+        GroomerTopBar(address = Address("1234 Main St", "City", "State", "12345", LocationMap()))
     }
 }

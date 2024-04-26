@@ -1,6 +1,13 @@
 package com.android.PetPamper.ui.screen.register
 
+import LocationViewModel
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import com.google.firebase.storage.FirebaseStorage
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -52,10 +60,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
+import com.android.PetPamper.model.GroomerReviews
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.android.PetPamper.ui.screen.CustomTextButton
 import com.google.firebase.Firebase
@@ -67,12 +78,15 @@ class GroomerSignUpViewModel {
     var email by mutableStateOf("")
     var phoneNumber by mutableStateOf("")
     var password by mutableStateOf("")
-    var address by mutableStateOf(Address("", "", "", ""))
+    var address by mutableStateOf(Address("", "", "", "", LocationMap()))
     var experienceYears by mutableStateOf("")
     var groomerServices = mutableStateListOf<String>()
+    var petTypes = mutableStateListOf<String>()
+    var profilePicture by mutableStateOf("")
+    var price by mutableStateOf<Int>(0)
 }
 
-const val NUM_STEPS = 9
+const val NUM_STEPS = 12
 
 @Composable
 fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController) {
@@ -89,7 +103,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                 CustomTextButton(
                     tag = "I already have a user account",
                     testTag = "AlreadyUserButton") {
-                    currentStep = 10
+                    currentStep = 20
                 }
                 GroomerRegisterLayout(
                     1,
@@ -147,6 +161,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
         }
         6 ->
             GroomerRegisterMultipleLayout(
+                viewModel,
                 6,
                 "Enter your address",
                 listOf("Street", "City", "State", "Postal Code"),
@@ -166,9 +181,20 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                     viewModel.experienceYears = experienceYears
                     currentStep++
                 })
+
         8 ->
+            GroomerRegisterLayout(
+            8,
+            "What is your average service price for an Hour",
+            "Price",
+            onNext = { price ->
+                viewModel.price = price.toInt()
+                currentStep++
+            })
+
+        9 ->
             GroomerRegisterCheckboxLayout(
-                8,
+                9,
                 "What types of services do you provide?",
                 listOf("Bath", "Brushing", "Eye/ear cleaning", "Hair trimming",
                     "Nail trimming", "Teeth brushing", "De-shedding", "Dematting"),
@@ -179,23 +205,52 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                     }
                     currentStep++
                 })
-        9 -> {
+
+        10 -> {
+
+            GroomerRegisterCheckboxLayout(10, "What types of pets do you groom?",
+                listOf("Dog", "Cat", "Bird", "Rabbit", "Hamster", "Guinea Pig", "Ferret", "Reptile", "Fish"),
+                onNext = { petTypes ->
+                    for (petType in petTypes)
+                    {
+                        viewModel.petTypes.add(petType)
+                    }
+                    currentStep++
+                })
+
+        }
+
+        11 -> {
+            GroomerProfilePicture(viewModel) { proceed ->
+                if (proceed) {
+                    currentStep++
+                }
+            }
+        }
+
+        12 -> {
             if (!registeredAsUser) {
-                firebaseConnection.registerUser(
+                firebaseConnection.addGroomer(Groomer(
+                    viewModel.name,
                     viewModel.email,
-                    viewModel.password,
+                    viewModel.phoneNumber,
+                    viewModel.address,
+                    viewModel.experienceYears,
+                    viewModel.groomerServices,
+                    viewModel.petTypes,
+                    viewModel.profilePicture,
+                    viewModel.price),
                     onSuccess = {
-                        firebaseConnection.addGroomer(Groomer(
-                            viewModel.name,
+                        firebaseConnection.addGroomerReview(GroomerReviews(
                             viewModel.email,
-                            viewModel.phoneNumber,
-                            viewModel.address,
-                            viewModel.experienceYears,
-                            viewModel.groomerServices),
-                            onSuccess = { navController.navigate("LoginScreen") },
-                            onFailure = { error ->
-                                Log.e("SignUp", "Registration failed", error) })
-                    },
+                            5.0,
+                            0),
+                            onSuccess = {
+                                navController.navigate("LoginScreen")
+                            },
+                            onFailure = { error -> Log.e("SignUp", "Review failed", error) }
+                            )
+                         },
                     onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
                 )
             } else {
@@ -211,11 +266,23 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                                 viewModel.phoneNumber,
                                 viewModel.address,
                                 viewModel.experienceYears,
-                                viewModel.groomerServices),
-                                onSuccess = { navController.navigate("LoginScreen") },
-                                onFailure = {
-                                    error -> Log.e("SignUp", "Registration failed", error)
-                                })
+                                viewModel.groomerServices,
+                                viewModel.petTypes,
+                                viewModel.profilePicture,
+                                viewModel.price),
+                                onSuccess = {
+                                    firebaseConnection.addGroomerReview(GroomerReviews(
+                                        viewModel.email,
+                                        5.0,
+                                        0),
+                                        onSuccess = {
+                                            navController.navigate("LoginScreen")
+                                        },
+                                        onFailure = { error -> Log.e("SignUp", "Review failed", error) }
+                                        )
+                                     },
+                                onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
+                            )
                         } else {
                             Log.e("AlreadyRegistered",
                                 "user was already registered as groomer")
@@ -229,7 +296,8 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                     }
             }
         }
-        10 -> {
+        
+        20 -> {
             var email by remember { mutableStateOf("") }
             var password by remember { mutableStateOf("") }
             var login by remember { mutableStateOf(true) }
@@ -361,6 +429,98 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
     // Add more steps as needed
 }
 
+
+@Composable
+fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) -> Unit)?){
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var image by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .testTag("GroomerRegisterScreen")) {
+        Text(
+            text = "Upload a profile picture",
+            style =
+            TextStyle(
+                fontSize = 20.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight(800),
+                color = Color(0xFF2490DF),
+                textAlign = TextAlign.Center,
+            ),
+            modifier = Modifier.testTag("DisplayText"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        GalleryImagePicker { uri ->
+            // Get a reference to the storage service
+            val storageRef = FirebaseStorage.getInstance().reference
+
+            val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
+            val uploadTask = fileRef.putFile(uri)
+
+            uploadTask.addOnSuccessListener { taskSnapshot ->
+                taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
+                    imageUri = downloadUri  // Store download URI instead of local URI
+                    viewModel.profilePicture = downloadUri.toString()
+                }
+            }.addOnFailureListener {
+                // Handle unsuccessful uploads
+                Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.End) {
+                Button(
+                    onClick = { onNext?.invoke(true) },
+                    modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .testTag("arrowButton"), // Make the button wrap its content
+                    colors =
+                    ButtonDefaults.buttonColors( // Set the button's background color
+                        containerColor = Color(0xFF2491DF))) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Go forward",
+                        tint = Color.White,
+                        // Set the icon color to blue
+                    )
+                }
+
+                Spacer(
+                    modifier =
+                    Modifier.height(16.dp)) // This adds space between the button and the
+                // progress bar
+
+                val progress = 9f / NUM_STEPS
+                LinearProgressIndicator(
+                    progress = { progress },
+                    color = Color(0xFF2491DF),
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(10.dp)))
+            }
+        }
+    }
+
+}
+
 @Composable
 fun GroomerRegisterLayout(
     currentStep: Int,
@@ -373,6 +533,7 @@ fun GroomerRegisterLayout(
 
     var textField by remember { mutableStateOf("") }
     var shownErrorText by remember { mutableStateOf("") }
+
 
     fun proceedWithNext() {
         var proceed = true
@@ -510,6 +671,7 @@ fun GroomerRegisterLayout(
 
 @Composable
 fun GroomerRegisterMultipleLayout(
+    viewModel: GroomerSignUpViewModel,
     currentStep: Int,
     textShown: String,
     fieldNames: List<String>,
@@ -520,6 +682,7 @@ fun GroomerRegisterMultipleLayout(
     val numFields = fieldNames.size
     val textFields = remember { mutableStateListOf<String>() }
     val shownErrorTexts = remember { mutableStateListOf<String>() }
+    var locationViewModel = LocationViewModel()
 
     for (i in 1..numFields)
     {
@@ -610,7 +773,16 @@ fun GroomerRegisterMultipleLayout(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End) {
                     Button(
-                        onClick = { proceedWithNext() },
+                        onClick = {
+                            locationViewModel.fetchLocation(textFields[0]) { locations ->
+                                if (locations != null) {
+                                    viewModel.address.location = locations[0]
+                                    proceedWithNext()
+                                } else {
+                                    shownErrorTexts[0] = "Invalid address"
+                                }
+                            }
+                                  },
                         modifier =
                         Modifier
                             .wrapContentWidth()
@@ -645,6 +817,7 @@ fun GroomerRegisterMultipleLayout(
         }
     }
 }
+
 
 @Composable
 fun GroomerRegisterCheckboxLayout(
@@ -754,6 +927,38 @@ fun GroomerRegisterCheckboxLayout(
             }
         }
     }
+}
+
+@Composable
+fun GalleryImagePicker(onImagePicked: (Uri?) -> Unit) {
+    val context = LocalContext.current
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Remember a launcher for picking an image from the gallery
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            imageUri = uri
+            onImagePicked(uri)
+        }
+    )
+
+    Button(onClick = { galleryLauncher.launch("image/*") }) {
+        Text("Select Image from Gallery")
+    }
+
+    imageUri?.let {
+        // Here you can use the URI to display the image or process it further
+        // Displaying a preview is often useful
+        ImagePreview(uri = it)
+    }
+}
+
+@Composable
+fun ImagePreview(uri: Uri) {
+    // Using Accompanist's Coil to load and display an image from the URI
+    val painter = rememberImagePainter(data = uri)
+    Image(painter = painter, contentDescription = "Selected Image")
 }
 
 @Preview
