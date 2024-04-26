@@ -1,11 +1,12 @@
 package com.android.PetPamper
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
-import androidx.compose.material3.*
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -29,9 +32,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.Groomer
+import com.android.PetPamper.model.GroomerReviews
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
+import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.BarScreen
-import com.android.PetPamper.ui.screen.GroomerItem
 import com.android.PetPamper.ui.screen.GroomerList
 import com.android.PetPamper.ui.screen.GroomerReview
 import com.android.PetPamper.ui.screen.GroomerTopBar
@@ -46,10 +52,10 @@ import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
 
 import com.github.se.bootcamp.map.MapView
-import com.google.android.material.bottomnavigation.BottomNavigationItemView
 
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
+import kotlin.math.round
 
 
 class MainActivity : ComponentActivity() {
@@ -165,35 +171,87 @@ fun AppNavigation(email : String?) {
         "1024 Ecublens", 320, "rando")
 
       composable(BarScreen.Chat.route) { /* Search screen content */ }
-      composable(BarScreen.Map.route) { MapView() }
+
+      composable(BarScreen.Map.route) { MapView(email!!) }
       composable(BarScreen.Profile.route) { UserProfileScreen(userProfile = userProfile) }
+
       composable(BarScreen.Groomers.route) {
 
-        val address = remember { mutableStateOf(Address("", "", "", "")) }
+        val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
         val firebaseConnection = FirebaseConnection()
-        firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-          val uid = documents.documents[0]?.id.toString()
-          val userViewModel = UserViewModel(uid)
-          userViewModel.getAddressFromFirebase { address1 -> address.value = address1 }
+        val sampleGroomers = remember { mutableStateOf(listOf<GroomerReview>()) }
+        val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
+        val groomersWithReviews = remember { mutableStateOf(mapOf<Groomer, GroomerReviews>()) }
+
+        LaunchedEffect(email) {
+          firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
+            val uid = documents.documents[0]?.id.toString()
+            val userViewModel = UserViewModel(uid)
+            userViewModel.getAddressFromFirebase { address1 ->
+              if (address.value != address1) {
+                address.value = address1
+              }
+            }
+          }
         }
 
-        val sampleGroomers = listOf(
-        GroomerReview("Will Parker", "Dog, Cat", "50$", "1,5 KM", 26, 4.4, "https://img.freepik.com/psd-gratuit/personne-celebrant-son-orientation-sexuelle_23-2150115662.jpg"),
-        GroomerReview("Kobe Bryant", "Dog, Cat, Hamster", "65$", "2 KM", 13, 4.5, "https://www.livreshebdo.fr/sites/default/files/styles/article_principal/public/assets/images/106092057_1566487914671gettyimages_1095029036.jpeg?itok=KQgvBUB3"),
-        GroomerReview("Cristiano Ronaldo", "Dog", "35$", "3 KM", 2, 4.4, "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg"),
-        GroomerReview("Lionel Messi", "Dog, Cat", "20$", "4 KM", 56, 4.5, "https://www.ami-sportif.com/wp-content/uploads/2023/03/3502507-71397308-2560-1440.jpg"),
-        GroomerReview("Pedri", "Dog, Hamster", "50$", "5 KM", 24, 4.9, "https://www.coachesvoice.com/wp-content/webpc-passthru.php?src=https://www.coachesvoice.com/wp-content/uploads/2021/10/PedriMobile-1.jpg&nocache=1"),
-        GroomerReview("Lamine Yamal", "Dog", "45$", "8 KM", 12, 4.1, "https://media.cnn.com/api/v1/images/stellar/prod/230821094444-02-lamine-yamal-youngest-starter-barcelona.jpg?c=16x9&q=h_833,w_1480,c_fill"),
-        GroomerReview("Cristiano Ronaldo", "Dog", "35$", "10 KM", 44, 3.9, "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg")
-      )
+
+        LaunchedEffect(address.value) {
+          firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener { groomers ->
+            groomersNearby.value = groomers
+            groomers.forEach { groomer ->
+              firebaseConnection.fetchGroomerReviews(groomer.email).addOnSuccessListener { reviews ->
+                groomersWithReviews.value += (groomer to reviews)
+              }
+            }
+          }
+        }
+
+
+        Log.d("GroomersOutLaunched", "${groomersNearby.value}")
+
+
+
+        LaunchedEffect(groomersNearby.value, groomersWithReviews.value) {
+          sampleGroomers.value = groomersNearby.value.map { groomer ->
+            val distanceWithGroomer = distance(
+              address.value.location.latitude,
+              address.value.location.longitude,
+              groomer.address.location.latitude,
+              groomer.address.location.longitude
+            )
+            GroomerReview(
+              groomer.email,
+              groomer.name,
+              groomer.petTypes.joinToString(", "),
+              groomer.price.toString() + " CHF",
+              (round(distanceWithGroomer * 10) / 10).toString() + " km",
+              groomersWithReviews.value[groomer]?.reviewCount ?: 0,
+              groomersWithReviews.value[groomer]?.rating ?: 0.0,
+              groomer.profilePic
+            )
+          }
+        }
+
 
         Column {
-          GroomerTopBar(address.value) // Call the top bar here
-          GroomerList(groomers = sampleGroomers) // Then the list of groomers
-        }
 
+          GroomerTopBar(address.value) // Call the top bar here
+          if (sampleGroomers.value.isEmpty()) {
+            Box(
+              modifier = Modifier.fillMaxSize(),
+              contentAlignment = Alignment.Center
+            ) {
+              Text(text = "No groomers found") // Show a message if there are no groomers
+            } // Show a message if there are no groomers
+          } else {
+            Log.d("Groomers", "${sampleGroomers.value}")
+            GroomerList(groomers = sampleGroomers.value) // Then the list of groomers
+          }
+
+        }
+        // Define other composable screens for your app
       }
-      // Define other composable screens for your app
     }
   }
 }
