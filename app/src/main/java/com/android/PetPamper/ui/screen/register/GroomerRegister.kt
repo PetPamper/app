@@ -22,11 +22,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -44,6 +49,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -81,6 +88,7 @@ class GroomerSignUpViewModel {
     var petTypes = mutableStateListOf<String>()
     var profilePicture by mutableStateOf("")
     var price by mutableStateOf<Int>(0)
+    var locationMap by mutableStateOf(LocationMap())
 }
 
 const val NUM_STEPS = 12
@@ -154,6 +162,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                     viewModel.address.state = fieldsList[1]
                     viewModel.address.street = fieldsList[2]
                     viewModel.address.postalCode = fieldsList[3]
+                    viewModel.address.location = viewModel.locationMap
                     currentStep++
                 })
         7 ->
@@ -487,6 +496,7 @@ fun GroomerRegisterLayout(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroomerRegisterMultipleLayout(
     viewModel: GroomerSignUpViewModel,
@@ -501,6 +511,9 @@ fun GroomerRegisterMultipleLayout(
     val textFields = remember { mutableStateListOf<String>() }
     val shownErrorTexts = remember { mutableStateListOf<String>() }
     var locationViewModel = LocationViewModel()
+    var expandedState by remember { mutableStateOf(false) }
+    val locationOptions = remember { mutableStateListOf<LocationMap>() }
+    val focusRequester = remember { FocusRequester() }
 
     for (i in 1..numFields)
     {
@@ -548,37 +561,94 @@ fun GroomerRegisterMultipleLayout(
                 ),
                 modifier = Modifier.testTag("DisplayText"))
         }
-        itemsIndexed(fieldNames) {i, _ ->
-            OutlinedTextField(
-                value = textFields[i],
-                onValueChange = { textFields[i] = it },
-                label = { Text(fieldNames[i]) },
-                singleLine = true,
-                visualTransformation = VisualTransformation.None,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("InputText")
-                ,
-                colors =
-                OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor =
-                    Color(0xFF2491DF), // Border color when the TextField is focused
-                    focusedLabelColor =
-                    Color(0xFF2491DF), // Label color when the TextField is focused
-                    unfocusedBorderColor =
-                    Color.Gray, // Additional customization for other states
-                    unfocusedLabelColor = Color.Gray))
+        itemsIndexed(fieldNames) { i, _ ->
+            if (i == 0) {
+                ExposedDropdownMenuBox(
+                    expanded = expandedState && locationOptions.isNotEmpty(),
+                    onExpandedChange = {
+                        expandedState = it
+                        if (expandedState) {
+                            // Request focus again if the dropdown expands
+                            focusRequester.requestFocus()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = textFields[0],
+                        onValueChange = { newValue ->
+                            textFields[0] = newValue
+                            locationViewModel.fetchLocation(newValue) { locations ->
+                                if (locations != null) {
+                                    locationOptions.clear()
+                                    locationOptions.addAll(locations)
+                                    Log.d(
+                                        "LocationInput",
+                                        "Updated location options: ${locationOptions.joinToString { it.name }}"
+                                    )
+                                }
+                            }
 
-            Text(
-                text = shownErrorTexts[i],
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .testTag("errorText")
-            )
+                        },
+                        label = { Text("Location") },
+                        placeholder = { Text("Enter an address") },
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                            .focusRequester(focusRequester),
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                        },
+                    )
+                    DropdownMenu(
+                        expanded = expandedState,
+                        onDismissRequest = { expandedState = false }
+                    ) {
+                        locationOptions.forEach { location ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    textFields[0] = location.name
+                                    viewModel.locationMap = location
+                                    expandedState = false
+                                }
+                            ) {
+                                Text(location.name)
+                            }
+                        }
+                    }
+                }
+            } else {
 
-            Spacer(modifier = Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = textFields[i],
+                    onValueChange = { textFields[i] = it },
+                    label = { Text(fieldNames[i]) },
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("InputText"),
+                    colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor =
+                        Color(0xFF2491DF), // Border color when the TextField is focused
+                        focusedLabelColor =
+                        Color(0xFF2491DF), // Label color when the TextField is focused
+                        unfocusedBorderColor =
+                        Color.Gray, // Additional customization for other states
+                        unfocusedLabelColor = Color.Gray
+                    )
+                )
+
+                Text(
+                    text = shownErrorTexts[i],
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .testTag("errorText")
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
 
         item {
@@ -591,16 +661,7 @@ fun GroomerRegisterMultipleLayout(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End) {
                     Button(
-                        onClick = {
-                            locationViewModel.fetchLocation(textFields[0]) { locations ->
-                                if (locations != null) {
-                                    viewModel.address.location = locations[0]
-                                    proceedWithNext()
-                                } else {
-                                    shownErrorTexts[0] = "Invalid address"
-                                }
-                            }
-                                  },
+                        onClick = { proceedWithNext() },
                         modifier =
                         Modifier
                             .wrapContentWidth()
