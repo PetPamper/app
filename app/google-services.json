@@ -14,11 +14,51 @@
       },
       "oauth_client": [
         {
+          "client_id": "776231202916-4j7rsk2bht21ctss7ifg611mg4s0s55q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "feda028470118602e0a2c3287be9fe85ebd23f30"
+          }
+        },
+        {
+          "client_id": "776231202916-54mhls734k6p3egut4tiifuv0hjvsin1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "34c9055278049e33d1445cdfb811cbcde9387e64"
+          }
+        },
+        {
           "client_id": "776231202916-8acq3q0lnvogflp8d7g2ttsuvm5u27nj.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.android.PetPamper",
             "certificate_hash": "d310965a3bd65f4854d9141b7c7866588a301527"
+          }
+        },
+        {
+          "client_id": "776231202916-9u4t9kaeugvi7mfpmeitnn8b5v76r9cl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "14cb33c3640a28bda0bba889ad5fc0571bf1a729"
+          }
+        },
+        {
+          "client_id": "776231202916-c21s3ojt5m483ci7t95k19o77sltjekf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "6ca8d4202460dc1b3caf2a27a55ed976916528f7"
+          }
+        },
+        {
+          "client_id": "776231202916-gonrqf1p2ulh7ueekem270hsd9hion6p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "84a5e94613ea562fe094f078b46d1042223d8d7e"
           }
         },
         {

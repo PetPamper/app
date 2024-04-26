@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.PetPamper.screen.MainScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
-import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,16 +21,38 @@ class MainActivityTest : TestCase() {
 
   @Test
   fun test() = run {
-    step("Start Main Activity") {
+    step("Start Login Screen") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         loginTitle {
           assertIsDisplayed()
-          assertTextEquals("Welcome")
+          assertTextEquals("Welcome,")
         }
         loginButton {
           assertIsDisplayed()
           assertHasClickAction()
         }
+        // Add a new check for the error message
+        errorMessage { assertIsNotDisplayed() }
+      }
+    }
+    step("Attempt to log in with empty credentials") {
+      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+        loginButton { performClick() }
+        // Check if the error message is displayed
+        errorMessage {
+          assertIsDisplayed()
+          assertTextEquals("Login failed, email or password is incorrect")
+        }
+      }
+    }
+
+    step("Attempt to login with google sign in") {
+      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+        // Click the google sign in button
+        googleSignInButton { performClick() }
+
+        // Check if the error message is displayed
+
       }
     }
   }

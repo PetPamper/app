@@ -10,4 +10,8 @@ class MainScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
 
   val loginTitle: KNode = child { hasTestTag("LoginTitle") }
   val loginButton: KNode = child { hasTestTag("LoginButton") }
+  val errorMessage: KNode = child { hasTestTag("ErrorMessage") } // Add this line
+  val googleSignInButton: KNode = child { hasTestTag("googleSignInButton") }
+  val registerButton: KNode = child { hasTestTag("registerButton") }
+  val forgetPasswordButton: KNode = child { hasTestTag("forgetButton") }
 }
