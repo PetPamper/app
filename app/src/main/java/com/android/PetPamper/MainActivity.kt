@@ -53,6 +53,7 @@ import com.github.se.bootcamp.map.MapView
 
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
+import kotlin.math.round
 
 
 class MainActivity : ComponentActivity() {
@@ -216,8 +217,8 @@ fun AppNavigation(email : String?) {
               groomer.email,
               groomer.name,
               groomer.petTypes.joinToString(", "),
-              groomer.price.toString(),
-              distanceWithGroomer.toString(),
+              groomer.price.toString() + " CHF",
+              (round(distanceWithGroomer * 10) / 10).toString() + " km",
               groomersWithReviews.value[groomer]?.reviewCount ?: 0,
               groomersWithReviews.value[groomer]?.rating ?: 0.0,
               groomer.profilePic

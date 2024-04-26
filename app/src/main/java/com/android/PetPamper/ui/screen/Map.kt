@@ -52,7 +52,6 @@ fun MapView(email : String) {
         position = CameraPosition.fromLatLngZoom(LatLng(46.516, 6.63282), 5f)
     }
 
-
     GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
         for (groomer in groomersNearby.value) {
             Marker(
