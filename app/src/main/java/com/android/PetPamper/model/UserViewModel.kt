@@ -7,7 +7,7 @@ class UserViewModel(uid: String) {
   var name: String = ""
   var email: String = ""
   var phoneNumber: String = ""
-  var address: Address = Address("", "", "", "")
+  var address: Address = Address("", "", "", "", LocationMap())
   var firebaseConnection: FirebaseConnection = FirebaseConnection()
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
@@ -32,14 +32,15 @@ class UserViewModel(uid: String) {
           val city = document.getString("address.city") ?: ""
           val state = document.getString("address.state") ?: ""
           val postalCode = document.getString("address.postalCode") ?: ""
+          val location = document.get("address.location") as HashMap<*, *>
 
           // Construct an Address object
-          val address = Address(street, city, state, postalCode)
+          val address = Address(street, city, state, postalCode, LocationMap(location["latitude"] as Double, location["longitude"] as Double, location["name"] as String))
           onComplete(address)
         }
       } else {
         // Handle the error or complete with a default Address
-        onComplete(Address("", "", "", ""))
+        onComplete(Address("", "", "", "", LocationMap()))
       }
     }
   }
