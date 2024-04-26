@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +58,11 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.User
+import com.android.PetPamper.ui.screen.CustomTextButton
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 class SignUpViewModel {
 
@@ -69,20 +75,33 @@ class SignUpViewModel {
 
 @Composable
 fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavController) {
+    val firebaseConnection = FirebaseConnection()
+    val db = Firebase.firestore
+
     var currentStep by remember { mutableIntStateOf(currentStep1) }
 
+    var registeredAsGroomer by remember { mutableStateOf(false) }
+
     when (currentStep) {
-        1 ->
-            RegisterLayout(
-                viewModel = viewModel,
-                1,
-                false,
-                "Let’s start with your name",
-                "Name",
-                onNext = { newName ->
-                    viewModel.name = newName
-                    currentStep++
-                })
+        1 -> {
+            Column {
+                CustomTextButton(
+                    tag = "I already have a groomer account",
+                    testTag = "AlreadyGroomerButton") {
+                    currentStep = 10
+                }
+                RegisterLayout(
+                    viewModel = viewModel,
+                    1,
+                    false,
+                    "Let’s start with your name",
+                    "Name",
+                    onNext = { newName ->
+                        viewModel.name = newName
+                        currentStep++
+                    })
+            }
+        }
 
         2 ->
             RegisterLayout(
@@ -121,6 +140,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                     viewModel.address.street = street
                     viewModel.address.postalCode = postalCode
                     currentStep++
+                    if (registeredAsGroomer) currentStep += 2
                 })
 
         5 ->
@@ -145,39 +165,69 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                 confirmPassword = viewModel.password,
                 onNext = { confirmedPassword ->
                     if (viewModel.password == confirmedPassword) {
-
-                        val firebaseConnection = FirebaseConnection()
-
-                        firebaseConnection.registerUser(
-                            viewModel.email,
-                            viewModel.password,
-                            onSuccess = {
-                                firebaseConnection.addUser(
-                                    User(
-                                        viewModel.name,
-                                        viewModel.email,
-                                        viewModel.phoneNumber,
-                                        viewModel.address
-                                    ),
-                                    onSuccess = { currentStep++ },
-                                    onFailure = { error ->
-                                        Log.e(
-                                            "SignUp",
-                                            "Registration failed",
-                                            error
-                                        )
-                                    })
-                            },
-                            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                        currentStep++
                     } else {
                         // Show error message
                     }
                 })
         }
 
-
-
         7 -> {
+            if (!registeredAsGroomer) {
+                firebaseConnection.registerUser(
+                    viewModel.email,
+                    viewModel.password,
+                    onSuccess = {
+                        firebaseConnection.addUser(
+                            User(
+                                viewModel.name,
+                                viewModel.email,
+                                viewModel.phoneNumber,
+                                viewModel.address
+                            ),
+                            onSuccess = { currentStep++ },
+                            onFailure = { error ->
+                                Log.e(
+                                    "SignUp",
+                                    "Registration failed",
+                                    error
+                                )
+                            })
+                    },
+                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+            } else {
+                // Need to check that user wasn't already registered to avoid duplicate accounts
+                val userRef = db.collection("users")
+                    .document(viewModel.email)
+                userRef.get()
+                    .addOnSuccessListener { document ->
+                        if (!document.exists()) {
+                            firebaseConnection.addUser(
+                                User(
+                                viewModel.name,
+                                viewModel.email,
+                                viewModel.phoneNumber,
+                                viewModel.address
+                                ),
+                                onSuccess = { currentStep++ },
+                                onFailure = {
+                                        error -> Log.e("SignUp", "Registration failed", error)
+                                })
+                        } else {
+                            Log.e("AlreadyRegistered",
+                                "user was already registered")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e(
+                            "Firebase query", "Get failed with ",
+                            exception
+                        )
+                    }
+            }
+        }
+
+        8 -> {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
@@ -233,6 +283,134 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                             )
                         }
                     }
+                }
+            }
+        }
+
+        10 -> {
+            var email by remember { mutableStateOf("") }
+            var password by remember { mutableStateOf("") }
+            var login by remember { mutableStateOf(true) }
+
+            var errorMessage by remember {
+                mutableStateOf("Login failed, email or password is incorrect")
+            }
+
+            Column (
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "Please enter your user credentials",
+                    style =
+                    TextStyle(
+                        fontSize = 23.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight(800),
+                        color = Color(0xFF2490DF),
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier.testTag("AlreadyUserText")
+                )
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                if (!login) {
+                    Text(
+                        text = errorMessage,
+                        color = Color.Red,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("ErrorMessage")
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
+                CustomTextButton(
+                    "Forgot password?",
+                    "",
+                    "forgetButton"
+                ) { navController.navigate("EmailScreen") }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        errorMessage = ""
+                        if (email.isBlank() || password.isBlank()) {
+                            login = false
+                        } else {
+                            firebaseConnection.loginUser(
+                                email,
+                                password,
+                                {
+                                    val groomerRef = db.collection("groomers")
+                                        .document(email)
+                                    groomerRef.get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                login = true
+                                                Log.d(
+                                                    "Firebase query", "User found," +
+                                                            " name is ${document.get("name")}"
+                                                )
+                                                viewModel.name = document.get("name").toString()
+                                                viewModel.email = document.get("email").toString()
+                                                viewModel.phoneNumber =
+                                                    document.get("phoneNumber").toString()
+                                                registeredAsGroomer = true
+                                                currentStep = 4
+                                            } else {
+                                                login = false
+                                                errorMessage = "Groomer is not registered"
+                                                Log.e("Firebase query", "No such groomer")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            login = false
+                                            errorMessage =
+                                                "Login failed, email or password is incorrect"
+                                            Log.e(
+                                                "Firebase query", "Get failed with ",
+                                                exception
+                                            )
+                                        }
+                                },
+                                { login = false })
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .testTag("LoginButton")
+                ) {
+                    Text("LOG IN", fontSize = 18.sp)
                 }
             }
         }
