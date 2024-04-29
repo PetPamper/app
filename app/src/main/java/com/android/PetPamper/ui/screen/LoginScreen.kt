@@ -283,23 +283,6 @@ fun SignIn(navController: NavHostController) {
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
-<<<<<<< HEAD
-                    Switch(
-                        checked = isGroomer,
-                        onCheckedChange = {
-                            isGroomer = it
-                        },
-                        modifier = Modifier.offset(x=100.dp)
-                    )
-                    Text(
-                        text = if (isGroomer) "I am a groomer" else "I am a user",
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontSize = 16.sp, fontWeight = FontWeight(600)
-                        ),
-                        modifier = Modifier.offset(x=110.dp)
-                    )
-=======
                       Switch(
                           checked = isGroomer,
                           onCheckedChange = { isGroomer = it },
@@ -312,17 +295,6 @@ fun SignIn(navController: NavHostController) {
                                   fontSize = 16.sp,
                                   fontWeight = FontWeight(600)),
                           modifier = Modifier.offset(x = 110.dp))
-                      //                      Button(
-                      //                          onClick = {
-                      // navController.navigate("GroomerRegisterScreen") },
-                      //                          colors = ButtonDefaults.buttonColors(Color.Black),
-                      //                          modifier = Modifier
-                      //                              .width(200.dp)
-                      //                              .height(48.dp)) {
-                      //                            Text("I am a Groomer", color = Color.White,
-                      // fontSize = 16.sp)
-                      //                          }
->>>>>>> ece2e3fc18561bb872089de8ffda9fb8ebf1a358
                     }
               }
         }
