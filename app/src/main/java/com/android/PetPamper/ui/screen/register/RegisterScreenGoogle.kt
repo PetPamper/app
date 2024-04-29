@@ -201,7 +201,7 @@ fun SignUpScreenLayoutGoogle(
                           if (fieldname == "Password" || fieldname == "Confirm Password")
                               PasswordVisualTransformation()
                           else VisualTransformation.None,
-                      modifier = Modifier.fillMaxWidth().testTag("NameTextInput"),
+                      modifier = Modifier.fillMaxWidth().testTag("valueWritten"),
                       colors =
                           OutlinedTextFieldDefaults.colors(
                               focusedBorderColor =
@@ -239,7 +239,7 @@ fun SignUpScreenLayoutGoogle(
                             label = { Text("Location") },
                             placeholder = { Text("Enter an address") },
                             modifier =
-                                Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                                Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("valueWritten"),
                             trailingIcon = {
                               ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                             },
