@@ -319,14 +319,6 @@ fun SignIn(navController: NavHostController) {
                         ),
                         modifier = Modifier.offset(x=110.dp)
                     )
-//                      Button(
-//                          onClick = { navController.navigate("GroomerRegisterScreen") },
-//                          colors = ButtonDefaults.buttonColors(Color.Black),
-//                          modifier = Modifier
-//                              .width(200.dp)
-//                              .height(48.dp)) {
-//                            Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
-//                          }
                     }
               }
         }
