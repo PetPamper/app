@@ -256,7 +256,7 @@ fun RegisterLayout(
     when (fieldName) {
       "Name" ->
           if (!isValidName(textField)) {
-            errorText = "Please enter a valid name. "
+            errorText = "Please enter a valid name."
             isValidInput = false
           }
       "Email" ->
