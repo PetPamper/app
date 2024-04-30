@@ -108,37 +108,39 @@ fun AppNavigation(email: String?) {
 
   Scaffold(
       bottomBar = {
-
-        NavigationBar(
-            containerColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
-              val currentRoute =
-                  navController.currentBackStackEntryAsState().value?.destination?.route
+          BottomNavigation(
+              backgroundColor = Color.White,
+              modifier = Modifier
+                  .height(60.dp)
+                  .fillMaxWidth()
+          ) {
+              val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
               items.forEach { screen ->
-                val iconColor =
-                    if (currentRoute == screen.route) Color(0xFF2490DF) else Color.DarkGray
-
-                NavigationBarItem(
-                    icon = {
-                      Icon(
+                  val iconColor = if (currentRoute == screen.route) Color(0xFF2490DF) else Color.DarkGray
+                  BottomNavigationItem(
+                      icon = { Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier
+                              .size(40.dp)
+                              .padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
-                    },
-                    label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
-                    selected = currentRoute == screen.route,
-                    onClick = {
-                      navController.navigate(screen.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                          popUpTo(route) { saveState = true }
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+                      },
+                      label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
+                      selected = currentRoute == screen.route,
+                      onClick = {
+                          navController.navigate(screen.route) {
+                              navController.graph.startDestinationRoute?.let { route ->
+                                  popUpTo(route) { saveState = true }
+                              }
+                              launchSingleTop = true
+                              restoreState = true
+                          }
                       }
-                    })
+                  )
               }
-            }
+          }
       }) { innerPadding ->
         NavHost(
             navController = navController,

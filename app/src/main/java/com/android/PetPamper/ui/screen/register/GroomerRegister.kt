@@ -353,17 +353,20 @@ fun GroomerRegisterLayout(
     fun proceedWithNext() {
         var proceed = true
 
-        if (isValidEmail?.invoke(textField)?.first == false) {
-            if (isValidInput?.invoke(textField) == false) {
-                println("what")
-                shownErrorText = errorText
-                proceed = false
-            }
+        if (isValidInput?.invoke(textField) == false) {
+            println("what")
+            shownErrorText = errorText
+            proceed = false
+        }
 
-            if (proceed) {
-                shownErrorText = ""
-                onNext?.invoke(textField)
-            }
+        if (isValidEmail?.invoke(textField)?.first == false) {
+            proceed = false
+            shownErrorText = errorText
+        }
+
+        if (proceed) {
+            shownErrorText = ""
+            onNext?.invoke(textField)
         }
     }
 

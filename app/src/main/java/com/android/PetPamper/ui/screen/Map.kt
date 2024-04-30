@@ -39,15 +39,6 @@ fun MapView(email: String) {
     }
   }
 
-
-    Marker(
-        state =
-            MarkerState(
-                position =
-                    LatLng(address.value.location.latitude, address.value.location.longitude)),
-        title = "Your Address",
-        snippet = "You are here!",
-    )
   LaunchedEffect(address.value) {
     firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener { groomers ->
       groomersNearby.value = groomers
