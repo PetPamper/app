@@ -6,7 +6,7 @@ plugins {
     id("com.ncorti.ktfmt.gradle") version "0.17.0"
     id("org.sonarqube") version "4.4.1.3373"
 
-     // ensure correct Kotlin plugin
+    // ensure correct Kotlin plugin
     id("jacoco")
     id("com.google.gms.google-services")
 }
@@ -107,7 +107,7 @@ android {
 
 sonar {
     properties {
-       // property("sonar.gradle.skipCompile", "true")
+        // property("sonar.gradle.skipCompile", "true")
         property("sonar.projectKey", "PetPamper_PetPamper")
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")
@@ -142,7 +142,6 @@ dependencies {
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
 
-
     // ------------- Jetpack Compose ------------------
 
     implementation(libs.androidx.ui)
@@ -152,12 +151,15 @@ dependencies {
     implementation ("androidx.compose.material:material:1.3.0")
 
 
+
+
+
     implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0"){
+        exclude(module = "protobuf-lite")
+    }
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
-
-
 
     implementation("com.google.maps.android:maps-compose:4.3.0")
     implementation("com.google.maps.android:maps-compose-utils:4.3.0")
@@ -195,12 +197,11 @@ dependencies {
 
     implementation(libs.core.ktx)
 
-//
-//    implementation (libs.play.services.auth)
-//    implementation (libs.accompanist.insets)
-//    implementation ("com.google.android.gms:play-services-auth:19.0.0")
-//
-//    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation (libs.play.services.auth)
+    implementation (libs.accompanist.insets)
+    implementation ("com.google.android.gms:play-services-auth:19.0.0")
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
 
     // Use the latest version
