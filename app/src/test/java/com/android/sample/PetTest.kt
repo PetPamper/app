@@ -49,8 +49,6 @@ class PetTest {
     assertEquals(true, pet.requiresPermit)
     pet.addPic("mascot3.jpeg")
     assertEquals(listOf("mascot1.png", "mascot2.jpg", "mascot3.jpeg"), pet.pictures)
-<<<<<<< HEAD
-=======
   }
 
   @Test
@@ -82,6 +80,5 @@ class PetTest {
 
     dog.birthDate = LocalDate.of(2026, 3, 28)
     assertEquals(LocalDate.of(2024, 3, 28), dog.birthDate)
->>>>>>> main
   }
 }
