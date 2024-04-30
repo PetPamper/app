@@ -55,8 +55,36 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.location.NetworkModule
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.User
+
+import androidx.lifecycle.ViewModel  // Base class for ViewModel
+import androidx.compose.runtime.mutableStateOf  // For managing mutable state in Compose
+import androidx.compose.runtime.getValue  // For delegating state properties (optional but tidy)
+import androidx.compose.runtime.setValue  // For delegating state properties (optional but tidy)
+import retrofit2.Call  // Retrofit's Call class for making async requests
+import retrofit2.Callback  // Callback for handling Retrofit responses
+import retrofit2.Response  // Response class from Retrofit
+import com.android.PetPamper.location.LocationResult
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextField
+import androidx.compose.ui.unit.dp
+
+
 
 class SignUpViewModel {
 
@@ -65,6 +93,32 @@ class SignUpViewModel {
   var phoneNumber by mutableStateOf("")
   var address by mutableStateOf(Address("", "", "", ""))
   var password by mutableStateOf("")
+
+    var addressSuggestions by mutableStateOf(listOf<String>())
+    var isLoadingSuggestions by mutableStateOf(false)
+
+    fun fetchAddressSuggestions(query: String) {
+        if (query.length > 3) { // To limit API calls
+            isLoadingSuggestions = true
+            // Assuming `nominatimAPI` is a Retrofit API client that's properly set up
+            NetworkModule.nominatimAPI.getCoordinates(query).enqueue(object : Callback<List<LocationResult>> {
+                override fun onResponse(call: Call<List<LocationResult>>, response: Response<List<LocationResult>>) {
+                    if (response.isSuccessful) {
+                        addressSuggestions = response.body()?.map { it.display_name } ?: listOf()
+                    } else {
+                        Log.e("API Error", "Response Code: ${response.code()}")
+                    }
+                    isLoadingSuggestions = false
+                }
+
+                override fun onFailure(call: Call<List<LocationResult>>, t: Throwable) {
+                    Log.e("API Failure", "Error fetching address suggestions: ${t.message}")
+                    isLoadingSuggestions = false
+                }
+            })
+        }
+    }
+
 }
 
 @Composable
@@ -513,6 +567,62 @@ fun isValidEmail(email: String) =
     email.contains('@') && email.contains('.') // Simplified validation
 
 fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
+
+@Composable
+fun AddressDropdownMenu(
+    suggestions: List<String>,
+    onSelectSuggestion: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // Dummy textFieldValue to show how it might be used
+    var textFieldValue by remember { mutableStateOf("") }
+
+    Column {
+        TextField(
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Address") },
+            trailingIcon = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Toggle Dropdown")
+                }
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            suggestions.forEach { suggestion ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSelectSuggestion(suggestion)
+                        expanded = false  // Collapse the dropdown menu
+                    },
+                    text = { Text(suggestion) }
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewAddressDropdownMenu() {
+    AddressDropdownMenu(
+        suggestions = listOf("123 Main St", "456 Elm St", "789 Oak St"),
+        onSelectSuggestion = { selectedAddress ->
+            println("Selected Address: $selectedAddress")
+        }
+    )
+}
+
+
+
 
 @Preview
 @Composable
