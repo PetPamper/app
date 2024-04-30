@@ -1,8 +1,6 @@
 package com.android.PetPamper
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
-import androidx.compose.material3.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -31,20 +29,21 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.ui.screen.BarScreen
-import com.android.PetPamper.ui.screen.GroomerItem
 import com.android.PetPamper.ui.screen.GroomerList
 import com.android.PetPamper.ui.screen.GroomerReview
 import com.android.PetPamper.ui.screen.GroomerTopBar
+import com.android.PetPamper.ui.screen.ReservationsScreen
 import com.android.PetPamper.ui.screen.SignIn
 import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
+import com.android.PetPamper.ui.screen.HomeScreen
+import com.android.PetPamper.ui.screen.PetListScreen
 import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
 
 import com.github.se.bootcamp.map.MapView
-import com.google.android.material.bottomnavigation.BottomNavigationItemView
 
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
@@ -75,6 +74,10 @@ class MainActivity : ComponentActivity() {
         SignUpScreenGoogle(signUp1, navController, email!!)
       }
 
+      /*composable("HomeScreen") {
+        AppNavigation()
+
+      }*/
       composable("GroomerRegisterScreen") {
         GroomerRegister(groomerSignUp, navController) }
 
@@ -83,7 +86,25 @@ class MainActivity : ComponentActivity() {
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         AppNavigation(email)
+        //HomeScreen(navController, email)
         }
+
+//      composable("ReservationsScreen") { //backStackEntry ->
+//        //val email = backStackEntry.arguments?.getString("email")
+//        //AppNavigation(email)
+//        ReservationsScreen(
+//          onBackPressed = { navController.navigateUp() }
+//        )
+//      }
+//
+//      composable("PetListScreen") {
+//        //val email = backStackEntry.arguments?.getString("email")
+//        //AppNavigation(email)
+//        PetListScreen(
+//          onBackPressed = { navController.navigateUp() }
+//        )
+//
+//      }
 
       }
     }
@@ -155,7 +176,25 @@ fun AppNavigation(email : String?) {
           val userViewModel = UserViewModel(uid)
           userViewModel.getNameFromFirebase { name -> nameUser.value = name }
         }
-        Text(text = "Welcome ${nameUser.value}")
+        // Text(text = "Welcome ${nameUser.value}")
+        HomeScreen(navController, email)
+
+      }
+
+      composable("ReservationsScreen") { //backStackEntry ->
+        //val email = backStackEntry.arguments?.getString("email")
+        //AppNavigation(email)
+        ReservationsScreen(
+          onBackPressed = { navController.navigateUp() }
+        )
+      }
+
+      composable("PetListScreen") {
+        //val email = backStackEntry.arguments?.getString("email")
+        //AppNavigation(email)
+        PetListScreen(
+          onBackPressed = { navController.navigateUp() }
+        )
 
       }
 
