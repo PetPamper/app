@@ -266,8 +266,8 @@ fun RegisterLayout(
           }
       "Phone" ->
           if (!isValidPhone(textField)) {
-              errorText = "Please enter a valid phone number."
-              isValidInput = false
+            errorText = "Please enter a valid phone number."
+            isValidInput = false
           }
       "Password" ->
           if (!isValidPassword(textField)) {
@@ -510,11 +510,11 @@ fun isValidEmail(email: String) =
     email.contains('@') && email.contains('.') // Simplified validation
 
 fun isValidPhone(phone: String): Boolean {
-    var _phone = phone.replace(Regex("-|\\s"), "")
-    if (_phone.startsWith("+")) {
-        _phone = _phone.replaceFirst("+","00")
-    }
-    return _phone.matches(Regex("\\d*")) && phone.isNotBlank()
+  var _phone = phone.replace(Regex("-|\\s"), "")
+  if (_phone.startsWith("+")) {
+    _phone = _phone.replaceFirst("+", "00")
+  }
+  return _phone.matches(Regex("\\d*")) && phone.isNotBlank()
 }
 
 fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration

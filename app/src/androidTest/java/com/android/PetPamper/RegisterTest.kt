@@ -27,7 +27,7 @@ class RegisterTest : TestCase() {
 
       // Now that navigation should have occurred, proceed with the RegisterScreen actions.
       ComposeScreen.onComposeScreen<RegisterScreen>(composeTestRule) {
-        fun testStep(lblTxt:String, errTxt:String, inTxt:String){
+        fun testStep(lblTxt: String, errTxt: String, inTxt: String) {
           errorText { assertIsNotDisplayed() }
           inputLabel {
             assertIsDisplayed()
@@ -41,9 +41,10 @@ class RegisterTest : TestCase() {
           inputText { performTextInput(inTxt) }
           arrowButton { performClick() }
         }
-        testStep("Let’s start with your name","Please enter a valid name.", "John")
-        testStep("Hello John, enter your email","Please enter a valid email.", "alikawazaki@gmail.com")
-        testStep("What’s your phone number?","Please enter a valid phone number.", "0782074677")
+        testStep("Let’s start with your name", "Please enter a valid name.", "John")
+        testStep(
+            "Hello John, enter your email", "Please enter a valid email.", "alikawazaki@gmail.com")
+        testStep("What’s your phone number?", "Please enter a valid phone number.", "0782074677")
 
         errorText { assertIsNotDisplayed() }
         inputLabel {
@@ -61,9 +62,9 @@ class RegisterTest : TestCase() {
 
         arrowButton { performClick() }
 
-
-        testStep("Great! Create your password","Password must be at least 8 characters.", "12345678")
-        testStep("Confirm your password","Passwords do not match.", "12345678")
+        testStep(
+            "Great! Create your password", "Password must be at least 8 characters.", "12345678")
+        testStep("Confirm your password", "Passwords do not match.", "12345678")
       }
     }
   }
