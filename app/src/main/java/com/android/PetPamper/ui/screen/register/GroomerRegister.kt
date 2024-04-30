@@ -226,26 +226,32 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
       }
     }
     12 -> {
-      if (!registeredAsUser) {
-        firebaseConnection.addGroomer(
-            Groomer(
-                viewModel.name,
+        if (!registeredAsUser) {
+            firebaseConnection.registerUser(
                 viewModel.email,
-                viewModel.phoneNumber,
-                viewModel.address,
-                viewModel.experienceYears,
-                viewModel.groomerServices,
-                viewModel.petTypes,
-                viewModel.profilePicture,
-                viewModel.price),
-            onSuccess = {
-              firebaseConnection.addGroomerReview(
-                  GroomerReviews(viewModel.email, 5.0, 0),
-                  onSuccess = { navController.navigate("LoginScreen") },
-                  onFailure = { error -> Log.e("SignUp", "Review failed", error) })
-            },
-            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-      } else {
+                viewModel.password,
+                onSuccess = {
+                    firebaseConnection.addGroomer(
+                        Groomer(
+                            viewModel.name,
+                            viewModel.email,
+                            viewModel.phoneNumber,
+                            viewModel.address,
+                            viewModel.experienceYears,
+                            viewModel.groomerServices,
+                            viewModel.petTypes,
+                            viewModel.profilePicture,
+                            viewModel.price),
+                        onSuccess = {
+                            firebaseConnection.addGroomerReview(
+                                GroomerReviews(viewModel.email, 5.0, 0),
+                                onSuccess = { navController.navigate("LoginScreen") },
+                                onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+                        },
+                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                },
+                onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+        } else {
         // Need to check that groomer wasn't already registered to avoid duplicate accounts
         val groomerRef = db.collection("groomers").document(viewModel.email)
         groomerRef

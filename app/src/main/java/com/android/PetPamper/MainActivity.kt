@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -106,15 +108,15 @@ fun AppNavigation(email: String?) {
 
   Scaffold(
       bottomBar = {
-        BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+        NavigationBar(
+            containerColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
               items.forEach { screen ->
                 val iconColor =
                     if (currentRoute == screen.route) Color(0xFF2490DF) else Color.DarkGray
-                BottomNavigationItem(
+                NavigationBarItem(
                     icon = {
                       Icon(
                           painterResource(id = screen.icon),

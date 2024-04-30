@@ -11,9 +11,9 @@ class RegisterScreen(semanticsProvider: SemanticsNodeInteractionsProvider) :
 
   val arrowButton: KNode = child { hasTestTag("arrowButton") }
   val errorText: KNode = child { hasTestTag("errorText") }
-  val NameTextInput: KNode = child { hasTestTag("NameTextInput") }
+  val inputText: KNode = child { hasTestTag("inputText") }
   val cityTag: KNode = child { hasTestTag("cityTag") }
   val stateTag: KNode = child { hasTestTag("stateTag") }
   val postalTag: KNode = child { hasTestTag("postalTag") }
-  val EmailText: KNode = child { hasTestTag("EmailText") }
+  val inputLabel: KNode = child { hasTestTag("inputLabel") }
 }

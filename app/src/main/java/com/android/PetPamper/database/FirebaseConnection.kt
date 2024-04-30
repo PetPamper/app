@@ -104,7 +104,7 @@ class FirebaseConnection {
       ->
       if (task.isSuccessful) {
         val reviews = task.result?.toObjects(GroomerReviews::class.java)
-        if (!reviews.isNullOrEmpty()) {
+        if (reviews != null && reviews.isNotEmpty()) {
           source.setResult(reviews[0])
         } else {
           source.setException(Exception("No review found for this email"))
