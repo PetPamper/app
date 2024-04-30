@@ -111,7 +111,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             3,
             false,
             "What’s your phone number?",
-            "Phone Number",
+            "Phone",
             onNext = { newPhoneNumber ->
               viewModel.phoneNumber = newPhoneNumber
               currentStep++
@@ -124,9 +124,9 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             "Enter your Address?",
             "Street",
             onNextAddress = { street, city, state, postalCode ->
+              viewModel.address.street = street
               viewModel.address.city = city
               viewModel.address.state = state
-              viewModel.address.street = street
               viewModel.address.postalCode = postalCode
               viewModel.address.location.latitude = viewModel.locationMap.latitude
               viewModel.address.location.longitude = viewModel.locationMap.longitude
@@ -233,7 +233,7 @@ fun RegisterLayout(
     viewModel: SignUpViewModel,
     currentStep: Int,
     isAddress: Boolean,
-    textShown: String,
+    textShown: String = "Let’s start with your name",
     fieldName: String,
     confirmPassword: String? = null,
     onNext: ((String) -> Unit)? = null,
@@ -263,6 +263,11 @@ fun RegisterLayout(
           if (!isValidEmail(textField)) {
             errorText = "Please enter a valid email."
             isValidInput = false
+          }
+      "Phone" ->
+          if (!isValidPhone(textField)) {
+              errorText = "Please enter a valid phone number."
+              isValidInput = false
           }
       "Password" ->
           if (!isValidPassword(textField)) {
@@ -503,6 +508,14 @@ fun isValidName(name: String) = name.isNotBlank() // Add more conditions as nece
 
 fun isValidEmail(email: String) =
     email.contains('@') && email.contains('.') // Simplified validation
+
+fun isValidPhone(phone: String): Boolean {
+    var _phone = phone.replace(Regex("-|\\s"), "")
+    if (_phone.startsWith("+")) {
+        _phone = _phone.replaceFirst("+","00")
+    }
+    return _phone.matches(Regex("\\d*")) && phone.isNotBlank()
+}
 
 fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
 
