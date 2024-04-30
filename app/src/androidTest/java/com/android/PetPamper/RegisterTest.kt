@@ -27,38 +27,32 @@ class RegisterTest : TestCase() {
 
       // Now that navigation should have occurred, proceed with the RegisterScreen actions.
       ComposeScreen.onComposeScreen<RegisterScreen>(composeTestRule) {
-        arrowButton { performClick() }
-        errorText {
-          assertIsDisplayed()
-          assertTextEquals("Please enter a valid name.")
+        fun testStep(lblTxt: String, errTxt: String, inTxt: String) {
+          errorText { assertIsNotDisplayed() }
+          inputLabel {
+            assertIsDisplayed()
+            assertTextEquals(lblTxt)
+          }
+          arrowButton { performClick() }
+          errorText {
+            assertIsDisplayed()
+            assertTextEquals(errTxt)
+          }
+          inputText { performTextInput(inTxt) }
+          arrowButton { performClick() }
         }
-        NameTextInput { performTextInput("John") }
-        arrowButton { performClick() }
+        testStep("Let’s start with your name", "Please enter a valid name.", "John")
+        testStep(
+            "Hello John, enter your email", "Please enter a valid email.", "alikawazaki@gmail.com")
+        testStep("What’s your phone number?", "Please enter a valid phone number.", "0782074677")
 
-        EmailText {
-          assertIsDisplayed()
-          assertTextEquals("Hello John, enter your email")
-        }
-
-        NameTextInput { performTextInput("alikawazaki@gmail.com") }
-
-        arrowButton { performClick() }
-
-        EmailText {
-          assertIsDisplayed()
-          assertTextEquals("What’s your phone number?")
-        }
-
-        NameTextInput { performTextInput("0782074677") }
-
-        arrowButton { performClick() }
-
-        EmailText {
+        errorText { assertIsNotDisplayed() }
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Enter your Address?")
         }
 
-        NameTextInput { performTextInput("Route des toches 7") }
+        inputText { performTextInput("Route des toches 7") }
 
         cityTag { performTextInput("Lausanne") }
 
@@ -68,21 +62,9 @@ class RegisterTest : TestCase() {
 
         arrowButton { performClick() }
 
-        EmailText {
-          assertIsDisplayed()
-          assertTextEquals("Great! Create your password")
-        }
-
-        NameTextInput { performTextInput("12345678") }
-
-        arrowButton { performClick() }
-
-        EmailText {
-          assertIsDisplayed()
-          assertTextEquals("Confirm your password")
-        }
-
-        NameTextInput { performTextInput("12345678") }
+        testStep(
+            "Great! Create your password", "Password must be at least 8 characters.", "12345678")
+        testStep("Confirm your password", "Passwords do not match.", "12345678")
       }
     }
   }
