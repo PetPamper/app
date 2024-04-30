@@ -297,8 +297,7 @@ fun RegisterLayout(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier =
                       Modifier.fillMaxWidth()
-                          .padding(horizontal = 16.dp)
-                          .testTag("RegisterScreen")) {
+                          .padding(horizontal = 16.dp)) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Go back",
@@ -317,7 +316,7 @@ fun RegisterLayout(
                                 color = Color(0xFF2490DF),
                                 textAlign = TextAlign.Center,
                             ),
-                        modifier = Modifier.testTag("EmailText"))
+                        modifier = Modifier.testTag("inputLabel"))
                   }
 
               Spacer(modifier = Modifier.height(10.dp))
@@ -333,7 +332,7 @@ fun RegisterLayout(
                         if (fieldName == "Password" || fieldName == "Confirm Password")
                             PasswordVisualTransformation()
                         else VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("NameTextInput"),
+                    modifier = Modifier.fillMaxWidth().testTag("inputText"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -371,7 +370,7 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-                              Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                              Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("inputText"),
                           trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                           },

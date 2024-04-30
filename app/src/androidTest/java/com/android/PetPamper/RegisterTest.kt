@@ -32,33 +32,33 @@ class RegisterTest : TestCase() {
           assertIsDisplayed()
           assertTextEquals("Please enter a valid name.")
         }
-        NameTextInput { performTextInput("John") }
+        inputText { performTextInput("John") }
         arrowButton { performClick() }
 
-        EmailText {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Hello John, enter your email")
         }
 
-        NameTextInput { performTextInput("alikawazaki@gmail.com") }
+        inputText { performTextInput("alikawazaki@gmail.com") }
 
         arrowButton { performClick() }
 
-        EmailText {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("What’s your phone number?")
         }
 
-        NameTextInput { performTextInput("0782074677") }
+        inputText { performTextInput("0782074677") }
 
         arrowButton { performClick() }
 
-        EmailText {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Enter your Address?")
         }
 
-        NameTextInput { performTextInput("Route des toches 7") }
+        inputText { performTextInput("Route des toches 7") }
 
         cityTag { performTextInput("Lausanne") }
 
@@ -68,21 +68,21 @@ class RegisterTest : TestCase() {
 
         arrowButton { performClick() }
 
-        EmailText {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Great! Create your password")
         }
 
-        NameTextInput { performTextInput("12345678") }
+        inputText { performTextInput("12345678") }
 
         arrowButton { performClick() }
 
-        EmailText {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Confirm your password")
         }
 
-        NameTextInput { performTextInput("12345678") }
+        inputText { performTextInput("12345678") }
       }
     }
   }
