@@ -295,9 +295,7 @@ fun RegisterLayout(
             modifier = Modifier.fillMaxWidth()) {
               Row(
                   verticalAlignment = Alignment.CenterVertically,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = 16.dp)) {
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Go back",
@@ -370,7 +368,10 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-                              Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("inputText"),
+                              Modifier.fillMaxWidth()
+                                  .menuAnchor()
+                                  .focusRequester(focusRequester)
+                                  .testTag("inputText"),
                           trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                           },
