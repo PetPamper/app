@@ -26,15 +26,48 @@ class FirebaseConnection {
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { exception -> onFailure(exception) }
   }
-  fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        db.collection("groomers")
-            .document(groomer.email) // Using email as a unique identifier; adjust if needed
-            .set(groomer)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { exception -> onFailure(exception) }
-    }
 
-  fun addGroomerReview(groomerReview: GroomerReviews, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  // method to verify if an email is already registered
+  fun verifyEmail(email: String, userType: String): Task<Boolean> {
+    val source = TaskCompletionSource<Boolean>()
+
+    db.collection(
+            if (userType == "user") {
+              "users"
+            } else {
+              "groomers"
+            })
+        .whereEqualTo("email", email)
+        .get()
+        .addOnCompleteListener { task ->
+          if (task.isSuccessful) {
+            if (task.result?.isEmpty == false) {
+              source.setResult(true) // Set true if email exists
+            } else {
+              source.setResult(false) // Set false if email does not exist
+            }
+          } else {
+            // If the query failed, set the exception
+            source.setException(task.exception ?: Exception("Failed to verify email"))
+          }
+        }
+
+    return source.task
+  }
+
+  fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    db.collection("groomers")
+        .document(groomer.email) // Using email as a unique identifier; adjust if needed
+        .set(groomer)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  fun addGroomerReview(
+      groomerReview: GroomerReviews,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
     db.collection("groomerReviews")
         .document(groomerReview.email)
         .set(groomerReview)
@@ -50,66 +83,67 @@ class FirebaseConnection {
     return db.collection("users").whereEqualTo("email", email).get()
   }
 
-    fun fetchNearbyGroomers(address: Address): Task<List<Groomer>> {
-        // Create a task completion source
-        val source = TaskCompletionSource<List<Groomer>>()
+  fun fetchNearbyGroomers(address: Address): Task<List<Groomer>> {
+    // Create a task completion source
+    val source = TaskCompletionSource<List<Groomer>>()
 
-        // Fetch all groomers
-        db.collection("groomers").get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val groomers = task.result?.toObjects(Groomer::class.java)
+    // Fetch all groomers
+    db.collection("groomers").get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val groomers = task.result?.toObjects(Groomer::class.java)
 
-                val nearbyGroomers = mutableListOf<Groomer>()
+        val nearbyGroomers = mutableListOf<Groomer>()
 
-                // Calculate the distance for each groomer
-                groomers?.forEach { groomer ->
-                    val distance = distance(
-                        address.location.latitude, address.location.longitude,
-                        groomer.address.location.latitude, groomer.address.location.longitude
-                    )
+        // Calculate the distance for each groomer
+        groomers?.forEach { groomer ->
+          val distance =
+              distance(
+                  address.location.latitude,
+                  address.location.longitude,
+                  groomer.address.location.latitude,
+                  groomer.address.location.longitude)
 
-                    // If the distance is less than or equal to 10 kilometers, add the groomer to the list
-                    Log.d("GroomersFirebase", "Distance to ${groomer.name}: $distance from ${address.location.name}")
-                    if (distance <= 10 && !nearbyGroomers.contains(groomer)) {
-                        nearbyGroomers.add(groomer)
-                    }
-                }
-
-                // Set the result of the task
-                source.setResult(nearbyGroomers)
-                Log.d("GroomersFirebase", "Nearby groomers: $nearbyGroomers")
-            } else {
-                // If the task failed, set the exception
-                source.setException(task.exception ?: Exception("Failed to fetch groomers"))
-            }
+          // If the distance is less than or equal to 10 kilometers, add the groomer to the list
+          Log.d(
+              "GroomersFirebase",
+              "Distance to ${groomer.name}: $distance from ${address.location.name}")
+          if (distance <= 10 && !nearbyGroomers.contains(groomer)) {
+            nearbyGroomers.add(groomer)
+          }
         }
 
-        // Return the task
-        return source.task
+        // Set the result of the task
+        source.setResult(nearbyGroomers)
+        Log.d("GroomersFirebase", "Nearby groomers: $nearbyGroomers")
+      } else {
+        // If the task failed, set the exception
+        source.setException(task.exception ?: Exception("Failed to fetch groomers"))
+      }
     }
 
-    fun fetchGroomerReviews(email: String): Task<GroomerReviews> {
-        val source = TaskCompletionSource<GroomerReviews>()
+    // Return the task
+    return source.task
+  }
 
-        db.collection("groomerReviews")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val reviews = task.result?.toObjects(GroomerReviews::class.java)
-                    if (reviews != null && reviews.isNotEmpty()) {
-                        source.setResult(reviews[0])
-                    } else {
-                        source.setException(Exception("No review found for this email"))
-                    }
-                } else {
-                    source.setException(task.exception ?: Exception("Failed to fetch reviews"))
-                }
-            }
+  fun fetchGroomerReviews(email: String): Task<GroomerReviews> {
+    val source = TaskCompletionSource<GroomerReviews>()
 
-        return source.task
+    db.collection("groomerReviews").whereEqualTo("email", email).get().addOnCompleteListener { task
+      ->
+      if (task.isSuccessful) {
+        val reviews = task.result?.toObjects(GroomerReviews::class.java)
+        if (reviews != null && reviews.isNotEmpty()) {
+          source.setResult(reviews[0])
+        } else {
+          source.setException(Exception("No review found for this email"))
+        }
+      } else {
+        source.setException(task.exception ?: Exception("Failed to fetch reviews"))
+      }
     }
 
+    return source.task
+  }
 
   fun registerUser(
       email: String,

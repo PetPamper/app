@@ -130,6 +130,7 @@ dependencies {
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
 
+
     // ------------- Jetpack Compose ------------------
 
     implementation(libs.androidx.ui)
@@ -143,6 +144,8 @@ dependencies {
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
+
+
 
     implementation("com.google.maps.android:maps-compose:4.3.0")
     implementation("com.google.maps.android:maps-compose-utils:4.3.0")
@@ -180,11 +183,12 @@ dependencies {
 
     implementation(libs.core.ktx)
 
-    implementation (libs.play.services.auth)
-    implementation (libs.accompanist.insets)
-    implementation ("com.google.android.gms:play-services-auth:19.0.0")
-
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+//
+//    implementation (libs.play.services.auth)
+//    implementation (libs.accompanist.insets)
+//    implementation ("com.google.android.gms:play-services-auth:19.0.0")
+//
+//    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
 
     // Use the latest version
