@@ -1,12 +1,24 @@
 
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.ktfmt)
-    alias(libs.plugins.sonar)
+
+    id("com.android.application") version "8.3.0"
+    id("org.jetbrains.kotlin.android") version "1.8.10"
+    id("com.ncorti.ktfmt.gradle") version "0.17.0"
+    id("org.sonarqube") version "4.4.1.3373"
+
+     // ensure correct Kotlin plugin
     id("jacoco")
     id("com.google.gms.google-services")
 }
+
+
+
+java {
+    // Set source and target compatibility
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 
 android {
     namespace = "com.android.PetPamper"
