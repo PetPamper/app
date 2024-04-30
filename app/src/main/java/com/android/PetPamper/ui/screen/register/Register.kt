@@ -19,14 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -179,7 +178,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
     7 -> {
       BoxWithConstraints(
           modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ForgetPassword")) {
-            val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
+            with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -213,7 +212,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                                 ButtonDefaults.buttonColors( // Set the button's background color
                                     containerColor = Color(0xFF2491DF))) {
                               Icon(
-                                  imageVector = Icons.Filled.ArrowForward,
+                                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                   contentDescription = "Go forward",
                                   tint = Color.White // Set the icon color to blue
                                   )
@@ -245,7 +244,7 @@ fun RegisterLayout(
   var state by remember { mutableStateOf("") }
   var postalCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
-  var locationViewModel = LocationViewModel()
+  val locationViewModel = LocationViewModel()
   var expandedState by remember { mutableStateOf(false) }
   val locationOptions = remember { mutableStateListOf<LocationMap>() }
   val focusRequester = remember { FocusRequester() }
@@ -302,7 +301,7 @@ fun RegisterLayout(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go back",
                         modifier = Modifier.clickable {}.size(30.dp),
                         tint = Color.Black)
@@ -385,13 +384,12 @@ fun RegisterLayout(
                           expanded = expandedState, onDismissRequest = { expandedState = false }) {
                             locationOptions.forEach { location ->
                               DropdownMenuItem(
+                                  text = { Text(location.name) },
                                   onClick = {
                                     textField = location.name
                                     viewModel.locationMap = location
                                     expandedState = false
-                                  }) {
-                                    Text(location.name)
-                                  }
+                                  })
                             }
                           }
                     }
