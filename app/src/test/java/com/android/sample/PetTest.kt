@@ -50,4 +50,35 @@ class PetTest {
     pet.addPic("mascot3.jpeg")
     assertEquals(listOf("mascot1.png", "mascot2.jpg", "mascot3.jpeg"), pet.pictures)
   }
+
+  @Test
+  fun checkChangeValues() {
+    val dog = Dog()
+
+    assertEquals("Unnamed", dog.name)
+    assertEquals(LocalDate.of(0, 1, 1), dog.birthDate)
+    assertEquals("", dog.description)
+    assertEquals(listOf(""), dog.pictures)
+    assertEquals(false, dog.requiresPermit)
+
+    dog.name = "PetPamper's Mascot"
+    dog.birthDate = LocalDate.of(2024, 3, 28)
+    dog.description = "Lorem ipsum"
+    dog.pictures = listOf("mascot1.png", "mascot2.jpg")
+    dog.owner = "PetPamper Team"
+    dog.requiresPermit = true
+
+    assertEquals("PetPamper's Mascot", dog.name)
+    assertEquals(LocalDate.of(2024, 3, 28), dog.birthDate)
+    assertEquals("Lorem ipsum", dog.description)
+    assertEquals(listOf("mascot1.png", "mascot2.jpg"), dog.pictures)
+    assertEquals("PetPamper Team", dog.owner)
+    assertEquals(true, dog.requiresPermit)
+
+    dog.addPic("mascot3.jpeg")
+    assertEquals(listOf("mascot1.png", "mascot2.jpg", "mascot3.jpeg"), dog.pictures)
+
+    dog.birthDate = LocalDate.of(2026, 3, 28)
+    assertEquals(LocalDate.of(2024, 3, 28), dog.birthDate)
+  }
 }

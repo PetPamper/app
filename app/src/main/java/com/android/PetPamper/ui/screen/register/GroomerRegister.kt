@@ -345,30 +345,35 @@ fun GroomerRegisterLayout(
     onNext: ((String) -> Unit)? = null
 ) {
 
-  var textField by remember { mutableStateOf("") }
-  var shownErrorText by remember { mutableStateOf("") }
-  val firebaseConnection = FirebaseConnection()
+    var textField by remember { mutableStateOf("") }
+    var shownErrorText by remember { mutableStateOf("") }
+    val firebaseConnection = FirebaseConnection()
 
-  fun proceedWithNext() {
-    var proceed = true
 
-    if (isValidEmail?.invoke(textField)?.first == false) {
-      println("what")
-      shownErrorText = errorText
-      proceed = false
+    fun proceedWithNext() {
+        var proceed = true
+
+        if (isValidEmail?.invoke(textField)?.first == false) {
+            if (isValidInput?.invoke(textField) == false) {
+                println("what")
+                shownErrorText = errorText
+                proceed = false
+            }
+
+            if (proceed) {
+                shownErrorText = ""
+                onNext?.invoke(textField)
+            }
+        }
     }
 
-    if (proceed) {
-      shownErrorText = ""
-      onNext?.invoke(textField)
-    }
-  }
-  Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
-        Text(
-            text = textShown,
-            style =
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")
+        ) {
+            Text(
+                text = textShown,
+                style =
                 TextStyle(
                     fontSize = 20.sp,
                     lineHeight = 24.sp,
@@ -376,416 +381,492 @@ fun GroomerRegisterLayout(
                     color = Color(0xFF2490DF),
                     textAlign = TextAlign.Center,
                 ),
-            modifier = Modifier.testTag("DisplayText"))
+                modifier = Modifier.testTag("DisplayText")
+            )
 
-        var textVisible by remember {
-          mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
-        }
-        OutlinedTextField(
-            value = textField,
-            onValueChange = { textField = it },
-            label = { Text(fieldName) },
-            singleLine = true,
-            keyboardOptions =
-                when (fieldName) {
-                  "Password",
-                  "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
-                  "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
-                  else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
-                },
-            visualTransformation =
-                if (!textVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            modifier = Modifier.fillMaxWidth().testTag("InputText"),
-            colors =
-                OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor =
-                        Color(0xFF2491DF), // Border color when the TextField is focused
-                    focusedLabelColor =
-                        Color(0xFF2491DF), // Label color when the TextField is focused
-                    unfocusedBorderColor = Color.Gray, // Additional customization for other states
-                    unfocusedLabelColor = Color.Gray),
-            trailingIcon = {
-              when (fieldName) {
-                "Password",
-                "Confirm Password" -> {
-                  val image =
-                      if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
-                      else painterResource(id = R.drawable.baseline_visibility_off_24)
-                  val description = if (textVisible) "Hide password" else "Show password"
-                  // Icon to toggle password visibility
-                  IconButton(onClick = { textVisible = !textVisible }) {
-                    Icon(painter = image, contentDescription = description)
-                  }
-                }
-                else -> {}
-              }
-            })
-
-        Text(
-            text = shownErrorText,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(modifier = Modifier.fillMaxSize()) {
-          Column(
-              modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-              verticalArrangement = Arrangement.Center,
-              horizontalAlignment = Alignment.End) {
-                Button(
-                    onClick = {
-                      if (isEmail) {
-                        firebaseConnection
-                            .verifyEmail(textField, "groomer")
-                            .addOnCompleteListener { isExist ->
-                              if (isExist.isSuccessful) {
-                                val emailExists = isExist.result
-                                if (emailExists) {
-                                  shownErrorText = "Email already in use with another account."
-                                } else {
-                                  Log.d("Email", "Email does not exist")
-                                  proceedWithNext()
-                                }
-                              } else {
-                                println("Error checking email: ${isExist.exception?.message}")
-                              }
-                            }
-                      } else {
-                        proceedWithNext()
-                      }
-                    },
-                    modifier =
-                        Modifier.wrapContentWidth()
-                            .testTag("arrowButton"), // Make the button wrap its content
-                    colors =
-                        ButtonDefaults.buttonColors( // Set the button's background color
-                            containerColor = Color(0xFF2491DF))) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                          contentDescription = "Go forward",
-                          tint = Color.White,
-                          // Set the icon color to blue
-                      )
-                    }
-
-                Spacer(
-                    modifier = Modifier.height(16.dp)) // This adds space between the button and the
-                // progress bar
-
-                val progress = currentStep.toFloat() / NUM_STEPS
-                LinearProgressIndicator(
-                    progress = { progress },
-                    color = Color(0xFF2491DF),
-                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
-              }
-        }
-      }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GroomerRegisterMultipleLayout(
-    viewModel: GroomerSignUpViewModel,
-    currentStep: Int,
-    textShown: String,
-    fieldNames: List<String>,
-    areValidInputs: ((List<String>) -> (List<Boolean>))? = null,
-    errorTexts: List<String>? = null,
-    onNext: ((List<String>) -> Unit)? = null,
-) {
-  val numFields = fieldNames.size
-  val textFields = remember { mutableStateListOf<String>() }
-  val shownErrorTexts = remember { mutableStateListOf<String>() }
-  var locationViewModel = LocationViewModel()
-  var expandedState by remember { mutableStateOf(false) }
-  val locationOptions = remember { mutableStateListOf<LocationMap>() }
-  val focusRequester = remember { FocusRequester() }
-
-  for (i in 1..numFields) {
-    textFields.add("")
-    shownErrorTexts.add("")
-  }
-
-  fun proceedWithNext() {
-    var isValidInput = true
-    val inputsValid = areValidInputs?.invoke(textFields)
-
-    for (i in 0 until numFields) {
-      if (inputsValid?.get(i) == false) {
-        isValidInput = false
-        shownErrorTexts[i] = errorTexts?.get(i) ?: ""
-      }
-    }
-
-    if (isValidInput) {
-      for (i in 0 until numFields) {
-        shownErrorTexts[i] = ""
-      }
-      onNext?.invoke(textFields)
-    }
-  }
-  LazyColumn(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")) {
-        item {
-          Text(
-              text = textShown,
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      lineHeight = 24.sp,
-                      fontWeight = FontWeight(800),
-                      color = Color(0xFF2490DF),
-                      textAlign = TextAlign.Center,
-                  ),
-              modifier = Modifier.testTag("DisplayText"))
-        }
-        itemsIndexed(fieldNames) { i, _ ->
-          if (i == 0) {
-            ExposedDropdownMenuBox(
-                expanded = expandedState && locationOptions.isNotEmpty(),
-                onExpandedChange = {
-                  expandedState = it
-                  if (expandedState) {
-                    // Request focus again if the dropdown expands
-                    focusRequester.requestFocus()
-                  }
-                },
-                modifier = Modifier.fillMaxWidth()) {
-                  OutlinedTextField(
-                      value = textFields[0],
-                      onValueChange = { newValue ->
-                        textFields[0] = newValue
-                        locationViewModel.fetchLocation(newValue) { locations ->
-                          if (locations != null) {
-                            locationOptions.clear()
-                            locationOptions.addAll(locations)
-                            Log.d(
-                                "LocationInput",
-                                "Updated location options: ${locationOptions.joinToString { it.name }}")
-                          }
-                        }
-                      },
-                      label = { Text("Location") },
-                      placeholder = { Text("Enter an address") },
-                      modifier =
-                          Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
-                      trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
-                      },
-                  )
-                  DropdownMenu(
-                      expanded = expandedState, onDismissRequest = { expandedState = false }) {
-                        locationOptions.forEach { location ->
-                          DropdownMenuItem(
-                              onClick = {
-                                textFields[0] = location.name
-                                viewModel.locationMap = location
-                                expandedState = false
-                              }) {
-                                Text(location.name)
-                              }
-                        }
-                      }
-                }
-          } else {
-
+            var textVisible by remember {
+                mutableStateOf(fieldName != "Password" && fieldName != "Confirm Password")
+            }
             OutlinedTextField(
-                value = textFields[i],
-                onValueChange = { textFields[i] = it },
-                label = { Text(fieldNames[i]) },
+                value = textField,
+                onValueChange = { textField = it },
+                label = { Text(fieldName) },
                 singleLine = true,
-                visualTransformation = VisualTransformation.None,
+                keyboardOptions =
+                when (fieldName) {
+                    "Password",
+                    "Confirm Password" -> KeyboardOptions(keyboardType = KeyboardType.Password)
+
+                    "Phone Number" -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                    else -> KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                },
+                visualTransformation =
+                if (!textVisible) PasswordVisualTransformation() else VisualTransformation.None,
                 modifier = Modifier.fillMaxWidth().testTag("InputText"),
                 colors =
-                    OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor =
-                            Color(0xFF2491DF), // Border color when the TextField is focused
-                        focusedLabelColor =
-                            Color(0xFF2491DF), // Label color when the TextField is focused
-                        unfocusedBorderColor =
-                            Color.Gray, // Additional customization for other states
-                        unfocusedLabelColor = Color.Gray))
+                OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor =
+                    Color(0xFF2491DF), // Border color when the TextField is focused
+                    focusedLabelColor =
+                    Color(0xFF2491DF), // Label color when the TextField is focused
+                    unfocusedBorderColor = Color.Gray, // Additional customization for other states
+                    unfocusedLabelColor = Color.Gray
+                ),
+                trailingIcon = {
+                    when (fieldName) {
+                        "Password",
+                        "Confirm Password" -> {
+                            val image =
+                                if (textVisible) painterResource(id = R.drawable.baseline_visibility_24)
+                                else painterResource(id = R.drawable.baseline_visibility_off_24)
+                            val description = if (textVisible) "Hide password" else "Show password"
+                            // Icon to toggle password visibility
+                            IconButton(onClick = { textVisible = !textVisible }) {
+                                Icon(painter = image, contentDescription = description)
+                            }
+                        }
+
+                        else -> {}
+                    }
+                })
 
             Text(
-                text = shownErrorTexts[i],
+                text = shownErrorText,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+                modifier = Modifier.padding(top = 4.dp).testTag("errorText")
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
-          }
-        }
 
-        item {
-          Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.End) {
-                  Button(
-                      onClick = { proceedWithNext() },
-                      modifier =
-                          Modifier.wrapContentWidth()
-                              .testTag("ArrowButton"), // Make the button wrap its content
-                      colors =
-                          ButtonDefaults.buttonColors( // Set the button's background color
-                              containerColor = Color(0xFF2491DF))) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Button(
+                        onClick = {
+                            if (isEmail) {
+                                firebaseConnection
+                                    .verifyEmail(textField, "groomer")
+                                    .addOnCompleteListener { isExist ->
+                                        if (isExist.isSuccessful) {
+                                            val emailExists = isExist.result
+                                            if (emailExists) {
+                                                shownErrorText =
+                                                    "Email already in use with another account."
+                                            } else {
+                                                Log.d("Email", "Email does not exist")
+                                                proceedWithNext()
+                                            }
+                                        } else {
+                                            println("Error checking email: ${isExist.exception?.message}")
+                                        }
+                                    }
+                            } else {
+                                proceedWithNext()
+                            }
+                        },
+                        modifier =
+                        Modifier.wrapContentWidth()
+                            .testTag("arrowButton"), // Make the button wrap its content
+                        colors =
+                        ButtonDefaults.buttonColors( // Set the button's background color
+                            containerColor = Color(0xFF2491DF)
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Go forward",
                             tint = Color.White,
                             // Set the icon color to blue
                         )
-                      }
+                    }
 
-                  Spacer(
-                      modifier =
-                          Modifier.height(16.dp)) // This adds space between the button and the
-                  // progress bar
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    ) // This adds space between the button and the
+                    // progress bar
 
-                  val progress = currentStep.toFloat() / NUM_STEPS
-                  LinearProgressIndicator(
-                      progress = { progress },
-                      color = Color(0xFF2491DF),
-                      modifier =
-                          Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                    val progress = currentStep.toFloat() / NUM_STEPS
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        color = Color(0xFF2491DF),
+                        modifier = Modifier.fillMaxWidth().height(8.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
                 }
-          }
+            }
         }
-      }
-}
+    }
 
-@Composable
-fun GroomerRegisterCheckboxLayout(
-    currentStep: Int,
-    textShown: String,
-    checkboxOptions: List<String>,
-    onNext: ((List<String>) -> Unit)? = null
-) {
-  val numOptions = checkboxOptions.size
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun GroomerRegisterMultipleLayout(
+        viewModel: GroomerSignUpViewModel,
+        currentStep: Int,
+        textShown: String,
+        fieldNames: List<String>,
+        areValidInputs: ((List<String>) -> (List<Boolean>))? = null,
+        errorTexts: List<String>? = null,
+        onNext: ((List<String>) -> Unit)? = null,
+    ) {
+        val numFields = fieldNames.size
+        val textFields = remember { mutableStateListOf<String>() }
+        val shownErrorTexts = remember { mutableStateListOf<String>() }
+        var locationViewModel = LocationViewModel()
+        var expandedState by remember { mutableStateOf(false) }
+        val locationOptions = remember { mutableStateListOf<LocationMap>() }
+        val focusRequester = remember { FocusRequester() }
 
-  val boxesChecked = remember { mutableStateListOf<Boolean>() }
-  val checkedOptions = remember { mutableStateListOf<String>() }
 
-  for (i in 0 until numOptions) {
-    boxesChecked.add(false)
-  }
-  LazyColumn(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
-        item {
-          Text(
-              text = textShown,
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      lineHeight = 24.sp,
-                      fontWeight = FontWeight(800),
-                      color = Color(0xFF2490DF),
-                      textAlign = TextAlign.Center,
-                  ),
-              modifier = Modifier.testTag("DisplayText"))
-
-          Spacer(modifier = Modifier.height(16.dp))
+        for (i in 1..numFields) {
+            textFields.add("")
+            shownErrorTexts.add("")
         }
 
-        itemsIndexed(checkboxOptions) { i, _ ->
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.fillMaxWidth().testTag("Checkbox")) {
-                Checkbox(
-                    checked = boxesChecked[i],
-                    onCheckedChange = { isChecked -> boxesChecked[i] = isChecked })
-                Text(text = checkboxOptions[i])
-              }
+        fun proceedWithNext() {
+            var isValidInput = true
+            val inputsValid = areValidInputs?.invoke(textFields)
 
-          Spacer(modifier = Modifier.height(10.dp))
+            for (i in 0 until numFields) {
+                if (inputsValid?.get(i) == false) {
+                    isValidInput = false
+                    shownErrorTexts[i] = errorTexts?.get(i) ?: ""
+                }
+            }
+
+            if (isValidInput) {
+                for (i in 0 until numFields) {
+                    shownErrorTexts[i] = ""
+                }
+                onNext?.invoke(textFields)
+            }
         }
-
-        item {
-          Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.End) {
-                  Button(
-                      onClick = {
-                        checkedOptions.clear()
-                        for (i in 0 until numOptions) {
-                          if (boxesChecked[i]) {
-                            checkedOptions.add(checkboxOptions[i])
-                          }
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")
+        ) {
+            item {
+                Text(
+                    text = textShown,
+                    style =
+                    TextStyle(
+                        fontSize = 20.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight(800),
+                        color = Color(0xFF2490DF),
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier.testTag("DisplayText")
+                )
+            }
+            itemsIndexed(fieldNames) { i, _ ->
+                if (i == 0) {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedState && locationOptions.isNotEmpty(),
+                        onExpandedChange = {
+                            expandedState = it
+                            if (expandedState) {
+                                // Request focus again if the dropdown expands
+                                focusRequester.requestFocus()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = textFields[0],
+                            onValueChange = { newValue ->
+                                textFields[0] = newValue
+                                locationViewModel.fetchLocation(newValue) { locations ->
+                                    if (locations != null) {
+                                        locationOptions.clear()
+                                        locationOptions.addAll(locations)
+                                        Log.d(
+                                            "LocationInput",
+                                            "Updated location options: ${locationOptions.joinToString { it.name }}"
+                                        )
+                                    }
+                                }
+                            },
+                            label = { Text("Location") },
+                            placeholder = { Text("Enter an address") },
+                            modifier =
+                            Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                            },
+                        )
+                        DropdownMenu(
+                            expanded = expandedState,
+                            onDismissRequest = { expandedState = false }) {
+                            locationOptions.forEach { location ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        textFields[0] = location.name
+                                        viewModel.locationMap = location
+                                        expandedState = false
+                                    }) {
+                                    Text(location.name)
+                                }
+                            }
                         }
-                        onNext?.invoke(checkedOptions)
-                      },
-                      modifier =
-                          Modifier.wrapContentWidth()
-                              .testTag("arrowButton"), // Make the button wrap its content
-                      colors =
-                          ButtonDefaults.buttonColors( // Set the button's background color
-                              containerColor = Color(0xFF2491DF))) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "Go forward",
-                            tint = Color.White,
-                            // Set the icon color to blue
+                    }
+                } else {
+
+                    OutlinedTextField(
+                        value = textFields[i],
+                        onValueChange = { textFields[i] = it },
+                        label = { Text(fieldNames[i]) },
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                        colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                            focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                            unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                            unfocusedLabelColor = Color.Gray
                         )
-                      }
+                    )
 
-                  Spacer(
-                      modifier =
-                          Modifier.height(16.dp)) // This adds space between the button and the
-                  // progress bar
+                    Text(
+                        text = shownErrorTexts[i],
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp).testTag("errorText")
+                    )
 
-                  val progress = currentStep.toFloat() / NUM_STEPS
-                  LinearProgressIndicator(
-                      progress = { progress },
-                      color = Color(0xFF2491DF),
-                      modifier =
-                          Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-          }
+                OutlinedTextField(
+                    value = textFields[i],
+                    onValueChange = { textFields[i] = it },
+                    label = { Text(fieldNames[i]) },
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                    colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor =
+                        Color(0xFF2491DF), // Border color when the TextField is focused
+                        focusedLabelColor =
+                        Color(0xFF2491DF), // Label color when the TextField is focused
+                        unfocusedBorderColor =
+                        Color.Gray, // Additional customization for other states
+                        unfocusedLabelColor = Color.Gray
+                    )
+                )
+
+                Text(
+                    text = shownErrorTexts[i],
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp).testTag("errorText")
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            item {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Button(
+
+                            onClick = {
+                                locationViewModel.fetchLocation(textFields[0]) { locations ->
+                                    if (locations != null) {
+                                        viewModel.address.location = locations[0]
+                                        proceedWithNext()
+                                    } else {
+                                        shownErrorTexts[0] = "Invalid address"
+                                    }
+                                }
+                            },
+                            modifier =
+                            Modifier.wrapContentWidth()
+                                .testTag("ArrowButton"), // Make the button wrap its content
+                            colors =
+                            ButtonDefaults.buttonColors( // Set the button's background color
+                                containerColor = Color(0xFF2491DF)
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Go forward",
+                                tint = Color.White,
+                                // Set the icon color to blue
+                            )
+                        }
+
+                        Spacer(
+                            modifier =
+                            Modifier.height(16.dp)
+                        ) // This adds space between the button and the
+                        // progress bar
+
+                        val progress = currentStep.toFloat() / NUM_STEPS
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            color = Color(0xFF2491DF),
+                            modifier =
+                            Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp))
+                        )
+                    }
+                }
+            }
         }
-      }
-}
+    }
 
-@Composable
-fun GalleryImagePicker(onImagePicked: (Uri?) -> Unit) {
-  val context = LocalContext.current
-  var imageUri by remember { mutableStateOf<Uri?>(null) }
+    @Composable
+    fun GroomerRegisterCheckboxLayout(
+        currentStep: Int,
+        textShown: String,
+        checkboxOptions: List<String>,
+        onNext: ((List<String>) -> Unit)? = null
+    ) {
+        val numOptions = checkboxOptions.size
 
-  // Remember a launcher for picking an image from the gallery
-  val galleryLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetContent(),
-          onResult = { uri: Uri? ->
-            imageUri = uri
-            onImagePicked(uri)
-          })
+        val boxesChecked = remember { mutableStateListOf<Boolean>() }
+        val checkedOptions = remember { mutableStateListOf<String>() }
 
-  Button(onClick = { galleryLauncher.launch("image/*") }) { Text("Select Image from Gallery") }
+        for (i in 0 until numOptions) {
+            boxesChecked.add(false)
+        }
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")
+        ) {
+            item {
+                Text(
+                    text = textShown,
+                    style =
+                    TextStyle(
+                        fontSize = 20.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight(800),
+                        color = Color(0xFF2490DF),
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier.testTag("DisplayText")
+                )
 
-  imageUri?.let {
-    // Here you can use the URI to display the image or process it further
-    // Displaying a preview is often useful
-    ImagePreview(uri = it)
-  }
-}
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-@Composable
-fun ImagePreview(uri: Uri) {
-  // Using Accompanist's Coil to load and display an image from the URI
-  val painter = rememberImagePainter(data = uri)
-  Image(painter = painter, contentDescription = "Selected Image")
-}
+            itemsIndexed(checkboxOptions) { i, _ ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().testTag("Checkbox")
+                ) {
+                    Checkbox(
+                        checked = boxesChecked[i],
+                        onCheckedChange = { isChecked -> boxesChecked[i] = isChecked })
+                    Text(text = checkboxOptions[i])
+                }
 
-@Preview
-@Composable
-fun GroomerRegisterPreview() {
-  val viewModel = remember { GroomerSignUpViewModel() }
-  val navController = rememberNavController()
-  GroomerRegister(viewModel, navController)
-}
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            item {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Button(
+                            onClick = {
+                                checkedOptions.clear()
+                                for (i in 0 until numOptions) {
+                                    if (boxesChecked[i]) {
+                                        checkedOptions.add(checkboxOptions[i])
+                                    }
+                                }
+                                onNext?.invoke(checkedOptions)
+                            },
+                            modifier =
+                            Modifier.wrapContentWidth()
+                                .testTag("arrowButton"), // Make the button wrap its content
+                            colors =
+                            ButtonDefaults.buttonColors( // Set the button's background color
+                                containerColor = Color(0xFF2491DF)
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Go forward",
+                                tint = Color.White,
+                                // Set the icon color to blue
+                            )
+                        }
+
+                        Spacer(
+                            modifier =
+                            Modifier.height(16.dp)
+                        ) // This adds space between the button and the
+                        // progress bar
+
+                        val progress = currentStep.toFloat() / NUM_STEPS
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            color = Color(0xFF2491DF),
+                            modifier =
+                            Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp))
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Composable
+    fun GalleryImagePicker(onImagePicked: (Uri?) -> Unit) {
+        val context = LocalContext.current
+        var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+        // Remember a launcher for picking an image from the gallery
+        val galleryLauncher =
+            rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetContent(),
+                onResult = { uri: Uri? ->
+                    imageUri = uri
+                    onImagePicked(uri)
+                })
+
+        Button(onClick = { galleryLauncher.launch("image/*") }) { Text("Select Image from Gallery") }
+
+        imageUri?.let {
+            // Here you can use the URI to display the image or process it further
+            // Displaying a preview is often useful
+            ImagePreview(uri = it)
+        }
+    }
+
+    @Composable
+    fun ImagePreview(uri: Uri) {
+        // Using Accompanist's Coil to load and display an image from the URI
+        val painter = rememberImagePainter(data = uri)
+        Image(painter = painter, contentDescription = "Selected Image")
+    }
+
+    @Preview
+    @Composable
+    fun GroomerRegisterPreview() {
+        val viewModel = remember { GroomerSignUpViewModel() }
+        val navController = rememberNavController()
+        GroomerRegister(viewModel, navController)
+    }
+
+

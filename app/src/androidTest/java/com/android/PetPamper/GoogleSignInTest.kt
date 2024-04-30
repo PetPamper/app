@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.PetPamper.database.FirebaseConnection
-import com.android.PetPamper.screen.GoogleSignInTest
+import com.android.PetPamper.screen.GoogleSignInScreen
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -16,7 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class GoogleSignIn : TestCase() {
+class GoogleSignInTest : TestCase() {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -32,8 +32,8 @@ class GoogleSignIn : TestCase() {
   @Test
   fun testGoogleSignIn() = run {
     step("infos about the google account") {
-      ComposeScreen.onComposeScreen<GoogleSignInTest>(composeTestRule) {
-        name {
+      ComposeScreen.onComposeScreen<GoogleSignInScreen>(composeTestRule) {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Let’s start with your name")
         }
@@ -42,7 +42,7 @@ class GoogleSignIn : TestCase() {
 
         ForwardButton { performClick() }
 
-        name {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("What’s your phone number?")
         }
@@ -51,7 +51,7 @@ class GoogleSignIn : TestCase() {
 
         ForwardButton { performClick() }
 
-        name {
+        inputLabel {
           assertIsDisplayed()
           assertTextEquals("Enter your Address")
         }

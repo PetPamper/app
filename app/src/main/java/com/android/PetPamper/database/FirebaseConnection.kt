@@ -55,6 +55,7 @@ class FirebaseConnection {
     return source.task
   }
 
+
   fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("groomers")
         .document(groomer.email) // Using email as a unique identifier; adjust if needed

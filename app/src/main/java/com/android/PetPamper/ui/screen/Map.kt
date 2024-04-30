@@ -39,6 +39,15 @@ fun MapView(email: String) {
     }
   }
 
+
+    Marker(
+        state =
+            MarkerState(
+                position =
+                    LatLng(address.value.location.latitude, address.value.location.longitude)),
+        title = "Your Address",
+        snippet = "You are here!",
+    )
   LaunchedEffect(address.value) {
     firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener { groomers ->
       groomersNearby.value = groomers
@@ -47,7 +56,7 @@ fun MapView(email: String) {
 
   // Remember the camera position state
   val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(46.516, 6.63282), 9f)
+    position = CameraPosition.fromLatLngZoom(LatLng(46.516, 6.63282), 5f)
   }
 
   GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
@@ -62,14 +71,5 @@ fun MapView(email: String) {
           snippet = groomer.petTypes.joinToString(", "),
       )
     }
-
-    Marker(
-        state =
-            MarkerState(
-                position =
-                    LatLng(address.value.location.latitude, address.value.location.longitude)),
-        title = "Your Address",
-        snippet = "You are here!",
-    )
   }
 }

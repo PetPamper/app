@@ -239,18 +239,21 @@ fun SignUpScreenLayoutGoogle(
                             label = { Text("Location") },
                             placeholder = { Text("Enter an address") },
                             modifier =
-                                Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("valueWritten"),
+
+                                Modifier.fillMaxWidth()
+                                    .menuAnchor()
+                                    .focusRequester(focusRequester)
+                                    .testTag("valueWritten"),
+
                             trailingIcon = {
                               ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                             },
                         )
                         androidx.compose.material.DropdownMenu(
-
                             expanded = expandedState,
                             onDismissRequest = { expandedState = false }) {
                               locationOptions.forEach { location ->
                                 androidx.compose.material.DropdownMenuItem(
-                                    modifier = Modifier.testTag("LocationItem"),
                                     onClick = {
                                       textField = location.name
                                       viewModel.locationMap = location

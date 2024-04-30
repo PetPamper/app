@@ -19,14 +19,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -114,7 +115,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             false,
             false,
             "What’s your phone number?",
-            "Phone Number",
+            "Phone",
             onNext = { newPhoneNumber ->
               viewModel.phoneNumber = newPhoneNumber
               currentStep++
@@ -185,7 +186,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
     7 -> {
       BoxWithConstraints(
           modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ForgetPassword")) {
-            val maxHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
+            with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -219,7 +220,8 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                                 ButtonDefaults.buttonColors( // Set the button's background color
                                     containerColor = Color(0xFF2491DF))) {
                               Icon(
-                                  imageVector = Icons.Filled.ArrowForward,
+
+                                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                   contentDescription = "Go forward",
                                   tint = Color.White // Set the icon color to blue
                                   )
@@ -240,7 +242,7 @@ fun RegisterLayout(
     currentStep: Int,
     isAddress: Boolean,
     isEmail: Boolean,
-    textShown: String,
+    textShown: String = "Let’s start with your name",
     fieldName: String,
     confirmPassword: String? = null,
     onNext: ((String) -> Unit)? = null,
@@ -270,6 +272,11 @@ fun RegisterLayout(
       "Email" ->
           if (!isValidEmail(textField)) {
             errorText = "Please enter a valid email."
+            isValidInput = false
+          }
+      "Phone" ->
+          if (!isValidPhone(textField)) {
+            errorText = "Please enter a valid phone number."
             isValidInput = false
           }
       "Password" ->
@@ -325,7 +332,8 @@ fun RegisterLayout(
                                 color = Color(0xFF2490DF),
                                 textAlign = TextAlign.Center,
                             ),
-                        modifier = Modifier.testTag("EmailText"))
+
+                        modifier = Modifier.testTag("inputLabel"))
                   }
 
               Spacer(modifier = Modifier.height(10.dp))
@@ -341,7 +349,8 @@ fun RegisterLayout(
                         if (fieldName == "Password" || fieldName == "Confirm Password")
                             PasswordVisualTransformation()
                         else VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("NameTextInput"),
+
+                    modifier = Modifier.fillMaxWidth().testTag("inputText"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -379,7 +388,11 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-                              Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+
+                              Modifier.fillMaxWidth()
+                                  .menuAnchor()
+                                  .focusRequester(focusRequester)
+                                  .testTag("inputText"),
                           trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                           },
@@ -388,13 +401,14 @@ fun RegisterLayout(
                           expanded = expandedState, onDismissRequest = { expandedState = false }) {
                             locationOptions.forEach { location ->
                               DropdownMenuItem(
+
+                                  text = { Text(location.name) },
                                   onClick = {
                                     textField = location.name
                                     viewModel.locationMap = location
                                     expandedState = false
-                                  }) {
-                                    Text(location.name)
-                                  }
+
+                                  })
                             }
                           }
                     }
@@ -495,6 +509,7 @@ fun RegisterLayout(
                               proceedWithNext()
                             }
                           },
+
                           modifier =
                               Modifier.wrapContentWidth()
                                   .testTag("arrowButton"), // Make the button wrap its content
@@ -554,6 +569,14 @@ fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
 }
 
 // More robust validation
+fun isValidPhone(phone: String): Boolean {
+  var _phone = phone.replace(Regex("-|\\s"), "")
+  if (_phone.startsWith("+")) {
+    _phone = _phone.replaceFirst("+", "00")
+  }
+  return _phone.matches(Regex("\\d*")) && phone.isNotBlank()
+}
+
 fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
 
 @Preview
