@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.PetPamper"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -95,6 +95,7 @@ android {
 
 sonar {
     properties {
+       // property("sonar.gradle.skipCompile", "true")
         property("sonar.projectKey", "PetPamper_PetPamper")
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")
@@ -124,6 +125,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -144,6 +146,7 @@ dependencies {
 
     implementation("com.google.maps.android:maps-compose:4.3.0")
     implementation("com.google.maps.android:maps-compose-utils:4.3.0")
+
 
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation ("io.coil-kt:coil-compose:1.4.0")
@@ -181,7 +184,11 @@ dependencies {
     implementation (libs.accompanist.insets)
     implementation ("com.google.android.gms:play-services-auth:19.0.0")
 
+
     implementation ("androidx.compose.material:material:1.6.5")
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+
 
     // Use the latest version
     // slider
