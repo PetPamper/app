@@ -86,6 +86,11 @@ class MainActivity : ComponentActivity() {
 
       composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
+      composable("GroomerHomeScreen/{email}") { backStackEntry ->
+        val email = backStackEntry.arguments?.getString("email")
+        Text("Hello $email")
+      }
+
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         AppNavigation(email)

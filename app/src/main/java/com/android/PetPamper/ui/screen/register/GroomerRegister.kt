@@ -73,6 +73,9 @@ import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
+import com.android.PetPamper.ui.screen.CustomTextButton
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 
 class GroomerSignUpViewModel {
@@ -94,10 +97,20 @@ const val NUM_STEPS = 12
 
 @Composable
 fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController) {
+  val firebaseConnection = FirebaseConnection()
+  val db = Firebase.firestore
+
   var currentStep by remember { mutableIntStateOf(1) }
 
+  var registeredAsUser by remember { mutableStateOf(false) }
+    var RegistrationDone by remember { mutableStateOf(false) }
+
   when (currentStep) {
-    1 ->
+    1 -> {
+      Column {
+        CustomTextButton(tag = "I already have a user account", testTag = "AlreadyUserButton") {
+          currentStep = 20
+        }
         GroomerRegisterLayout(
             false,
             1,
@@ -109,6 +122,8 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
               viewModel.name = newName
               currentStep++
             })
+      }
+    }
     2 ->
         GroomerRegisterLayout(
             true,
@@ -228,25 +243,185 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
       }
     }
     12 -> {
-      val firebaseConnection = FirebaseConnection()
-      firebaseConnection.addGroomer(
-          Groomer(
-              viewModel.name,
-              viewModel.email,
-              viewModel.phoneNumber,
-              viewModel.address,
-              viewModel.experienceYears,
-              viewModel.groomerServices,
-              viewModel.petTypes,
-              viewModel.profilePicture,
-              viewModel.price),
-          onSuccess = {
-            firebaseConnection.addGroomerReview(
-                GroomerReviews(viewModel.email, 5.0, 0),
-                onSuccess = { navController.navigate("LoginScreen") },
-                onFailure = { error -> Log.e("SignUp", "Review failed", error) })
-          },
-          onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+        if (!RegistrationDone) {
+            firebaseConnection.registerUser(
+                viewModel.email,
+                viewModel.password,
+                onSuccess = {
+                    RegistrationDone = true
+                    Log.d("SignUp1", "Registering user")
+                    firebaseConnection.addGroomer(
+                        Groomer(
+                            viewModel.name,
+                            viewModel.email,
+                            viewModel.phoneNumber,
+                            viewModel.address,
+                            viewModel.experienceYears,
+                            viewModel.groomerServices,
+                            viewModel.petTypes,
+                            viewModel.profilePicture,
+                            viewModel.price
+                        ),
+                        onSuccess = {
+                            firebaseConnection.addGroomerReview(
+                                GroomerReviews(viewModel.email, 5.0, 0),
+                                onSuccess = { navController.navigate("LoginScreen") },
+                                onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+                        },
+                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                },
+                onFailure = { error ->
+                    Log.e("SignUp", "Registration failed", error)
+                    Log.d("SignUp1", "Registering user")
+                })
+//      } else {
+//        // Need to check that groomer wasn't already registered to avoid duplicate accounts
+//        val groomerRef = db.collection("groomers").document(viewModel.email)
+//        groomerRef
+//            .get()
+//            .addOnSuccessListener { document ->
+//              if (!document.exists()) {
+//                firebaseConnection.addGroomer(
+//                    Groomer(
+//                        viewModel.name,
+//                        viewModel.email,
+//                        viewModel.phoneNumber,
+//                        viewModel.address,
+//                        viewModel.experienceYears,
+//                        viewModel.groomerServices,
+//                        viewModel.petTypes,
+//                        viewModel.profilePicture,
+//                        viewModel.price),
+//                    onSuccess = {
+//                      firebaseConnection.addGroomerReview(
+//                          GroomerReviews(viewModel.email, 5.0, 0),
+//                          onSuccess = { navController.navigate("LoginScreen") },
+//                          onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+//                    },
+//                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+//              } else {
+//                Log.e("AlreadyRegistered", "user was already registered as groomer")
+//              }
+//            }
+//            .addOnFailureListener { exception ->
+//              Log.e("Firebase query", "Get failed with ", exception)
+//            }
+//      }
+        }
+    }
+    20 -> {
+      var email by remember { mutableStateOf("") }
+      var password by remember { mutableStateOf("") }
+      var login by remember { mutableStateOf(true) }
+
+      var errorMessage by remember {
+        mutableStateOf("Login failed, email or password is incorrect")
+      }
+
+      Column(
+          horizontalAlignment = Alignment.Start,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(16.dp)) {
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                text = "Please enter your user credentials",
+                style =
+                    TextStyle(
+                        fontSize = 23.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight(800),
+                        color = Color(0xFF2490DF),
+                        textAlign = TextAlign.Center,
+                    ),
+                modifier = Modifier.testTag("AlreadyUserText"))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth())
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth())
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            if (!login) {
+              Text(
+                  text = errorMessage,
+                  color = Color.Red,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier
+                      .fillMaxWidth()
+                      .testTag("ErrorMessage"))
+
+              Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            CustomTextButton("Forgot password?", "", "forgetButton") {
+              navController.navigate("EmailScreen")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                  errorMessage = ""
+                  if (email.isBlank() || password.isBlank()) {
+                    login = false
+                  } else {
+                    firebaseConnection.loginUser(
+                        email,
+                        password,
+                        {
+                          val userRef = db.collection("users").document(email)
+                          userRef
+                              .get()
+                              .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                  login = true
+                                  Log.d(
+                                      "Firebase query",
+                                      "User found," + " name is ${document.get("name")}")
+                                  viewModel.name = document.get("name").toString()
+                                  viewModel.email = document.get("email").toString()
+                                  viewModel.phoneNumber = document.get("phoneNumber").toString()
+                                  registeredAsUser = true
+                                  currentStep = 6
+                                } else {
+                                  login = false
+                                  errorMessage = "User is not registered"
+                                  Log.e("Firebase query", "No such user")
+                                }
+                              }
+                              .addOnFailureListener { exception ->
+                                login = false
+                                errorMessage = "Login failed, email or password is incorrect"
+                                Log.e("Firebase query", "Get failed with ", exception)
+                              }
+                        },
+                        { login = false })
+                  }
+                },
+                colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .testTag("LoginButton")) {
+                  Text("LOG IN", fontSize = 18.sp)
+                }
+          }
     }
   }
 
@@ -261,7 +436,10 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp)
+          .testTag("GroomerRegisterScreen")) {
         Text(
             text = "Upload a profile picture",
             style =
@@ -277,37 +455,50 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
         Spacer(modifier = Modifier.height(16.dp))
 
         GalleryImagePicker { uri ->
-          // Get a reference to the storage service
-          val storageRef = FirebaseStorage.getInstance().reference
 
-          val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
-          val uploadTask = fileRef.putFile(uri)
+            if (uri != null) {
+                // Get a reference to the storage service
+                val storageRef = FirebaseStorage.getInstance().reference
 
-          uploadTask
-              .addOnSuccessListener { taskSnapshot ->
-                taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
-                  imageUri = downloadUri // Store download URI instead of local URI
-                  viewModel.profilePicture = downloadUri.toString()
-                }
-              }
-              .addOnFailureListener {
-                // Handle unsuccessful uploads
-                Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
-              }
+
+                val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
+                val uploadTask = fileRef.putFile(uri)
+
+                uploadTask
+                    .addOnSuccessListener { taskSnapshot ->
+                        taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
+                            imageUri = downloadUri // Store download URI instead of local URI
+                            viewModel.profilePicture = downloadUri.toString()
+                        }
+                    }
+                    .addOnFailureListener {
+                        // Handle unsuccessful uploads
+                        Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+            }
+            else{
+                imageUri = null
+                viewModel.profilePicture = imageUri.toString()
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
-              modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+              modifier = Modifier
+                  .align(Alignment.BottomCenter)
+                  .fillMaxWidth()
+                  .padding(16.dp),
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.End) {
                 Button(
                     onClick = { onNext?.invoke(true) },
                     modifier =
-                        Modifier.wrapContentWidth()
-                            .testTag("arrowButton"), // Make the button wrap its content
+                    Modifier
+                        .wrapContentWidth()
+                        .testTag("arrowButton"), // Make the button wrap its content
                     colors =
                         ButtonDefaults.buttonColors( // Set the button's background color
                             containerColor = Color(0xFF2491DF))) {
@@ -327,7 +518,10 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
                 LinearProgressIndicator(
                     progress = { progress },
                     color = Color(0xFF2491DF),
-                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(10.dp)))
               }
         }
       }
@@ -372,7 +566,10 @@ fun GroomerRegisterLayout(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .testTag("GroomerRegisterScreen")
         ) {
             Text(
                 text = textShown,
@@ -405,7 +602,9 @@ fun GroomerRegisterLayout(
                 },
                 visualTransformation =
                 if (!textVisible) PasswordVisualTransformation() else VisualTransformation.None,
-                modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("InputText"),
                 colors =
                 OutlinedTextFieldDefaults.colors(
                     focusedBorderColor =
@@ -437,14 +636,19 @@ fun GroomerRegisterLayout(
                 text = shownErrorText,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp).testTag("errorText")
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .testTag("errorText")
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End
                 ) {
@@ -472,7 +676,8 @@ fun GroomerRegisterLayout(
                             }
                         },
                         modifier =
-                        Modifier.wrapContentWidth()
+                        Modifier
+                            .wrapContentWidth()
                             .testTag("arrowButton"), // Make the button wrap its content
                         colors =
                         ButtonDefaults.buttonColors( // Set the button's background color
@@ -496,7 +701,9 @@ fun GroomerRegisterLayout(
                     LinearProgressIndicator(
                         progress = { progress },
                         color = Color(0xFF2491DF),
-                        modifier = Modifier.fillMaxWidth().height(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
                             .clip(RoundedCornerShape(10.dp))
                     )
                 }
@@ -549,7 +756,10 @@ fun GroomerRegisterLayout(
         }
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .testTag("RegisterScreen")
         ) {
             item {
                 Text(
@@ -596,7 +806,10 @@ fun GroomerRegisterLayout(
                             label = { Text("Location") },
                             placeholder = { Text("Enter an address") },
                             modifier =
-                            Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                            Modifier
+                                .fillMaxWidth()
+                                .menuAnchor()
+                                .focusRequester(focusRequester),
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                             },
@@ -616,6 +829,7 @@ fun GroomerRegisterLayout(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
                 } else {
 
                     OutlinedTextField(
@@ -624,7 +838,9 @@ fun GroomerRegisterLayout(
                         label = { Text(fieldNames[i]) },
                         singleLine = true,
                         visualTransformation = VisualTransformation.None,
-                        modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("InputText"),
                         colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -641,44 +857,19 @@ fun GroomerRegisterLayout(
                         text = shownErrorTexts[i],
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp).testTag("errorText")
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .testTag("errorText")
                     )
-
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                OutlinedTextField(
-                    value = textFields[i],
-                    onValueChange = { textFields[i] = it },
-                    label = { Text(fieldNames[i]) },
-                    singleLine = true,
-                    visualTransformation = VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("InputText"),
-                    colors =
-                    OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor =
-                        Color(0xFF2491DF), // Border color when the TextField is focused
-                        focusedLabelColor =
-                        Color(0xFF2491DF), // Label color when the TextField is focused
-                        unfocusedBorderColor =
-                        Color.Gray, // Additional customization for other states
-                        unfocusedLabelColor = Color.Gray
-                    )
-                )
-
-                Text(
-                    text = shownErrorTexts[i],
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp).testTag("errorText")
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
             }
 
             item {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
-                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.End
@@ -696,7 +887,8 @@ fun GroomerRegisterLayout(
                                 }
                             },
                             modifier =
-                            Modifier.wrapContentWidth()
+                            Modifier
+                                .wrapContentWidth()
                                 .testTag("ArrowButton"), // Make the button wrap its content
                             colors =
                             ButtonDefaults.buttonColors( // Set the button's background color
@@ -722,7 +914,10 @@ fun GroomerRegisterLayout(
                             progress = { progress },
                             color = Color(0xFF2491DF),
                             modifier =
-                            Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp))
+                            Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(10.dp))
                         )
                     }
                 }
@@ -747,7 +942,10 @@ fun GroomerRegisterLayout(
         }
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .testTag("GroomerRegisterScreen")
         ) {
             item {
                 Text(
@@ -769,7 +967,9 @@ fun GroomerRegisterLayout(
             itemsIndexed(checkboxOptions) { i, _ ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().testTag("Checkbox")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("Checkbox")
                 ) {
                     Checkbox(
                         checked = boxesChecked[i],
@@ -783,7 +983,9 @@ fun GroomerRegisterLayout(
             item {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
-                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.End
@@ -799,7 +1001,8 @@ fun GroomerRegisterLayout(
                                 onNext?.invoke(checkedOptions)
                             },
                             modifier =
-                            Modifier.wrapContentWidth()
+                            Modifier
+                                .wrapContentWidth()
                                 .testTag("arrowButton"), // Make the button wrap its content
                             colors =
                             ButtonDefaults.buttonColors( // Set the button's background color
@@ -825,7 +1028,10 @@ fun GroomerRegisterLayout(
                             progress = { progress },
                             color = Color(0xFF2491DF),
                             modifier =
-                            Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp))
+                            Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(10.dp))
                         )
                     }
                 }
