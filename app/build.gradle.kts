@@ -201,10 +201,16 @@ dependencies {
     implementation (libs.accompanist.insets)
     implementation ("com.google.android.gms:play-services-auth:19.0.0")
 
+
+    implementation ("androidx.compose.material:material:1.6.5")
+
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
 
     // Use the latest version
+    // slider
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation ("androidx.compose.ui:ui-util:1.6.5")
 }
 
 tasks.withType<Test> {

@@ -1,6 +1,12 @@
 package com.android.PetPamper.model
+data class Pet(
+    var name: String,
+    var age: Int,
+    var description: String,
+    //var image: String
+) {}
 
-import java.time.LocalDate
+/*import java.time.LocalDate
 
 sealed class Pet(
     protected open var _name: String = "Unnamed",
@@ -52,4 +58,5 @@ class Dog(
     set(value) {
       _owner = value
     }
-}
+}*/
+
