@@ -621,27 +621,7 @@ fun RegisterLayout(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End) {
                       Button(
-                          onClick = {
-                            if (isEmail) {
-                              firebaseConnection
-                                  .verifyEmail(textField, "user")
-                                  .addOnCompleteListener { isExist ->
-                                    if (isExist.isSuccessful) {
-                                      val emailExists = isExist.result
-                                      if (emailExists) {
-                                        errorText = "Email already in use with another account."
-                                      } else {
-                                        Log.d("Email", "Email does not exist")
-                                        proceedWithNext()
-                                      }
-                                    } else {
-                                      println("Error checking email: ${isExist.exception?.message}")
-                                    }
-                                  }
-                            } else {
-                              proceedWithNext()
-                            }
-                          },
+                          onClick = { proceedWithNext() },
                           modifier =
                               Modifier.wrapContentWidth()
                                   .testTag("arrowButton"), // Make the button wrap its content

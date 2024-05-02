@@ -105,7 +105,6 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
   var registeredAsUser by remember { mutableStateOf(false) }
   var RegistrationDone by remember { mutableStateOf(false) }
 
-
   when (currentStep) {
     1 -> {
       Column {
@@ -246,7 +245,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
     12 -> {
 
       if (!registeredAsUser) {
-          firebaseConnection.registerUser(
+        firebaseConnection.registerUser(
             viewModel.email,
             viewModel.password,
             onSuccess = {
@@ -311,7 +310,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
         //              Log.e("Firebase query", "Get failed with ", exception)
         //            }
         //      }
-//            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+        //            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
       } else {
         // Need to check that groomer wasn't already registered to avoid duplicate accounts
         val groomerRef = db.collection("groomers").document(viewModel.email)
@@ -652,27 +651,7 @@ fun GroomerRegisterLayout(
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.End) {
                 Button(
-                    onClick = {
-                      if (isEmail) {
-                        firebaseConnection
-                            .verifyEmail(textField, "groomer")
-                            .addOnCompleteListener { isExist ->
-                              if (isExist.isSuccessful) {
-                                val emailExists = isExist.result
-                                if (emailExists) {
-                                  shownErrorText = "Email already in use with another account."
-                                } else {
-                                  Log.d("Email", "Email does not exist")
-                                  proceedWithNext()
-                                }
-                              } else {
-                                println("Error checking email: ${isExist.exception?.message}")
-                              }
-                            }
-                      } else {
-                        proceedWithNext()
-                      }
-                    },
+                    onClick = { proceedWithNext() },
                     modifier =
                         Modifier.wrapContentWidth()
                             .testTag("arrowButton"), // Make the button wrap its content
