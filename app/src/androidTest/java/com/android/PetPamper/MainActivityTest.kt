@@ -1,6 +1,5 @@
 package com.android.PetPamper
 
-import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.PetPamper.screen.MainScreen
@@ -69,12 +68,6 @@ class MainActivityTest : TestCase() {
         emailTbx { performTextInput("alikawazaki@gmail.com") }
         pwdTbx { performTextInput("12345678") }
         loginButton { assertHasClickAction() }
-        Log.d("my_debug_test", "attempting login")
-        try {
-          loginButton { performClick() }
-        } catch (e: Exception) {
-          Log.e("my_error", e.toString())
-        }
       }
     }
   }
