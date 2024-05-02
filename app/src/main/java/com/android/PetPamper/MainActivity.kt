@@ -23,13 +23,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
@@ -57,43 +60,67 @@ import kotlin.math.round
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
+    Log.i("my_start", "App started")
+
     super.onCreate(savedInstanceState)
     setContent { AppNavigation() }
   }
 
   @Composable
   fun AppNavigation() {
+    Log.d("my_debug", "AppNavigation() called")
     val navController = rememberNavController() // Create the NavHostController
     val signUp = SignUpViewModel()
     val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
 
-    NavHost(navController = navController, startDestination = "LoginScreen") {
-      composable("LoginScreen") { SignIn(navController) }
+    Scaffold(modifier = Modifier.testTag("mainScaffold")) { innerPadding ->
+      NavHost(
+          navController = navController,
+          startDestination = "LoginScreen",
+          modifier = Modifier.padding(innerPadding).testTag("navHostMain")) {
+            composable("LoginScreen") { SignIn(navController) }
 
-      composable("RegisterScreen1") { Register(1, signUp, navController) }
+            composable("RegisterScreen1") { Register(1, signUp, navController) }
 
-      composable("RegisterScreenGoogle/{email}") { backStackEntry ->
-        val email = backStackEntry.arguments?.getString("email")
-        val signUp1 = SignUpViewModelGoogle()
-        SignUpScreenGoogle(signUp1, navController, email!!)
-      }
+            composable(
+                "RegisterScreenGoogle/{email}",
+                arguments =
+                    listOf(
+                        navArgument("email") {
+                          type = NavType.StringType
+                          defaultValue = ""
+                        })) { backStackEntry ->
+                  val email = backStackEntry.arguments?.getString("email")
+                  val signUp1 = SignUpViewModelGoogle()
+                  SignUpScreenGoogle(signUp1, navController, email!!)
+                }
 
-      composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
+            composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
 
-      composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
+            composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
-      composable("HomeScreen/{email}") { backStackEntry ->
-        val email = backStackEntry.arguments?.getString("email")
-        AppNavigation(email)
-      }
+            composable(
+                "HomeScreen/{email}",
+                arguments =
+                    listOf(
+                        navArgument("email") {
+                          type = NavType.StringType
+                          defaultValue = ""
+                        })) { backStackEntry ->
+                  val email = backStackEntry.arguments?.getString("email")
+                  Log.d("my_debug", "navigate to logged in view for \"${email}\"")
+                  AppNavigation(email)
+                }
+          }
     }
   }
 }
 
 @Composable
 fun AppNavigation(email: String?) {
+  Log.d("my_debug", "AppNavigation(email = " + email + ") called")
   val navController = rememberNavController()
   val items =
       listOf(
@@ -105,6 +132,7 @@ fun AppNavigation(email: String?) {
       )
 
   Scaffold(
+      modifier = Modifier.testTag("mainScaffold2"),
       bottomBar = {
         NavigationBar(
             containerColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
@@ -132,22 +160,29 @@ fun AppNavigation(email: String?) {
                         launchSingleTop = true
                         restoreState = true
                       }
-                    })
+                    },
+                    modifier = Modifier.testTag(screen.label))
               }
             }
       }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = BarScreen.Home.route,
-            modifier = Modifier.padding(innerPadding) // Apply the padding here
+            modifier =
+                Modifier.padding(innerPadding).testTag("navHostMain") // Apply the padding here
             ) {
               composable(BarScreen.Home.route) {
                 val nameUser = remember { mutableStateOf("") }
                 val firebaseConnection = FirebaseConnection()
-                firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-                  val uid = documents.documents[0]?.id.toString()
-                  val userViewModel = UserViewModel(uid)
-                  userViewModel.getNameFromFirebase { name -> nameUser.value = name }
+                firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { task ->
+                  if (!task.documents.isNullOrEmpty()) {
+                    val uid = task.documents[0]?.id.toString()
+                    val userViewModel = UserViewModel(uid)
+                    userViewModel.getNameFromFirebase { name -> nameUser.value = name }
+                  } else {
+                    Log.w("my_warn", "user documents were empty")
+                    nameUser.value = "Unknown user"
+                  }
                 }
                 Text(text = "Welcome ${nameUser.value}")
               }
@@ -172,12 +207,17 @@ fun AppNavigation(email: String?) {
 
                 LaunchedEffect(email) {
                   firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-                    val uid = documents.documents[0]?.id.toString()
-                    val userViewModel = UserViewModel(uid)
-                    userViewModel.getAddressFromFirebase { address1 ->
-                      if (address.value != address1) {
-                        address.value = address1
+                    if (!documents.documents.isNullOrEmpty()) {
+                      val uid = documents.documents[0]?.id.toString()
+                      val userViewModel = UserViewModel(uid)
+                      userViewModel.getAddressFromFirebase { address1 ->
+                        if (address.value != address1) {
+                          address.value = address1
+                        }
                       }
+                    } else {
+                      Log.w("my_warn", "user documents were empty")
+                      address.value = Address()
                     }
                   }
                 }
@@ -195,7 +235,7 @@ fun AppNavigation(email: String?) {
                   }
                 }
 
-                Log.d("GroomersOutLaunched", "${groomersNearby.value}")
+                Log.d("my_GroomersOutLaunched", "${groomersNearby.value}")
 
                 LaunchedEffect(groomersNearby.value, groomersWithReviews.value) {
                   sampleGroomers.value =
@@ -225,7 +265,7 @@ fun AppNavigation(email: String?) {
                       Text(text = "No groomers found") // Show a message if there are no groomers
                     } // Show a message if there are no groomers
                   } else {
-                    Log.d("Groomers", "${sampleGroomers.value}")
+                    Log.d("my_Groomers", "${sampleGroomers.value}")
                     GroomerList(groomers = sampleGroomers.value) // Then the list of groomers
                   }
                 }

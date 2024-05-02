@@ -2,12 +2,36 @@ package com.android.PetPamper.ui.screen.register
 
 import LocationViewModel
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,13 +57,13 @@ import com.android.PetPamper.model.User
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 
-class SignUpViewModelGoogle() {
+class SignUpViewModelGoogle {
 
-  var locationMap: LocationMap = LocationMap()
   var name by mutableStateOf("")
   var email by mutableStateOf("")
   var phoneNumber by mutableStateOf("")
   var address by mutableStateOf(Address("", "", "", "", LocationMap()))
+  var locationMap: LocationMap = LocationMap()
 }
 
 @Composable
@@ -95,7 +119,7 @@ fun SignUpScreenGoogle(
               firebaseConnection.addUser(
                   User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address),
                   onSuccess = { currentStep++ },
-                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                  onFailure = { error -> Log.e("my_SignUp", "Registration failed", error) })
             })
     4 -> navController.navigate("LoginScreen")
   }
@@ -231,7 +255,7 @@ fun SignUpScreenLayoutGoogle(
                                   locationOptions.clear()
                                   locationOptions.addAll(locations)
                                   Log.d(
-                                      "LocationInput",
+                                      "my_LocationInput",
                                       "Updated location options: ${locationOptions.joinToString { it.name }}")
                                 }
                               }
@@ -281,14 +305,15 @@ fun SignUpScreenLayoutGoogle(
                       singleLine = true,
                       modifier = Modifier.fillMaxWidth().testTag("cityTag"),
                       colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
+                          OutlinedTextFieldDefaults.colors(
                               focusedBorderColor =
                                   Color(0xFF2491DF), // Border color when the TextField is focused
-                              focusedLabelColor =
-                                  Color(0xFF2491DF), // Label color when the TextField is focused
                               unfocusedBorderColor =
                                   Color.Gray, // Additional customization for other states
-                              unfocusedLabelColor = Color.Gray))
+                              focusedLabelColor =
+                                  Color(0xFF2491DF), // Label color when the TextField is focused
+                              unfocusedLabelColor = Color.Gray,
+                          ))
 
                   Spacer(modifier = Modifier.height(8.dp))
 
@@ -299,14 +324,15 @@ fun SignUpScreenLayoutGoogle(
                       singleLine = true,
                       modifier = Modifier.fillMaxWidth().testTag("stateTag"),
                       colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
+                          OutlinedTextFieldDefaults.colors(
                               focusedBorderColor =
                                   Color(0xFF2491DF), // Border color when the TextField is focused
-                              focusedLabelColor =
-                                  Color(0xFF2491DF), // Label color when the TextField is focused
                               unfocusedBorderColor =
                                   Color.Gray, // Additional customization for other states
-                              unfocusedLabelColor = Color.Gray))
+                              focusedLabelColor =
+                                  Color(0xFF2491DF), // Label color when the TextField is focused
+                              unfocusedLabelColor = Color.Gray,
+                          ))
 
                   Spacer(modifier = Modifier.height(8.dp))
 
@@ -317,14 +343,15 @@ fun SignUpScreenLayoutGoogle(
                       singleLine = true,
                       modifier = Modifier.fillMaxWidth().testTag("postalTag"),
                       colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
+                          OutlinedTextFieldDefaults.colors(
                               focusedBorderColor =
                                   Color(0xFF2491DF), // Border color when the TextField is focused
-                              focusedLabelColor =
-                                  Color(0xFF2491DF), // Label color when the TextField is focused
                               unfocusedBorderColor =
                                   Color.Gray, // Additional customization for other states
-                              unfocusedLabelColor = Color.Gray))
+                              focusedLabelColor =
+                                  Color(0xFF2491DF), // Label color when the TextField is focused
+                              unfocusedLabelColor = Color.Gray,
+                          ))
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -378,7 +405,7 @@ fun SignUpScreenLayoutGoogle(
                                         .buttonColors( // Set the button's background color
                                             containerColor = Color(0xFF2491DF))) {
                                   Icon(
-                                      imageVector = Icons.Filled.ArrowForward,
+                                      imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                       contentDescription = "Go forward",
                                       tint = Color.White // Set the icon color to blue
                                       )

@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -95,18 +94,27 @@ android {
 
 sonar {
     properties {
-       // property("sonar.gradle.skipCompile", "true")
+        // property("sonar.gradle.skipCompile", "true")
         property("sonar.projectKey", "PetPamper_PetPamper")
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.token", System.getenv("SONAR_TOKEN"))
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
-        property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
+        property(
+            "sonar.junit.reportPaths",
+            "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/"
+        )
         // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
-        property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
+        property(
+            "sonar.androidLint.reportPaths",
+            "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml"
+        )
         // Paths to JaCoCo XML coverage report files.
-        property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
     }
 }
 
@@ -123,8 +131,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.firebase.auth.ktx)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
@@ -133,23 +141,22 @@ dependencies {
     // ------------- Jetpack Compose ------------------
 
     implementation(libs.androidx.ui)
-    implementation("androidx.compose.ui:ui:1.6.5")
-    implementation ("androidx.compose.material3:material3:1.2.1")
-    implementation ("androidx.navigation:navigation-compose:2.7.0-rc01")
-    implementation ("androidx.compose.material:material:1.3.0")
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material)
 
 
     implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation ("androidx.test:runner:1.4.0")
-    androidTestImplementation ("androidx.test:rules:1.4.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test:runner:1.4.0")
+    androidTestImplementation("androidx.test:rules:1.4.0")
 
     implementation("com.google.maps.android:maps-compose:4.3.0")
     implementation("com.google.maps.android:maps-compose-utils:4.3.0")
 
 
     implementation("com.google.android.gms:play-services-maps:18.1.0")
-    implementation ("io.coil-kt:coil-compose:1.4.0")
+    implementation("io.coil-kt:coil-compose:1.4.0")
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
@@ -176,15 +183,15 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
-    implementation (libs.firebase.ui.auth)
+    implementation(libs.firebase.ui.auth)
 
     implementation(libs.core.ktx)
 
-    implementation (libs.play.services.auth)
-    implementation (libs.accompanist.insets)
-    implementation ("com.google.android.gms:play-services-auth:19.0.0")
+    implementation(libs.play.services.auth)
+    implementation(libs.accompanist.insets)
+    implementation("com.google.android.gms:play-services-auth:19.0.0")
 
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
 
     // Use the latest version

@@ -1,5 +1,6 @@
 package com.github.se.bootcamp.map
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,12 +30,17 @@ fun MapView(email: String) {
 
   LaunchedEffect(email) {
     firebaseConnection.getUserUidByEmail(email).addOnSuccessListener { documents ->
-      val uid = documents.documents[0]?.id.toString()
-      val userViewModel = UserViewModel(uid)
-      userViewModel.getAddressFromFirebase { address1 ->
-        if (address.value != address1) {
-          address.value = address1
+      if (!documents.documents.isNullOrEmpty()) {
+        val uid = documents.documents[0]?.id.toString()
+        val userViewModel = UserViewModel(uid)
+        userViewModel.getAddressFromFirebase { address1 ->
+          if (address.value != address1) {
+            address.value = address1
+          }
         }
+      } else {
+        Log.w("my_warn", "user documents were empty")
+        address.value = Address()
       }
     }
   }

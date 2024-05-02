@@ -77,7 +77,7 @@ class FirebaseConnection {
 
           // If the distance is less than or equal to 10 kilometers, add the groomer to the list
           Log.d(
-              "GroomersFirebase",
+              "my_GroomersFirebase",
               "Distance to ${groomer.name}: $distance from ${address.location.name}")
           if (distance <= 10 && !nearbyGroomers.contains(groomer)) {
             nearbyGroomers.add(groomer)
@@ -86,7 +86,7 @@ class FirebaseConnection {
 
         // Set the result of the task
         source.setResult(nearbyGroomers)
-        Log.d("GroomersFirebase", "Nearby groomers: $nearbyGroomers")
+        Log.d("my_GroomersFirebase", "Nearby groomers: $nearbyGroomers")
       } else {
         // If the task failed, set the exception
         source.setException(task.exception ?: Exception("Failed to fetch groomers"))
@@ -143,6 +143,7 @@ class FirebaseConnection {
     FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
         task ->
       if (task.isSuccessful) {
+        Log.d("my_debug", "user: ${task.result.user?.email ?: "NULL_USER"}")
         onSuccess()
       } else {
         onFailure(task.exception ?: Exception("Login failed"))

@@ -20,7 +20,7 @@ class MainActivityTest : TestCase() {
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
   @Test
-  fun test() = run {
+  fun testBase() = run {
     step("Start Login Screen") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         loginTitle {
@@ -35,6 +35,10 @@ class MainActivityTest : TestCase() {
         errorMessage { assertIsNotDisplayed() }
       }
     }
+  }
+
+  @Test
+  fun testEmptyLogin() = run {
     step("Attempt to log in with empty credentials") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         loginButton { performClick() }
@@ -45,14 +49,25 @@ class MainActivityTest : TestCase() {
         }
       }
     }
+  }
 
+  @Test
+  fun testGoogle() = run {
     step("Attempt to login with google sign in") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
         // Click the google sign in button
-        googleSignInButton { performClick() }
+        googleSignInButton { assertHasClickAction() }
+      }
+    }
+  }
 
-        // Check if the error message is displayed
-
+  @Test
+  fun testLogin() = run {
+    step("Attempt to log in with default credentials") {
+      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+        emailTbx { performTextInput("alikawazaki@gmail.com") }
+        pwdTbx { performTextInput("12345678") }
+        loginButton { assertHasClickAction() }
       }
     }
   }
