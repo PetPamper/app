@@ -239,12 +239,10 @@ fun SignUpScreenLayoutGoogle(
                             label = { Text("Location") },
                             placeholder = { Text("Enter an address") },
                             modifier =
-
                                 Modifier.fillMaxWidth()
                                     .menuAnchor()
                                     .focusRequester(focusRequester)
                                     .testTag("valueWritten"),
-
                             trailingIcon = {
                               ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                             },

@@ -9,11 +9,13 @@ import com.android.PetPamper.resources.distance
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import java.util.Calendar
 
 class FirebaseConnection {
 
@@ -55,7 +57,6 @@ class FirebaseConnection {
     return source.task
   }
 
-
   fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("groomers")
         .document(groomer.email) // Using email as a unique identifier; adjust if needed
@@ -82,6 +83,26 @@ class FirebaseConnection {
 
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
     return db.collection("users").whereEqualTo("email", email).get()
+  }
+
+  fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
+    // Convert each Calendar instance to a Timestamp for Firebase storage
+    val hoursData =
+        newHours.map { calendar ->
+          hashMapOf("timestamp" to Timestamp(calendar.timeInMillis / 1000, 0))
+        }
+
+    // Update the Firestore document
+    db.collection("groomerAvailabilities")
+        .document(email)
+        .set(mapOf("availableHours" to hoursData))
+        .addOnSuccessListener {
+          onComplete() // Call onComplete callback when update is successful
+        }
+        .addOnFailureListener { e ->
+          println("Error updating available hours: ${e.localizedMessage}")
+          onComplete() // Optionally handle errors, still call onComplete to signal end of operation
+        }
   }
 
   fun fetchNearbyGroomers(address: Address): Task<List<Groomer>> {

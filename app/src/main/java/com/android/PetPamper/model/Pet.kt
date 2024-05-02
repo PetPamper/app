@@ -3,7 +3,7 @@ data class Pet(
     var name: String,
     var age: Int,
     var description: String,
-    //var image: String
+    // var image: String
 ) {}
 
 /*import java.time.LocalDate
@@ -59,4 +59,3 @@ class Dog(
       _owner = value
     }
 }*/
-

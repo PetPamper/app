@@ -63,7 +63,6 @@ class GoogleSignInTest : TestCase() {
         state { performTextInput("Switzerland") }
 
         postalCode { performTextInput("1026") }
-
       }
     }
   }

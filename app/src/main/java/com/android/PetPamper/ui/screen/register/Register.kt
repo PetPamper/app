@@ -21,10 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -70,7 +68,7 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
-import com.android.PetPamper.ui.screen.CustomTextButton
+import com.android.PetPamper.ui.screen.users.CustomTextButton
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -254,7 +252,6 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                                 ButtonDefaults.buttonColors( // Set the button's background color
                                     containerColor = Color(0xFF2491DF))) {
                               Icon(
-
                                   imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                   contentDescription = "Go forward",
                                   tint = Color.White // Set the icon color to blue
@@ -473,7 +470,6 @@ fun RegisterLayout(
                                 color = Color(0xFF2490DF),
                                 textAlign = TextAlign.Center,
                             ),
-
                         modifier = Modifier.testTag("inputLabel"))
                   }
 
@@ -490,7 +486,6 @@ fun RegisterLayout(
                         if (fieldName == "Password" || fieldName == "Confirm Password")
                             PasswordVisualTransformation()
                         else VisualTransformation.None,
-
                     modifier = Modifier.fillMaxWidth().testTag("inputText"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
@@ -529,7 +524,6 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-
                               Modifier.fillMaxWidth()
                                   .menuAnchor()
                                   .focusRequester(focusRequester)
@@ -542,13 +536,11 @@ fun RegisterLayout(
                           expanded = expandedState, onDismissRequest = { expandedState = false }) {
                             locationOptions.forEach { location ->
                               DropdownMenuItem(
-
                                   text = { Text(location.name) },
                                   onClick = {
                                     textField = location.name
                                     viewModel.locationMap = location
                                     expandedState = false
-
                                   })
                             }
                           }
@@ -650,7 +642,6 @@ fun RegisterLayout(
                               proceedWithNext()
                             }
                           },
-
                           modifier =
                               Modifier.wrapContentWidth()
                                   .testTag("arrowButton"), // Make the button wrap its content
