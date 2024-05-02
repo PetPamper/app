@@ -21,11 +21,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -43,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -66,7 +73,7 @@ import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.ui.screen.CustomTextButton
+import com.android.PetPamper.ui.screen.users.CustomTextButton
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
@@ -83,6 +90,7 @@ class GroomerSignUpViewModel {
   var petTypes = mutableStateListOf<String>()
   var profilePicture by mutableStateOf("")
   var price by mutableStateOf<Int>(0)
+  var locationMap by mutableStateOf(LocationMap())
 }
 
 const val NUM_STEPS = 12
@@ -95,6 +103,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
   var currentStep by remember { mutableIntStateOf(1) }
 
   var registeredAsUser by remember { mutableStateOf(false) }
+  var RegistrationDone by remember { mutableStateOf(false) }
 
   when (currentStep) {
     1 -> {
@@ -103,6 +112,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
           currentStep = 20
         }
         GroomerRegisterLayout(
+            false,
             1,
             "Let’s start with your name",
             "Name",
@@ -116,10 +126,11 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
     }
     2 ->
         GroomerRegisterLayout(
+            true,
             2,
             "Hello ${viewModel.name}, enter your email",
             "Email",
-            isValidInput = ::isValidEmail,
+            isValidEmail = ::isValidEmail1,
             errorText = "Please enter a valid email.",
             onNext = { newEmail ->
               viewModel.email = newEmail
@@ -127,6 +138,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             })
     3 ->
         GroomerRegisterLayout(
+            false,
             3,
             "What’s your phone number?",
             "Phone Number",
@@ -136,6 +148,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             })
     4 ->
         GroomerRegisterLayout(
+            false,
             4,
             "Great! Create your password",
             "Password",
@@ -147,6 +160,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             })
     5 -> {
       GroomerRegisterLayout(
+          false,
           5,
           "Confirm your password",
           "Confirm Password",
@@ -165,10 +179,12 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
               viewModel.address.state = fieldsList[1]
               viewModel.address.street = fieldsList[2]
               viewModel.address.postalCode = fieldsList[3]
+              viewModel.address.location = viewModel.locationMap
               currentStep++
             })
     7 ->
         GroomerRegisterLayout(
+            false,
             7,
             "How many years of experience do you have as a groomer?",
             "Experience Years",
@@ -178,6 +194,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             })
     8 ->
         GroomerRegisterLayout(
+            false,
             8,
             "What is your average service price for an Hour",
             "Price",
@@ -226,11 +243,14 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
       }
     }
     12 -> {
+
       if (!registeredAsUser) {
         firebaseConnection.registerUser(
             viewModel.email,
             viewModel.password,
             onSuccess = {
+              RegistrationDone = true
+              Log.d("SignUp1", "Registering user")
               firebaseConnection.addGroomer(
                   Groomer(
                       viewModel.name,
@@ -250,7 +270,47 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                   },
                   onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
             },
-            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+            onFailure = { error ->
+              Log.e("SignUp", "Registration failed", error)
+              Log.d("SignUp1", "Registering user")
+            })
+        //      } else {
+        //        // Need to check that groomer wasn't already registered to avoid duplicate
+        // accounts
+        //        val groomerRef = db.collection("groomers").document(viewModel.email)
+        //        groomerRef
+        //            .get()
+        //            .addOnSuccessListener { document ->
+        //              if (!document.exists()) {
+        //                firebaseConnection.addGroomer(
+        //                    Groomer(
+        //                        viewModel.name,
+        //                        viewModel.email,
+        //                        viewModel.phoneNumber,
+        //                        viewModel.address,
+        //                        viewModel.experienceYears,
+        //                        viewModel.groomerServices,
+        //                        viewModel.petTypes,
+        //                        viewModel.profilePicture,
+        //                        viewModel.price),
+        //                    onSuccess = {
+        //                      firebaseConnection.addGroomerReview(
+        //                          GroomerReviews(viewModel.email, 5.0, 0),
+        //                          onSuccess = { navController.navigate("LoginScreen") },
+        //                          onFailure = { error -> Log.e("SignUp", "Review failed", error)
+        // })
+        //                    },
+        //                    onFailure = { error -> Log.e("SignUp", "Registration failed", error)
+        // })
+        //              } else {
+        //                Log.e("AlreadyRegistered", "user was already registered as groomer")
+        //              }
+        //            }
+        //            .addOnFailureListener { exception ->
+        //              Log.e("Firebase query", "Get failed with ", exception)
+        //            }
+        //      }
+        //            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
       } else {
         // Need to check that groomer wasn't already registered to avoid duplicate accounts
         val groomerRef = db.collection("groomers").document(viewModel.email)
@@ -421,23 +481,29 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
         Spacer(modifier = Modifier.height(16.dp))
 
         GalleryImagePicker { uri ->
-          // Get a reference to the storage service
-          val storageRef = FirebaseStorage.getInstance().reference
+          if (uri != null) {
+            // Get a reference to the storage service
+            val storageRef = FirebaseStorage.getInstance().reference
 
-          val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
-          val uploadTask = fileRef.putFile(uri)
+            val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
+            val uploadTask = fileRef.putFile(uri)
 
-          uploadTask
-              .addOnSuccessListener { taskSnapshot ->
-                taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
-                  imageUri = downloadUri // Store download URI instead of local URI
-                  viewModel.profilePicture = downloadUri.toString()
+            uploadTask
+                .addOnSuccessListener { taskSnapshot ->
+                  taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri
+                    ->
+                    imageUri = downloadUri // Store download URI instead of local URI
+                    viewModel.profilePicture = downloadUri.toString()
+                  }
                 }
-              }
-              .addOnFailureListener {
-                // Handle unsuccessful uploads
-                Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
-              }
+                .addOnFailureListener {
+                  // Handle unsuccessful uploads
+                  Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+          } else {
+            imageUri = null
+            viewModel.profilePicture = imageUri.toString()
+          }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -479,16 +545,19 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
 
 @Composable
 fun GroomerRegisterLayout(
+    isEmail: Boolean,
     currentStep: Int,
     textShown: String,
     fieldName: String,
     isValidInput: ((String) -> Boolean)? = null,
+    isValidEmail: ((String) -> Pair<Boolean, Boolean>)? = null,
     errorText: String = "",
     onNext: ((String) -> Unit)? = null
 ) {
 
   var textField by remember { mutableStateOf("") }
   var shownErrorText by remember { mutableStateOf("") }
+  val firebaseConnection = FirebaseConnection()
 
   fun proceedWithNext() {
     var proceed = true
@@ -499,11 +568,17 @@ fun GroomerRegisterLayout(
       proceed = false
     }
 
+    if (isValidEmail?.invoke(textField)?.first == false) {
+      proceed = false
+      shownErrorText = errorText
+    }
+
     if (proceed) {
       shownErrorText = ""
       onNext?.invoke(textField)
     }
   }
+
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
@@ -605,6 +680,7 @@ fun GroomerRegisterLayout(
       }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroomerRegisterMultipleLayout(
     viewModel: GroomerSignUpViewModel,
@@ -619,6 +695,9 @@ fun GroomerRegisterMultipleLayout(
   val textFields = remember { mutableStateListOf<String>() }
   val shownErrorTexts = remember { mutableStateListOf<String>() }
   var locationViewModel = LocationViewModel()
+  var expandedState by remember { mutableStateOf(false) }
+  val locationOptions = remember { mutableStateListOf<LocationMap>() }
+  val focusRequester = remember { FocusRequester() }
 
   for (i in 1..numFields) {
     textFields.add("")
@@ -660,30 +739,79 @@ fun GroomerRegisterMultipleLayout(
               modifier = Modifier.testTag("DisplayText"))
         }
         itemsIndexed(fieldNames) { i, _ ->
-          OutlinedTextField(
-              value = textFields[i],
-              onValueChange = { textFields[i] = it },
-              label = { Text(fieldNames[i]) },
-              singleLine = true,
-              visualTransformation = VisualTransformation.None,
-              modifier = Modifier.fillMaxWidth().testTag("InputText"),
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      focusedBorderColor =
-                          Color(0xFF2491DF), // Border color when the TextField is focused
-                      focusedLabelColor =
-                          Color(0xFF2491DF), // Label color when the TextField is focused
-                      unfocusedBorderColor =
-                          Color.Gray, // Additional customization for other states
-                      unfocusedLabelColor = Color.Gray))
+          if (i == 0) {
+            ExposedDropdownMenuBox(
+                expanded = expandedState && locationOptions.isNotEmpty(),
+                onExpandedChange = {
+                  expandedState = it
+                  if (expandedState) {
+                    // Request focus again if the dropdown expands
+                    focusRequester.requestFocus()
+                  }
+                },
+                modifier = Modifier.fillMaxWidth()) {
+                  OutlinedTextField(
+                      value = textFields[0],
+                      onValueChange = { newValue ->
+                        textFields[0] = newValue
+                        locationViewModel.fetchLocation(newValue) { locations ->
+                          if (locations != null) {
+                            locationOptions.clear()
+                            locationOptions.addAll(locations)
+                            Log.d(
+                                "LocationInput",
+                                "Updated location options: ${locationOptions.joinToString { it.name }}")
+                          }
+                        }
+                      },
+                      label = { Text("Location") },
+                      placeholder = { Text("Enter an address") },
+                      modifier =
+                          Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                      trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                      },
+                  )
+                  DropdownMenu(
+                      expanded = expandedState, onDismissRequest = { expandedState = false }) {
+                        locationOptions.forEach { location ->
+                          DropdownMenuItem(
+                              onClick = {
+                                textFields[0] = location.name
+                                viewModel.locationMap = location
+                                expandedState = false
+                              }) {
+                                Text(location.name)
+                              }
+                        }
+                      }
+                }
+            Spacer(modifier = Modifier.height(10.dp))
+          } else {
 
-          Text(
-              text = shownErrorTexts[i],
-              color = MaterialTheme.colorScheme.error,
-              style = MaterialTheme.typography.bodySmall,
-              modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+            OutlinedTextField(
+                value = textFields[i],
+                onValueChange = { textFields[i] = it },
+                label = { Text(fieldNames[i]) },
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor =
+                            Color(0xFF2491DF), // Border color when the TextField is focused
+                        focusedLabelColor =
+                            Color(0xFF2491DF), // Label color when the TextField is focused
+                        unfocusedBorderColor =
+                            Color.Gray, // Additional customization for other states
+                        unfocusedLabelColor = Color.Gray))
 
-          Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = shownErrorTexts[i],
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+          }
         }
 
         item {

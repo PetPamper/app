@@ -1,4 +1,4 @@
-package com.github.se.bootcamp.map
+package com.android.PetPamper.ui.screen.users
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

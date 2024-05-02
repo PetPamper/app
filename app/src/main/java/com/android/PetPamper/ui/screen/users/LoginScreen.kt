@@ -1,4 +1,4 @@
-package com.android.PetPamper.ui.screen
+package com.android.PetPamper.ui.screen.users
 
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -202,6 +202,8 @@ fun SignIn(navController: NavHostController) {
                                     .addOnSuccessListener { document ->
                                       if (document.exists()) {
                                         login = true
+                                        navController.navigate("GroomerHomeScreen/${email}")
+
                                         Log.d(
                                             "Firebase query",
                                             "Groomer found," + " name is ${document.get("name")}")
