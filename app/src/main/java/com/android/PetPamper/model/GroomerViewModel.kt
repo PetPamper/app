@@ -30,16 +30,6 @@ class GroomerViewModel(uid: String, email: String) : ViewModel() {
     }
   }
 
-  //    fun fetchAvailableHours(onComplete: (List<Calendar>) -> Unit) {
-  //        // Assume `email` is already a property of the ViewModel, or fetch it as needed
-  //        firebaseConnection.getAvailableHours(email) { calendars ->
-  //            // The callback now directly receives a List<Calendar> from the Firebase method
-  //            availableHours = calendars
-  //            onComplete(calendars)
-  //        }
-  //    }
-
-  // New method to update available hours in Firebase
   fun updateAvailableHours(
       email: String,
       date: String,

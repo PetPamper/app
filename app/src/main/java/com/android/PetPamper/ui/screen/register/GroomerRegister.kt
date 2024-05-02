@@ -105,6 +105,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
   var registeredAsUser by remember { mutableStateOf(false) }
   var RegistrationDone by remember { mutableStateOf(false) }
 
+
   when (currentStep) {
     1 -> {
       Column {
@@ -243,8 +244,9 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
       }
     }
     12 -> {
-      if (!RegistrationDone) {
-        firebaseConnection.registerUser(
+
+      if (!registeredAsUser) {
+          firebaseConnection.registerUser(
             viewModel.email,
             viewModel.password,
             onSuccess = {
@@ -309,6 +311,39 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
         //              Log.e("Firebase query", "Get failed with ", exception)
         //            }
         //      }
+//            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+      } else {
+        // Need to check that groomer wasn't already registered to avoid duplicate accounts
+        val groomerRef = db.collection("groomers").document(viewModel.email)
+        groomerRef
+            .get()
+            .addOnSuccessListener { document ->
+              if (!document.exists()) {
+                firebaseConnection.addGroomer(
+                    Groomer(
+                        viewModel.name,
+                        viewModel.email,
+                        viewModel.phoneNumber,
+                        viewModel.address,
+                        viewModel.experienceYears,
+                        viewModel.groomerServices,
+                        viewModel.petTypes,
+                        viewModel.profilePicture,
+                        viewModel.price),
+                    onSuccess = {
+                      firebaseConnection.addGroomerReview(
+                          GroomerReviews(viewModel.email, 5.0, 0),
+                          onSuccess = { navController.navigate("LoginScreen") },
+                          onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+                    },
+                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+              } else {
+                Log.e("AlreadyRegistered", "user was already registered as groomer")
+              }
+            }
+            .addOnFailureListener { exception ->
+              Log.e("Firebase query", "Get failed with ", exception)
+            }
       }
     }
     20 -> {
