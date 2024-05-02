@@ -81,7 +81,7 @@ fun MapView(email: String) {
     AlertDialog(
         onDismissRequest = { showDialog = false },
         title = { Text(text = "Groomer Details") },
-        text = { selectedGroomer?.let { InfoWindow(it) } },
+        text = { selectedGroomer?.let { InfoWindow(it, address.value.location) } },
         confirmButton = {
           Button(
               colors =
@@ -94,12 +94,16 @@ fun MapView(email: String) {
 }
 
 @Composable
-fun InfoWindow(groomer: Groomer) {
+fun InfoWindow(groomer: Groomer, userLocation: LocationMap) {
   Column(
       modifier =
           Modifier.padding(4.dp)
-              .border(2.dp, Color.White, RoundedCornerShape(40.dp))
-              .padding(8.dp)) {
+              .border(
+                  1.dp,
+                  Color.White,
+                  RoundedCornerShape(50.dp)) // Increased rounding and reduced border thickness
+              .padding(6.dp) // Reduced padding
+      ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Image(
               painter =
@@ -109,9 +113,9 @@ fun InfoWindow(groomer: Groomer) {
                               .data(groomer.profilePic)
                               .build()),
               contentDescription = "Groomer Profile Picture",
-              modifier = Modifier.size(100.dp).padding(4.dp),
+              modifier = Modifier.size(100.dp).padding(2.dp), // Reduced padding
               contentScale = ContentScale.Crop)
-          Column(modifier = Modifier.padding(4.dp)) {
+          Column(modifier = Modifier.padding(2.dp)) { // Reduced padding
             Text(
                 text = groomer.name,
                 color = Color(0xFF000080), // Navy blue color
@@ -119,8 +123,11 @@ fun InfoWindow(groomer: Groomer) {
                 fontWeight = FontWeight.Bold)
             Text(
                 text =
-                    "Distance: ${distance(groomer.address.location.latitude, groomer.address.location.longitude,
-            groomer.address.location.latitude, groomer.address.location.longitude )}", // change parameters
+                    "Distance: ${
+                        String.format("%.2f", distance(
+                            userLocation.latitude, userLocation.longitude,
+                            groomer.address.location.latitude, groomer.address.location.longitude
+                        ))} km",
                 fontWeight = FontWeight.Bold)
             Text(
                 text = "Groomable Pets: ${groomer.petTypes.joinToString(", ")}",
