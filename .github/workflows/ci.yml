@@ -2,6 +2,7 @@ name: CI - Test Runner
 
 # Run the workflow when commits are pushed on main or when a PR is modified
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -11,6 +12,8 @@ on:
       - opened
       - synchronize
       - reopened
+
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Manual CI run started by {0}', github.triggering_actor) || '' }}
 
 jobs:
   ci:
@@ -73,6 +76,11 @@ jobs:
         run: |
           chmod +x ./gradlew
 
+      # Try formatting
+      - name: KTFmt Format
+        run: |
+          ./gradlew ktfmtFormat
+
       # Check formatting
       - name: KTFmt Check
         run: |
@@ -85,13 +93,13 @@ jobs:
           ./gradlew assemble lint --parallel --build-cache
 
       # Run Unit tests
-      - name: Run tests
+      - name: Run Unit Tests
         run: |
           # To run the CI with debug information, add --info
           ./gradlew check --parallel --build-cache
 
       # Run connected tests on the emulator
-      - name: run tests
+      - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
