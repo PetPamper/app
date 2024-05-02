@@ -35,8 +35,8 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 
 class SignUpViewModelGoogle() {
 
-    var locationMap: LocationMap = LocationMap()
-    var name by mutableStateOf("")
+  var locationMap: LocationMap = LocationMap()
+  var name by mutableStateOf("")
   var email by mutableStateOf("")
   var phoneNumber by mutableStateOf("")
   var address by mutableStateOf(Address("", "", "", "", LocationMap()))
@@ -190,7 +190,7 @@ fun SignUpScreenLayoutGoogle(
                         ),
                     modifier = Modifier.testTag("TextShownTag"))
 
-              if (!isAddress) {
+                if (!isAddress) {
 
                   OutlinedTextField(
                       value = textField,
@@ -198,74 +198,71 @@ fun SignUpScreenLayoutGoogle(
                       label = { Text(fieldname) },
                       singleLine = true,
                       visualTransformation =
-                      if (fieldname == "Password" || fieldname == "Confirm Password")
-                          PasswordVisualTransformation()
-                      else VisualTransformation.None,
-                      modifier = Modifier
-                          .fillMaxWidth()
-                          .testTag("NameTextInput"),
+                          if (fieldname == "Password" || fieldname == "Confirm Password")
+                              PasswordVisualTransformation()
+                          else VisualTransformation.None,
+                      modifier = Modifier.fillMaxWidth().testTag("valueWritten"),
                       colors =
-                      OutlinedTextFieldDefaults.colors(
-                          focusedBorderColor =
-                          Color(0xFF2491DF), // Border color when the TextField is focused
-                          focusedLabelColor =
-                          Color(0xFF2491DF), // Label color when the TextField is focused
-                          unfocusedBorderColor =
-                          Color.Gray, // Additional customization for other states
-                          unfocusedLabelColor = Color.Gray
-                      )
-                  )
-              }
-              else {
+                          OutlinedTextFieldDefaults.colors(
+                              focusedBorderColor =
+                                  Color(0xFF2491DF), // Border color when the TextField is focused
+                              focusedLabelColor =
+                                  Color(0xFF2491DF), // Label color when the TextField is focused
+                              unfocusedBorderColor =
+                                  Color.Gray, // Additional customization for other states
+                              unfocusedLabelColor = Color.Gray))
+                } else {
                   ExposedDropdownMenuBox(
                       expanded = expandedState && locationOptions.isNotEmpty(),
-                      onExpandedChange = { expandedState = it
-                          if (expandedState) {
-                              // Request focus again if the dropdown expands
-                              focusRequester.requestFocus()
-                          }
+                      onExpandedChange = {
+                        expandedState = it
+                        if (expandedState) {
+                          // Request focus again if the dropdown expands
+                          focusRequester.requestFocus()
+                        }
                       },
-                      modifier = Modifier.fillMaxWidth()
-                  ) {
-                      OutlinedTextField(
-
-                          value = textField,
-                          onValueChange = { newValue ->
+                      modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = textField,
+                            onValueChange = { newValue ->
                               textField = newValue
                               locationViewModel.fetchLocation(newValue) { locations ->
-                                  if (locations != null) {
-                                      locationOptions.clear()
-                                      locationOptions.addAll(locations)
-                                      Log.d("LocationInput", "Updated location options: ${locationOptions.joinToString { it.name }}")
-                                  }
+                                if (locations != null) {
+                                  locationOptions.clear()
+                                  locationOptions.addAll(locations)
+                                  Log.d(
+                                      "LocationInput",
+                                      "Updated location options: ${locationOptions.joinToString { it.name }}")
+                                }
                               }
-
-                          },
-                          label = { Text("Location") },
-                          placeholder = { Text("Enter an address") },
-                          modifier = Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
-                          trailingIcon = {
+                            },
+                            label = { Text("Location") },
+                            placeholder = { Text("Enter an address") },
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .menuAnchor()
+                                    .focusRequester(focusRequester)
+                                    .testTag("valueWritten"),
+                            trailingIcon = {
                               ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
-                          },
-                      )
-                      androidx.compose.material.DropdownMenu(
-                          expanded = expandedState,
-                          onDismissRequest = { expandedState = false }
-                      ) {
-                          locationOptions.forEach { location ->
-                              androidx.compose.material.DropdownMenuItem(
-                                  onClick = {
+                            },
+                        )
+                        androidx.compose.material.DropdownMenu(
+                            expanded = expandedState,
+                            onDismissRequest = { expandedState = false }) {
+                              locationOptions.forEach { location ->
+                                androidx.compose.material.DropdownMenuItem(
+                                    onClick = {
                                       textField = location.name
                                       viewModel.locationMap = location
                                       expandedState = false
-                                  }
-                              ) {
-                                  Text(location.name)
+                                    }) {
+                                      Text(location.name)
+                                    }
                               }
-                          }
+                            }
                       }
-                  }
-              }
+                }
 
                 if (errorText.isNotBlank()) {
                   Text(
