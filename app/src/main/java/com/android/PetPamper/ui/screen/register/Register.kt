@@ -73,8 +73,8 @@ class SignUpViewModel {
   var email by mutableStateOf("")
   var phoneNumber by mutableStateOf("")
   var address by mutableStateOf(Address("", "", "", "", LocationMap()))
-  var password by mutableStateOf("")
   var locationMap: LocationMap = LocationMap()
+  var password by mutableStateOf("")
 }
 
 @Composable
@@ -167,9 +167,9 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                             viewModel.phoneNumber,
                             viewModel.address),
                         onSuccess = { currentStep++ },
-                        onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                        onFailure = { error -> Log.e("my_SignUp", "Registration failed", error) })
                   },
-                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                  onFailure = { error -> Log.e("my_SignUp", "Registration failed", error) })
             } else {
               // Show error message
             }
@@ -364,7 +364,7 @@ fun RegisterLayout(
                                 locationOptions.clear()
                                 locationOptions.addAll(locations)
                                 Log.d(
-                                    "LocationInput",
+                                    "my_LocationInput",
                                     "Updated location options: ${locationOptions.joinToString { it.name }}")
                               }
                             }

@@ -34,7 +34,12 @@ class LocationViewModel : ViewModel() {
       try {
         val client = OkHttpClient()
         val url =
-            "https://nominatim.openstreetmap.org/search?q=${locationName.replace(" ", "+")}&format=json&limit=1"
+            "https://nominatim.openstreetmap.org/search?q=${
+                        locationName.replace(
+                            " ",
+                            "+"
+                        )
+                    }&format=json&limit=1"
         val request = Request.Builder().url(url).build()
 
         val response = withContext(Dispatchers.IO) { client.newCall(request).execute() }
@@ -47,12 +52,12 @@ class LocationViewModel : ViewModel() {
 
         withContext(Dispatchers.Main) {
           onResult(locations)
-          Log.d("Location Fetch", "Locations fetched successfully: $locations")
+          Log.d("my_Location Fetch", "Locations fetched successfully: $locations")
         }
       } catch (e: Exception) {
         withContext(Dispatchers.Main) {
           onResult(null)
-          Log.e("Location Fetch", "Failed to fetch locations", e)
+          Log.e("my_Location Fetch", "Failed to fetch locations", e)
         }
       }
     }

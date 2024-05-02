@@ -228,9 +228,9 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             firebaseConnection.addGroomerReview(
                 GroomerReviews(viewModel.email, 5.0, 0),
                 onSuccess = { navController.navigate("LoginScreen") },
-                onFailure = { error -> Log.e("SignUp", "Review failed", error) })
+                onFailure = { error -> Log.e("my_SignUp", "Review failed", error) })
           },
-          onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+          onFailure = { error -> Log.e("my_SignUp", "Registration failed", error) })
     }
   }
 

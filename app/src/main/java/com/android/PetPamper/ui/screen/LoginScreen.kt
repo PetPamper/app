@@ -70,6 +70,14 @@ private fun OnSignInResult(
   }
 }
 
+fun nav(nc: NavHostController, rt: String) {
+  try {
+    nc.navigate(rt)
+  } catch (e: IllegalArgumentException) {
+    Log.e("my_error", "Navigation error, unable to reach route \"${rt}\"")
+  }
+}
+
 @Composable
 fun SignIn(navController: NavHostController) {
   var signedIn by remember { mutableStateOf(false) }
@@ -96,7 +104,7 @@ fun SignIn(navController: NavHostController) {
       )
 
   if (!signedIn) {
-
+    Log.d("my_debug", "Not signed in...")
     Surface(
         modifier =
             Modifier.fillMaxSize().testTag("LoginScreen").verticalScroll(rememberScrollState())) {
@@ -142,7 +150,7 @@ fun SignIn(navController: NavHostController) {
                     onValueChange = { email = it }, // Implement logic in real implementation
                     label = { Text("Email") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("emailTbx"))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -152,7 +160,7 @@ fun SignIn(navController: NavHostController) {
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("pwdTbx"))
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -166,16 +174,16 @@ fun SignIn(navController: NavHostController) {
                   Spacer(modifier = Modifier.height(4.dp))
                 }
 
-                CustomTextButton(
-                    "Forgot password?",
-                    "",
-                    "forgetButton",
-                    { navController.navigate("EmailScreen") })
+                CustomTextButton("Forgot password?", "", "forgetButton") {
+                  Log.d("my_debug", "Forgot Password custom text button callback")
+                  nav(navController, "EmailScreen")
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
+                      Log.d("my_debug", "log-in button callback")
                       if (email.isBlank() || password.isBlank()) {
                         login = false
                       } else {
@@ -183,10 +191,17 @@ fun SignIn(navController: NavHostController) {
                             email,
                             password,
                             {
+                              Log.i("my_info", "Login with " + email + " success")
                               login = true
-                              navController.navigate("HomeScreen/${email}")
+                              nav(navController, "HomeScreen/${email}")
                             },
-                            { login = false })
+                            {
+                              Log.e(
+                                  "my_error",
+                                  it.message
+                                      ?: ("error with empty message: " + it.stackTraceToString()))
+                              login = false
+                            })
                       }
                     },
                     colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
@@ -197,7 +212,8 @@ fun SignIn(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(15.dp))
 
                 CustomTextButton("REGISTER", "Don't have an account? ", "registerButton") {
-                  navController.navigate("RegisterScreen1")
+                  Log.d("my_debug", "Register custom text button callback")
+                  nav(navController, "RegisterScreen1")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -231,7 +247,8 @@ fun SignIn(navController: NavHostController) {
                           modifier =
                               Modifier.size(80.dp) // Size of the image
                                   .clip(CircleShape) // Clip image to circle shape
-                                  .clickable {
+                                  .clickable(onClickLabel = "Google Sign In") {
+                                    Log.d("my_debug", "Google sign in button callback")
                                     val signInIntent =
                                         AuthUI.getInstance()
                                             .createSignInIntentBuilder()
@@ -250,7 +267,10 @@ fun SignIn(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
                       Button(
-                          onClick = { navController.navigate("GroomerRegisterScreen") },
+                          onClick = {
+                            Log.d("my_debug", "Groomer Register button callback")
+                            nav(navController, "GroomerRegisterScreen")
+                          },
                           colors = ButtonDefaults.buttonColors(Color.Black),
                           modifier = Modifier.width(200.dp).height(48.dp)) {
                             Text("I am a Groomer", color = Color.White, fontSize = 16.sp)
@@ -259,25 +279,29 @@ fun SignIn(navController: NavHostController) {
               }
         }
   } else {
+    Log.d("my_debug", "Signed in!")
     firebaseConnection.getUserUidByEmail(GoogleEmail).addOnCompleteListener { task ->
       if (task.isSuccessful) {
+        Log.d("my_debug", "UUID Query success")
         // Check if the query found any documents
         val documents = task.result?.documents
-        if (documents != null && documents.isNotEmpty()) {
+        if (!documents.isNullOrEmpty()) {
+          Log.d("my_debug", "Documents found, user registered -> redirect to home screen")
           // If documents are found, it means there is a user ID associated with the email
           // Navigate to the home screen
-          navController.navigate("HomeScreen/$GoogleEmail")
+          nav(navController, "HomeScreen/$GoogleEmail")
         } else {
+          Log.d("my_debug", "Documents not found, new user -> redirect to register")
           // If no documents are found, it means no user ID is associated with the email
           // Navigate to the register screen
-          navController.navigate("RegisterScreenGoogle/$GoogleEmail")
+          nav(navController, "RegisterScreenGoogle/$GoogleEmail")
         }
       } else {
         // If the task itself failed (e.g., due to network issues), you may want to handle this case
         // as well.
         // For example, you might want to show an error message or try again.
         // Here, we'll just log the error.
-        Log.e("FirebaseQuery", "Error querying user by email: ${task.exception}")
+        Log.e("my_FirebaseQuery", "Error querying user by email: ${task.exception}")
         // Optionally navigate to an error screen or show an error message
       }
     }
