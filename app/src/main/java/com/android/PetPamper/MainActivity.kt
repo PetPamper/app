@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,22 +37,26 @@ import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
-import com.android.PetPamper.ui.screen.BarScreen
-import com.android.PetPamper.ui.screen.GroomerList
-import com.android.PetPamper.ui.screen.GroomerReview
-import com.android.PetPamper.ui.screen.GroomerTopBar
-import com.android.PetPamper.ui.screen.SignIn
-import com.android.PetPamper.ui.screen.UserProfile
-import com.android.PetPamper.ui.screen.UserProfileScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
+import com.android.PetPamper.ui.screen.groomers.GroomerHome
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
-import com.github.se.bootcamp.map.MapView
+import com.android.PetPamper.ui.screen.users.BarScreen
+import com.android.PetPamper.ui.screen.users.GroomerList
+import com.android.PetPamper.ui.screen.users.GroomerReview
+import com.android.PetPamper.ui.screen.users.GroomerTopBar
+import com.android.PetPamper.ui.screen.users.HomeScreen
+import com.android.PetPamper.ui.screen.users.MapView
+import com.android.PetPamper.ui.screen.users.PetListScreen
+import com.android.PetPamper.ui.screen.users.ReservationsScreen
+import com.android.PetPamper.ui.screen.users.SignIn
+import com.android.PetPamper.ui.screen.users.UserProfile
+import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import kotlin.math.round
 
 class MainActivity : ComponentActivity() {
@@ -81,12 +85,17 @@ class MainActivity : ComponentActivity() {
       }
 
       composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
-
       composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         AppNavigation(email)
+      }
+      composable("GroomerHomeScreen/{email}") { backStackEntry ->
+        val email = backStackEntry.arguments?.getString("email")
+        if (email != null) {
+          GroomerHome(email)
+        }
       }
     }
   }
@@ -106,15 +115,15 @@ fun AppNavigation(email: String?) {
 
   Scaffold(
       bottomBar = {
-        NavigationBar(
-            containerColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+        BottomNavigation(
+            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
               items.forEach { screen ->
                 val iconColor =
                     if (currentRoute == screen.route) Color(0xFF2490DF) else Color.DarkGray
-                NavigationBarItem(
+                BottomNavigationItem(
                     icon = {
                       Icon(
                           painterResource(id = screen.icon),
@@ -149,7 +158,15 @@ fun AppNavigation(email: String?) {
                   val userViewModel = UserViewModel(uid)
                   userViewModel.getNameFromFirebase { name -> nameUser.value = name }
                 }
-                Text(text = "Welcome ${nameUser.value}")
+                HomeScreen(navController, email)
+              }
+
+              composable("ReservationsScreen") {
+                ReservationsScreen(onBackPressed = { navController.navigateUp() })
+              }
+
+              composable("PetListScreen") {
+                PetListScreen(onBackPressed = { navController.navigateUp() })
               }
 
               val userProfile =
@@ -223,13 +240,12 @@ fun AppNavigation(email: String?) {
                   if (sampleGroomers.value.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                       Text(text = "No groomers found") // Show a message if there are no groomers
-                    } // Show a message if there are no groomers
+                    }
                   } else {
                     Log.d("Groomers", "${sampleGroomers.value}")
                     GroomerList(groomers = sampleGroomers.value) // Then the list of groomers
                   }
                 }
-                // Define other composable screens for your app
               }
             }
       }

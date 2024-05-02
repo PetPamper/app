@@ -41,7 +41,7 @@ class LocationViewModel : ViewModel() {
 
         if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-        val responseBody = response.body()?.string() ?: throw IOException("No response body")
+        val responseBody = response.body?.string() ?: throw IOException("No response body")
 
         val locations = handleResponse(responseBody)
 
@@ -50,6 +50,7 @@ class LocationViewModel : ViewModel() {
           Log.d("Location Fetch", "Locations fetched successfully: $locations")
         }
       } catch (e: Exception) {
+
         withContext(Dispatchers.Main) {
           onResult(null)
           Log.e("Location Fetch", "Failed to fetch locations", e)

@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.screen.GoogleSignInScreen
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
@@ -24,6 +25,7 @@ class GoogleSignInTest : TestCase() {
     composeTestRule.setContent {
       val navController = rememberNavController()
       SignUpScreenGoogle(SignUpViewModelGoogle(), navController, "alitennis131800@gmail.com")
+      val firebaseConnection = FirebaseConnection()
     }
   }
 
@@ -54,7 +56,7 @@ class GoogleSignInTest : TestCase() {
           assertTextEquals("Enter your Address")
         }
 
-        valueWritten { performTextInput("0782074677") }
+        valueWritten { performTextInput("EPFL") }
 
         city { performTextInput("Lausanne") }
 

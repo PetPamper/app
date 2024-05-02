@@ -1,4 +1,4 @@
-package com.android.PetPamper.ui.screen
+package com.android.PetPamper.ui.screen.users
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -21,8 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -68,7 +68,7 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
-import com.android.PetPamper.ui.screen.CustomTextButton
+import com.android.PetPamper.ui.screen.users.CustomTextButton
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -102,6 +102,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             viewModel = viewModel,
             1,
             false,
+            false,
             "Let’s start with your name",
             "Name",
             onNext = { newName ->
@@ -115,6 +116,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             viewModel,
             2,
             false,
+            true,
             "Hello ${viewModel.name}, enter your email",
             "Email",
             onNext = { newEmail ->
@@ -125,6 +127,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
         RegisterLayout(
             viewModel,
             3,
+            false,
             false,
             "What’s your phone number?",
             "Phone",
@@ -137,12 +140,13 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             viewModel,
             4,
             true,
+            false,
             "Enter your Address?",
             "Street",
             onNextAddress = { street, city, state, postalCode ->
-              viewModel.address.street = street
               viewModel.address.city = city
               viewModel.address.state = state
+              viewModel.address.street = street
               viewModel.address.postalCode = postalCode
               viewModel.address.location.latitude = viewModel.locationMap.latitude
               viewModel.address.location.longitude = viewModel.locationMap.longitude
@@ -155,6 +159,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
             viewModel,
             5,
             false,
+            false,
             "Great! Create your password",
             "Password",
             onNext = { password ->
@@ -165,6 +170,7 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
       RegisterLayout(
           viewModel,
           6,
+          false,
           false,
           "Confirm your password",
           "Confirm Password",
@@ -373,6 +379,7 @@ fun RegisterLayout(
     viewModel: SignUpViewModel,
     currentStep: Int,
     isAddress: Boolean,
+    isEmail: Boolean,
     textShown: String,
     fieldName: String,
     confirmPassword: String? = null,
@@ -385,10 +392,11 @@ fun RegisterLayout(
   var state by remember { mutableStateOf("") }
   var postalCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
-  val locationViewModel = LocationViewModel()
+  var locationViewModel = LocationViewModel()
   var expandedState by remember { mutableStateOf(false) }
   val locationOptions = remember { mutableStateListOf<LocationMap>() }
   val focusRequester = remember { FocusRequester() }
+  val firebaseConnection = FirebaseConnection()
 
   fun proceedWithNext() {
     var isValidInput = true
@@ -440,9 +448,12 @@ fun RegisterLayout(
             modifier = Modifier.fillMaxWidth()) {
               Row(
                   verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(horizontal = 16.dp)
+                          .testTag("RegisterScreen")) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Go back",
                         modifier = Modifier.clickable {}.size(30.dp),
                         tint = Color.Black)
@@ -648,6 +659,28 @@ fun isValidName(name: String) = name.isNotBlank() // Add more conditions as nece
 fun isValidEmail(email: String) =
     email.contains('@') && email.contains('.') // Simplified validation
 
+fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
+  val firebaseConnection = FirebaseConnection()
+  var alreadyinuse = false
+  var isValid = false
+  firebaseConnection.verifyEmail(email, "groomer").addOnCompleteListener { isExist ->
+    if (isExist.isSuccessful) {
+      val emailExists = isExist.result
+      if (emailExists) {
+        alreadyinuse = true
+      } else {
+        alreadyinuse = false
+      }
+    } else {
+      alreadyinuse = false
+    }
+  }
+  isValid = email.contains('@') && email.contains('.')
+
+  return Pair(isValid, alreadyinuse)
+}
+
+// More robust validation
 fun isValidPhone(phone: String): Boolean {
   var _phone = phone.replace(Regex("-|\\s"), "")
   if (_phone.startsWith("+")) {

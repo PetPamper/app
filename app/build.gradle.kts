@@ -1,12 +1,24 @@
 
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.ktfmt)
-    alias(libs.plugins.sonar)
+
+    id("com.android.application") version "8.3.0"
+    id("org.jetbrains.kotlin.android") version "1.8.10"
+    id("com.ncorti.ktfmt.gradle") version "0.17.0"
+    id("org.sonarqube") version "4.4.1.3373"
+
+    // ensure correct Kotlin plugin
     id("jacoco")
     id("com.google.gms.google-services")
 }
+
+
+
+java {
+    // Set source and target compatibility
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 
 android {
     namespace = "com.android.PetPamper"
@@ -95,7 +107,7 @@ android {
 
 sonar {
     properties {
-       // property("sonar.gradle.skipCompile", "true")
+        // property("sonar.gradle.skipCompile", "true")
         property("sonar.projectKey", "PetPamper_PetPamper")
         property("sonar.projectName", "PetPamper")
         property("sonar.organization", "petpamper")
@@ -139,8 +151,13 @@ dependencies {
     implementation ("androidx.compose.material:material:1.3.0")
 
 
+
+
+
     implementation("com.google.accompanist:accompanist-insets:0.24.1-alpha")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0"){
+        exclude(module = "protobuf-lite")
+    }
     androidTestImplementation ("androidx.test:runner:1.4.0")
     androidTestImplementation ("androidx.test:rules:1.4.0")
 
@@ -184,10 +201,16 @@ dependencies {
     implementation (libs.accompanist.insets)
     implementation ("com.google.android.gms:play-services-auth:19.0.0")
 
+
+    implementation ("androidx.compose.material:material:1.6.5")
+
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
 
     // Use the latest version
+    // slider
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation ("androidx.compose.ui:ui-util:1.6.5")
 }
 
 tasks.withType<Test> {
@@ -197,6 +220,8 @@ tasks.withType<Test> {
         excludes = listOf("jdk.internal.*")
     }
 }
+
+
 
 tasks.register("jacocoTestReport", JacocoReport::class) {
     mustRunAfter("testDebugUnitTest", "connectedDebugAndroidTest")

@@ -9,11 +9,13 @@ import com.android.PetPamper.resources.distance
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import java.util.Calendar
 
 class FirebaseConnection {
 
@@ -25,6 +27,34 @@ class FirebaseConnection {
         .set(user)
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  // method to verify if an email is already registered
+  fun verifyEmail(email: String, userType: String): Task<Boolean> {
+    val source = TaskCompletionSource<Boolean>()
+
+    db.collection(
+            if (userType == "user") {
+              "users"
+            } else {
+              "groomers"
+            })
+        .whereEqualTo("email", email)
+        .get()
+        .addOnCompleteListener { task ->
+          if (task.isSuccessful) {
+            if (task.result?.isEmpty == false) {
+              source.setResult(true) // Set true if email exists
+            } else {
+              source.setResult(false) // Set false if email does not exist
+            }
+          } else {
+            // If the query failed, set the exception
+            source.setException(task.exception ?: Exception("Failed to verify email"))
+          }
+        }
+
+    return source.task
   }
 
   fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -53,6 +83,26 @@ class FirebaseConnection {
 
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
     return db.collection("users").whereEqualTo("email", email).get()
+  }
+
+  fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
+    // Convert each Calendar instance to a Timestamp for Firebase storage
+    val hoursData =
+        newHours.map { calendar ->
+          hashMapOf("timestamp" to Timestamp(calendar.timeInMillis / 1000, 0))
+        }
+
+    // Update the Firestore document
+    db.collection("groomerAvailabilities")
+        .document(email)
+        .set(mapOf("availableHours" to hoursData))
+        .addOnSuccessListener {
+          onComplete() // Call onComplete callback when update is successful
+        }
+        .addOnFailureListener { e ->
+          println("Error updating available hours: ${e.localizedMessage}")
+          onComplete() // Optionally handle errors, still call onComplete to signal end of operation
+        }
   }
 
   fun fetchNearbyGroomers(address: Address): Task<List<Groomer>> {

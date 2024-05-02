@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "776231202916-137f94nnp68n6mh6ki8j7it0o4m2qd4v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.PetPamper",
+            "certificate_hash": "f55b702ab98cd4e102a67451afff32c041e1ce3b"
+          }
+        },
+        {
           "client_id": "776231202916-4j7rsk2bht21ctss7ifg611mg4s0s55q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
