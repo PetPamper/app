@@ -164,15 +164,17 @@ fun SignIn(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(15.dp))
 
+                var etxt = ""
                 if (!login) {
-                  Text(
-                      text = errorMessage,
-                      color = Color.Red,
-                      textAlign = TextAlign.Center,
-                      modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
-
-                  Spacer(modifier = Modifier.height(4.dp))
+                  etxt = errorMessage
                 }
+                Text(
+                    text = etxt,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+
+                Spacer(modifier = Modifier.height(4.dp))
 
                 CustomTextButton("Forgot password?", "", "forgetButton") {
                   navController.navigate("EmailScreen")
@@ -196,8 +198,8 @@ fun SignIn(navController: NavHostController) {
 
                 Button(
                     onClick = {
-                      errorMessage = "Login failed, email or password is incorrect"
                       if (email.isBlank() || password.isBlank()) {
+                        errorMessage = "Login failed, email or password is incorrect"
                         login = false
                       } else {
                         firebaseConnection.loginUser(
@@ -218,7 +220,12 @@ fun SignIn(navController: NavHostController) {
 
                                         Log.d(
                                             "Firebase query",
-                                            "Groomer found," + " name is ${document.get("name")}")
+                                            "Groomer found," +
+                                                " name is ${
+                                                            document.get(
+                                                                "name"
+                                                            )
+                                                        }")
                                       } else {
                                         login = false
                                         errorMessage = "User is not registered as a groomer"
@@ -299,7 +306,10 @@ fun SignIn(navController: NavHostController) {
                     modifier = Modifier.fillMaxWidth()) {
                       Switch(
                           checked = isGroomer,
-                          onCheckedChange = { isGroomer = it },
+                          onCheckedChange = {
+                            isGroomer = it
+                            errorMessage = ""
+                          },
                           modifier = Modifier.offset(x = 100.dp).testTag("GroomerToggle"))
                       Text(
                           text = if (isGroomer) "I am a groomer" else "I am a user",
