@@ -128,7 +128,7 @@ jobs:
 
       # Sign the APK
       - name: Sign app APK
-        uses: SomeActionForSigningAPK@v1  # Assuming you have an action for signing
+        uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/release
