@@ -211,6 +211,11 @@ dependencies {
     // slider
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation ("androidx.compose.ui:ui-util:1.6.5")
+
+
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
+    // To use constraintlayout in compose
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
 }
 
 tasks.withType<Test> {
