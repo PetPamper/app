@@ -107,9 +107,9 @@ class RegisterTest : TestCase() {
 
         for (i in 0 until n) {
           val inputText = inputText(i)
-          inputText {performTextInput(inTxt[i])}
+          inputText { performTextInput(inTxt[i]) }
         }
-        arrowButton{performClick()}
+        arrowButton { performClick() }
       }
 
       fun testCheckboxLayout(lblTxt: String, checks: List<Int>) {
@@ -120,17 +120,19 @@ class RegisterTest : TestCase() {
 
         for (check in checks) {
           val checkbox = checkbox(check)
-          checkbox {performClick()}
+          checkbox { performClick() }
         }
-        arrowButton{performClick()}
+        arrowButton { performClick() }
       }
 
-      testSimpleLayoutWithError("Let’s start with your name", "Please enter a valid name.", "Groomer")
       testSimpleLayoutWithError(
-        "Hello Groomer, enter your email", "Please enter a valid email.", "groomer@test.test")
-      testSimpleLayoutWithError("What’s your phone number?", "Please enter a valid phone number.", "0100000000")
+          "Let’s start with your name", "Please enter a valid name.", "Groomer")
       testSimpleLayoutWithError(
-        "Great! Create your password", "Password must be at least 8 characters.", "12345678")
+          "Hello Groomer, enter your email", "Please enter a valid email.", "groomer@test.test")
+      testSimpleLayoutWithError(
+          "What’s your phone number?", "Please enter a valid phone number.", "0100000000")
+      testSimpleLayoutWithError(
+          "Great! Create your password", "Password must be at least 8 characters.", "12345678")
       testSimpleLayoutWithError("Confirm your password", "Passwords do not match.", "12345678")
 
       testMultipleLayout("Enter your address", listOf("Champ de Mars", "Paris", "France", "75007"))
@@ -141,7 +143,7 @@ class RegisterTest : TestCase() {
       testCheckboxLayout("What types of services do you provide?", listOf(0, 1, 3))
       testCheckboxLayout("What types of pets do you groom?", listOf(1, 4, 5))
 
-      arrowButton{performClick()}
+      arrowButton { performClick() }
     }
   }
 }

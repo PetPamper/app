@@ -174,24 +174,23 @@ fun SignIn(navController: NavHostController) {
                   Spacer(modifier = Modifier.height(4.dp))
                 }
 
+                CustomTextButton("Forgot password?", "", "forgetButton") {
+                  navController.navigate("EmailScreen")
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 CustomTextButton(
-                    "Forgot password?",
-                    "",
-                    "forgetButton"
-                ) { navController.navigate("EmailScreen") }
-
-              Spacer(modifier = Modifier.height(24.dp))
-
-              CustomTextButton(
-                  tag = if (!isGroomer) "I already have a groomer account"
-                  else "I already have a user account",
-                  testTag = "AlreadyGroomerButton") {
-                  if (!isGroomer) {
-                      navController.navigate("RegisterScreenAlreadyGroomer")
-                  } else {
-                      navController.navigate("GroomerRegisterScreenAlreadyUser")
-                  }
-              }
+                    tag =
+                        if (!isGroomer) "I already have a groomer account"
+                        else "I already have a user account",
+                    testTag = "AlreadyGroomerButton") {
+                      if (!isGroomer) {
+                        navController.navigate("RegisterScreenAlreadyGroomer")
+                      } else {
+                        navController.navigate("GroomerRegisterScreenAlreadyUser")
+                      }
+                    }
 
                 Spacer(modifier = Modifier.height(24.dp))
 

@@ -96,12 +96,15 @@ class GroomerSignUpViewModel {
 const val NUM_STEPS = 12
 
 @Composable
-fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController,
-                    hasUserAccount: Boolean = false) {
+fun GroomerRegister(
+    viewModel: GroomerSignUpViewModel,
+    navController: NavController,
+    hasUserAccount: Boolean = false
+) {
   val firebaseConnection = FirebaseConnection()
   val db = Firebase.firestore
 
-    val initialStep = if (!hasUserAccount) 1 else 20
+  val initialStep = if (!hasUserAccount) 1 else 20
 
   var currentStep by remember { mutableIntStateOf(initialStep) }
 
@@ -109,17 +112,17 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
 
   when (currentStep) {
     1 -> {
-        GroomerRegisterLayout(
-            false,
-            1,
-            "Let’s start with your name",
-            "Name",
-            isValidInput = ::isValidName,
-            errorText = "Please enter a valid name.",
-            onNext = { newName ->
-              viewModel.name = newName
-              currentStep++
-            })
+      GroomerRegisterLayout(
+          false,
+          1,
+          "Let’s start with your name",
+          "Name",
+          isValidInput = ::isValidName,
+          errorText = "Please enter a valid name.",
+          onNext = { newName ->
+            viewModel.name = newName
+            currentStep++
+          })
     }
     2 ->
         GroomerRegisterLayout(
@@ -606,11 +609,11 @@ fun GroomerRegisterLayout(
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
               modifier =
-              if (isKeyboardOpen().value) {
-                  Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
-              } else {
-                  Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
-              },
+                  if (isKeyboardOpen().value) {
+                    Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                  } else {
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                  },
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.End) {
                 Button(
@@ -730,7 +733,10 @@ fun GroomerRegisterMultipleLayout(
                       label = { Text("Location") },
                       placeholder = { Text("Enter an address") },
                       modifier =
-                          Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("InputText$i"),
+                          Modifier.fillMaxWidth()
+                              .menuAnchor()
+                              .focusRequester(focusRequester)
+                              .testTag("InputText$i"),
                       trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                       },
@@ -781,11 +787,11 @@ fun GroomerRegisterMultipleLayout(
           Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier =
-                if (isKeyboardOpen().value) {
-                    Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
-                } else {
-                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
-                },
+                    if (isKeyboardOpen().value) {
+                      Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                    } else {
+                      Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                    },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End) {
                   Button(
@@ -865,15 +871,13 @@ fun GroomerRegisterCheckboxLayout(
         }
 
         itemsIndexed(checkboxOptions) { i, _ ->
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.fillMaxWidth()) {
-                Checkbox(
-                    checked = boxesChecked[i],
-                    onCheckedChange = { isChecked -> boxesChecked[i] = isChecked },
-                    modifier = Modifier.testTag("Checkbox$i"))
-                Text(text = checkboxOptions[i])
-              }
+          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Checkbox(
+                checked = boxesChecked[i],
+                onCheckedChange = { isChecked -> boxesChecked[i] = isChecked },
+                modifier = Modifier.testTag("Checkbox$i"))
+            Text(text = checkboxOptions[i])
+          }
 
           Spacer(modifier = Modifier.height(10.dp))
         }
@@ -882,11 +886,11 @@ fun GroomerRegisterCheckboxLayout(
           Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier =
-                if (isKeyboardOpen().value) {
-                    Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
-                } else {
-                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
-                },
+                    if (isKeyboardOpen().value) {
+                      Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                    } else {
+                      Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                    },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End) {
                   Button(

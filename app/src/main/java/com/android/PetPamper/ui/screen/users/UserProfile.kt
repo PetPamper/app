@@ -94,7 +94,7 @@ fun UserProfileScreen(userProfile: UserProfile) {
                                     contentScale =
                                         ContentScale
                                             .Crop // This ensures the image covers the button area
-                                                  // without distortion
+                                    // without distortion
                                     )
                                 Text(
                                     text = "Edit photo",
@@ -103,9 +103,8 @@ fun UserProfileScreen(userProfile: UserProfile) {
                                             fontSize = 8.sp, // Adjusted for readability
                                             fontWeight = FontWeight.Bold, // Makes text bold
                                             color =
-                                                Color
-                                                    .Black // Changed for better visibility against
-                                                           // likely dark images
+                                                Color.Black // Changed for better visibility against
+                                            // likely dark images
                                             ))
                               }
                         }
