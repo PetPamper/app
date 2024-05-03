@@ -1,5 +1,6 @@
 package com.android.PetPamper.ui.screen.users
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.PetPamper.R
+import com.android.PetPamper.model.UserViewModel
 
 data class UserProfile(
     val name: String,
@@ -32,11 +36,33 @@ data class UserProfile(
 )
 
 @Composable
-fun UserProfileScreen(userProfile: UserProfile) {
+fun UserProfileScreen(email: String) {
+  var userviewModel = UserViewModel(email)
+  val _phoneNumber = remember { mutableStateOf<String>("") }
+  val _addressStreet = remember { mutableStateOf<String>("") }
+  val _name = remember { mutableStateOf<String>("") }
+
+  userviewModel.getPhoneNumberFromFirebase { name -> _phoneNumber.value = name }
+
+  userviewModel.getAddressFromFirebase { address -> _addressStreet.value = address.street }
+
+  userviewModel.getNameFromFirebase { name -> _name.value = name }
+
+  var userProfile =
+      UserProfile(
+          name = userviewModel.name,
+          phoneNumber = _phoneNumber.value,
+          email = userviewModel.email,
+          address = _addressStreet.value,
+          pawPoints = 75,
+          profilePictureUrl = "https://yourimageurl.com/image.jpg")
+
+  Log.d("UserProfile1", "phone: ${userviewModel.phoneNumber}")
+
   Column(modifier = Modifier.padding(12.dp)) { // Adding padding around the entire screen content
     // user name
     Text(
-        text = "Stanley Cohen",
+        text = _name.value,
         style =
             TextStyle(
                 fontSize = 38.sp,
@@ -94,7 +120,7 @@ fun UserProfileScreen(userProfile: UserProfile) {
                                     contentScale =
                                         ContentScale
                                             .Crop // This ensures the image covers the button area
-                                                  // without distortion
+                                    // without distortion
                                     )
                                 Text(
                                     text = "Edit photo",
@@ -103,9 +129,8 @@ fun UserProfileScreen(userProfile: UserProfile) {
                                             fontSize = 8.sp, // Adjusted for readability
                                             fontWeight = FontWeight.Bold, // Makes text bold
                                             color =
-                                                Color
-                                                    .Black // Changed for better visibility against
-                                                           // likely dark images
+                                                Color.Black // Changed for better visibility against
+                                            // likely dark images
                                             ))
                               }
                         }
@@ -134,7 +159,8 @@ fun UserProfileScreen(userProfile: UserProfile) {
                       contentScale = ContentScale.FillBounds)
                 }
             Text(
-                text = "${userProfile.phoneNumber}\n${userProfile.email}\n${userProfile.address}",
+                text =
+                    "${userProfile.phoneNumber}\n${userProfile.email.take(20)}\n${userProfile.address.take(20)}",
                 style =
                     TextStyle(
                         fontSize = 13.sp,
@@ -464,5 +490,5 @@ fun PreviewUserProfile() {
           address = "Rue Louis Favre 4, 1024 Ecublens",
           pawPoints = 75,
           profilePictureUrl = "https://yourimageurl.com/image.jpg")
-  MaterialTheme { UserProfileScreen(userProfile = sampleUserProfile) }
+  MaterialTheme { UserProfileScreen("alitennis131800@gmail.com") }
 }
