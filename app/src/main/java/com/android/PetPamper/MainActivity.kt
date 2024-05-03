@@ -37,7 +37,6 @@ import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
-import com.android.PetPamper.ui.screen.chat.ChatScreen
 import com.android.PetPamper.ui.screen.chat.ChatScreenPreview
 import com.android.PetPamper.ui.screen.chat.ConversationsScreen
 import com.android.PetPamper.ui.screen.chat.UsersScreen
@@ -177,19 +176,19 @@ fun AppNavigation(email: String?) {
                 PetListScreen(onBackPressed = { navController.navigateUp() })
               }
 
-            composable("ChatScreen") {
-                ChatScreenPreview()
-            }
+              composable("ChatScreen") { ChatScreenPreview() }
 
-            composable("UsersScreen") {
+              composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
-            }
+              }
 
               val userProfile =
                   UserProfile(
                       "Stanley", "078787878", "stan@stanley.com", "1024 Ecublens", 320, "rando")
 
-              composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
+              composable(BarScreen.Chat.route) {
+                ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
+              }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
