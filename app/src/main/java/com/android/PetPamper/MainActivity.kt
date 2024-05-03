@@ -188,7 +188,7 @@ fun AppNavigation(email: String?) {
               composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
-              composable(BarScreen.Profile.route) { UserProfileScreen(userProfile = userProfile) }
+              composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
 
               composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }

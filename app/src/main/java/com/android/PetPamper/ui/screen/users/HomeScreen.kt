@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,7 +71,7 @@ fun CarouselCard(navController: NavController, email: String?) {
   val scope = rememberCoroutineScope()
   Column(modifier = Modifier.fillMaxSize()) {
     Row(modifier = Modifier.padding(20.dp)) {
-      Text(text = "Your pets", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+      Text(text = "Your pets", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Gray)
     }
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
       IconButton(
@@ -98,9 +99,12 @@ fun CarouselCard(navController: NavController, email: String?) {
                               start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
                   Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Floyd", fontWeight = FontWeight.Bold, color = Color.Blue)
+                    Text(text = "Floyd", fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
                     Text(text = "11 years old", color = Color.DarkGray)
-                    Text(text = "Description", fontWeight = FontWeight.Bold, color = Color.Blue)
+                    Text(
+                        text = "Description",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2490DF))
                     Text(
                         text =
                             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
@@ -170,13 +174,16 @@ fun CarouselCard(navController: NavController, email: String?) {
     //                    navController.navigate("PetListScreen/$email")
     //                }
     //            )
+    Spacer(modifier = Modifier.height(10.dp))
 
     Button(
         onClick = { navController.navigate("PetListScreen") },
         modifier = Modifier.align(Alignment.CenterHorizontally),
-    ) {
-      Text("Show your pets", fontSize = 9.sp)
-    }
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2490DF), contentColor = Color.White)) {
+          Text("Show your pets", fontSize = 12.sp)
+        }
 
     // second one
 
@@ -184,7 +191,11 @@ fun CarouselCard(navController: NavController, email: String?) {
     val scope2 = rememberCoroutineScope()
 
     Row(modifier = Modifier.padding(15.dp)) {
-      Text(text = "Your Reservations", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+      Text(
+          text = "Your Reservations",
+          fontWeight = FontWeight.Bold,
+          fontSize = 20.sp,
+          color = Color.Gray)
     }
 
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -254,7 +265,11 @@ fun CarouselCard(navController: NavController, email: String?) {
                         // Start chatting button
                         Button(
                             onClick = { /* Handle start chatting action */},
-                            modifier = Modifier.align(Alignment.BottomEnd)) {
+                            modifier = Modifier.align(Alignment.BottomEnd),
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF2490DF),
+                                    contentColor = Color.White)) {
                               Text("Chat")
                             }
                       }
@@ -303,11 +318,14 @@ fun CarouselCard(navController: NavController, email: String?) {
     //            }
     //        )
 
+    Spacer(modifier = Modifier.height(10.dp))
     Button(
         onClick = { navController.navigate("ReservationsScreen") },
         modifier = Modifier.align(Alignment.CenterHorizontally),
-    ) {
-      Text("Show your Reservations", fontSize = 9.sp)
-    }
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2490DF), contentColor = Color.White)) {
+          Text("Show your Reservations", fontSize = 12.sp)
+        }
   }
 }
