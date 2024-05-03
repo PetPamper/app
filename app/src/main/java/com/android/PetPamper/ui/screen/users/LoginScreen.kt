@@ -83,7 +83,7 @@ fun SignIn(navController: NavHostController) {
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection()
   var login by remember { mutableStateOf(true) }
 
   var errorMessage by remember { mutableStateOf("Login failed, email or password is incorrect") }
@@ -150,7 +150,7 @@ fun SignIn(navController: NavHostController) {
                     onValueChange = { email = it }, // Implement logic in real implementation
                     label = { Text("Email") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("EmailTextField"))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -160,7 +160,7 @@ fun SignIn(navController: NavHostController) {
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("PasswordTextField"))
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -177,8 +177,21 @@ fun SignIn(navController: NavHostController) {
                 CustomTextButton(
                     "Forgot password?",
                     "",
-                    "forgetButton",
-                    { navController.navigate("EmailScreen") })
+                    "forgetButton"
+                ) { navController.navigate("EmailScreen") }
+
+              Spacer(modifier = Modifier.height(24.dp))
+
+              CustomTextButton(
+                  tag = if (!isGroomer) "I already have a groomer account"
+                  else "I already have a user account",
+                  testTag = "AlreadyGroomerButton") {
+                  if (!isGroomer) {
+                      navController.navigate("RegisterScreenAlreadyGroomer")
+                  } else {
+                      navController.navigate("GroomerRegisterScreenAlreadyUser")
+                  }
+              }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -288,7 +301,7 @@ fun SignIn(navController: NavHostController) {
                       Switch(
                           checked = isGroomer,
                           onCheckedChange = { isGroomer = it },
-                          modifier = Modifier.offset(x = 100.dp))
+                          modifier = Modifier.offset(x = 100.dp).testTag("GroomerToggle"))
                       Text(
                           text = if (isGroomer) "I am a groomer" else "I am a user",
                           style =

@@ -89,28 +89,26 @@ class GroomerSignUpViewModel {
   var groomerServices = mutableStateListOf<String>()
   var petTypes = mutableStateListOf<String>()
   var profilePicture by mutableStateOf("")
-  var price by mutableStateOf<Int>(0)
+  var price by mutableIntStateOf(0)
   var locationMap by mutableStateOf(LocationMap())
 }
 
 const val NUM_STEPS = 12
 
 @Composable
-fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController) {
+fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavController,
+                    hasUserAccount: Boolean = false) {
   val firebaseConnection = FirebaseConnection()
   val db = Firebase.firestore
 
-  var currentStep by remember { mutableIntStateOf(1) }
+    val initialStep = if (!hasUserAccount) 1 else 20
+
+  var currentStep by remember { mutableIntStateOf(initialStep) }
 
   var registeredAsUser by remember { mutableStateOf(false) }
-  var RegistrationDone by remember { mutableStateOf(false) }
 
   when (currentStep) {
     1 -> {
-      Column {
-        CustomTextButton(tag = "I already have a user account", testTag = "AlreadyUserButton") {
-          currentStep = 20
-        }
         GroomerRegisterLayout(
             false,
             1,
@@ -122,7 +120,6 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
               viewModel.name = newName
               currentStep++
             })
-      }
     }
     2 ->
         GroomerRegisterLayout(
@@ -142,6 +139,8 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
             3,
             "What’s your phone number?",
             "Phone Number",
+            isValidInput = ::isValidPhone,
+            errorText = "Please enter a valid phone number.",
             onNext = { newPhoneNumber ->
               viewModel.phoneNumber = newPhoneNumber
               currentStep++
@@ -196,7 +195,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
         GroomerRegisterLayout(
             false,
             8,
-            "What is your average service price for an Hour",
+            "What is your average service price for an hour",
             "Price",
             onNext = { price ->
               viewModel.price = price.toInt()
@@ -243,13 +242,11 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
       }
     }
     12 -> {
-
       if (!registeredAsUser) {
         firebaseConnection.registerUser(
             viewModel.email,
             viewModel.password,
             onSuccess = {
-              RegistrationDone = true
               Log.d("SignUp1", "Registering user")
               firebaseConnection.addGroomer(
                   Groomer(
@@ -274,43 +271,6 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
               Log.e("SignUp", "Registration failed", error)
               Log.d("SignUp1", "Registering user")
             })
-        //      } else {
-        //        // Need to check that groomer wasn't already registered to avoid duplicate
-        // accounts
-        //        val groomerRef = db.collection("groomers").document(viewModel.email)
-        //        groomerRef
-        //            .get()
-        //            .addOnSuccessListener { document ->
-        //              if (!document.exists()) {
-        //                firebaseConnection.addGroomer(
-        //                    Groomer(
-        //                        viewModel.name,
-        //                        viewModel.email,
-        //                        viewModel.phoneNumber,
-        //                        viewModel.address,
-        //                        viewModel.experienceYears,
-        //                        viewModel.groomerServices,
-        //                        viewModel.petTypes,
-        //                        viewModel.profilePicture,
-        //                        viewModel.price),
-        //                    onSuccess = {
-        //                      firebaseConnection.addGroomerReview(
-        //                          GroomerReviews(viewModel.email, 5.0, 0),
-        //                          onSuccess = { navController.navigate("LoginScreen") },
-        //                          onFailure = { error -> Log.e("SignUp", "Review failed", error)
-        // })
-        //                    },
-        //                    onFailure = { error -> Log.e("SignUp", "Registration failed", error)
-        // })
-        //              } else {
-        //                Log.e("AlreadyRegistered", "user was already registered as groomer")
-        //              }
-        //            }
-        //            .addOnFailureListener { exception ->
-        //              Log.e("Firebase query", "Get failed with ", exception)
-        //            }
-        //      }
-        //            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
       } else {
         // Need to check that groomer wasn't already registered to avoid duplicate accounts
         val groomerRef = db.collection("groomers").document(viewModel.email)
@@ -396,7 +356,7 @@ fun GroomerRegister(viewModel: GroomerSignUpViewModel, navController: NavControl
                   text = errorMessage,
                   color = Color.Red,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+                  modifier = Modifier.fillMaxWidth().testTag("errorMessage"))
 
               Spacer(modifier = Modifier.height(4.dp))
             }
@@ -557,13 +517,11 @@ fun GroomerRegisterLayout(
 
   var textField by remember { mutableStateOf("") }
   var shownErrorText by remember { mutableStateOf("") }
-  val firebaseConnection = FirebaseConnection()
 
   fun proceedWithNext() {
     var proceed = true
 
     if (isValidInput?.invoke(textField) == false) {
-      println("what")
       shownErrorText = errorText
       proceed = false
     }
@@ -647,7 +605,12 @@ fun GroomerRegisterLayout(
 
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
-              modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+              modifier =
+              if (isKeyboardOpen().value) {
+                  Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+              } else {
+                  Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+              },
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.End) {
                 Button(
@@ -694,7 +657,7 @@ fun GroomerRegisterMultipleLayout(
   val numFields = fieldNames.size
   val textFields = remember { mutableStateListOf<String>() }
   val shownErrorTexts = remember { mutableStateListOf<String>() }
-  var locationViewModel = LocationViewModel()
+  val locationViewModel = LocationViewModel()
   var expandedState by remember { mutableStateOf(false) }
   val locationOptions = remember { mutableStateListOf<LocationMap>() }
   val focusRequester = remember { FocusRequester() }
@@ -724,7 +687,7 @@ fun GroomerRegisterMultipleLayout(
   }
   LazyColumn(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")) {
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("GroomerRegisterScreen")) {
         item {
           Text(
               text = textShown,
@@ -767,7 +730,7 @@ fun GroomerRegisterMultipleLayout(
                       label = { Text("Location") },
                       placeholder = { Text("Enter an address") },
                       modifier =
-                          Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester),
+                          Modifier.fillMaxWidth().menuAnchor().focusRequester(focusRequester).testTag("InputText$i"),
                       trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                       },
@@ -795,7 +758,7 @@ fun GroomerRegisterMultipleLayout(
                 label = { Text(fieldNames[i]) },
                 singleLine = true,
                 visualTransformation = VisualTransformation.None,
-                modifier = Modifier.fillMaxWidth().testTag("InputText"),
+                modifier = Modifier.fillMaxWidth().testTag("InputText$i"),
                 colors =
                     OutlinedTextFieldDefaults.colors(
                         focusedBorderColor =
@@ -810,14 +773,19 @@ fun GroomerRegisterMultipleLayout(
                 text = shownErrorTexts[i],
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+                modifier = Modifier.padding(top = 4.dp).testTag("errorText$i"))
           }
         }
 
         item {
           Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                modifier =
+                if (isKeyboardOpen().value) {
+                    Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                } else {
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End) {
                   Button(
@@ -833,7 +801,7 @@ fun GroomerRegisterMultipleLayout(
                       },
                       modifier =
                           Modifier.wrapContentWidth()
-                              .testTag("ArrowButton"), // Make the button wrap its content
+                              .testTag("arrowButton"), // Make the button wrap its content
                       colors =
                           ButtonDefaults.buttonColors( // Set the button's background color
                               containerColor = Color(0xFF2491DF))) {
@@ -899,10 +867,11 @@ fun GroomerRegisterCheckboxLayout(
         itemsIndexed(checkboxOptions) { i, _ ->
           Row(
               verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.fillMaxWidth().testTag("Checkbox")) {
+              modifier = Modifier.fillMaxWidth()) {
                 Checkbox(
                     checked = boxesChecked[i],
-                    onCheckedChange = { isChecked -> boxesChecked[i] = isChecked })
+                    onCheckedChange = { isChecked -> boxesChecked[i] = isChecked },
+                    modifier = Modifier.testTag("Checkbox$i"))
                 Text(text = checkboxOptions[i])
               }
 
@@ -912,7 +881,12 @@ fun GroomerRegisterCheckboxLayout(
         item {
           Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                modifier =
+                if (isKeyboardOpen().value) {
+                    Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                } else {
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.End) {
                   Button(

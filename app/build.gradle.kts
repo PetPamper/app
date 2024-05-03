@@ -213,6 +213,12 @@ dependencies {
     implementation ("androidx.compose.ui:ui-util:1.6.5")
 }
 
+configurations {
+    all {
+        exclude(module = "protobuf-lite")
+    }
+}
+
 tasks.withType<Test> {
     // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {

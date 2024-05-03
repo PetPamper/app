@@ -2,6 +2,7 @@ package com.android.PetPamper.ui.screen.register
 
 import LocationViewModel
 import android.util.Log
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +38,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +54,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,6 +66,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
@@ -83,21 +90,19 @@ class SignUpViewModel {
 }
 
 @Composable
-fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavController) {
+fun Register(viewModel: SignUpViewModel, navController: NavController,
+             hasGroomerAccount: Boolean = false) {
   val firebaseConnection = FirebaseConnection()
   val db = Firebase.firestore
 
-  var currentStep by remember { mutableIntStateOf(currentStep1) }
+    val initialStep = if (!hasGroomerAccount) 1 else 10
+  var currentStep by remember { mutableIntStateOf(initialStep) }
 
   var registeredAsGroomer by remember { mutableStateOf(false) }
 
   when (currentStep) {
     1 -> {
       Column {
-        CustomTextButton(
-            tag = "I already have a groomer account", testTag = "AlreadyGroomerButton") {
-              currentStep = 10
-            }
         RegisterLayout(
             viewModel = viewModel,
             1,
@@ -217,7 +222,10 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
     }
     8 -> {
       BoxWithConstraints(
-          modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ForgetPassword")) {
+          modifier = Modifier
+              .fillMaxSize()
+              .padding(16.dp)
+              .testTag("ForgetPassword")) {
             with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
             Column(
@@ -239,9 +247,13 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                   Image(
                       painter = painterResource(id = R.drawable.check_success),
                       contentDescription = "Succuss Icon",
-                      modifier = Modifier.size(120.dp).clip(CircleShape))
+                      modifier = Modifier
+                          .size(120.dp)
+                          .clip(CircleShape))
                   Column(
-                      modifier = Modifier.fillMaxSize().padding(16.dp),
+                      modifier = Modifier
+                          .fillMaxSize()
+                          .padding(16.dp),
                       verticalArrangement = Arrangement.Bottom,
                       horizontalAlignment = Alignment.End) {
                         Button(
@@ -273,7 +285,9 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
       Column(
           horizontalAlignment = Alignment.Start,
           verticalArrangement = Arrangement.Center,
-          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(16.dp)) {
             Spacer(modifier = Modifier.height(5.dp))
 
             Text(
@@ -312,7 +326,9 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                   text = errorMessage,
                   color = Color.Red,
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+                  modifier = Modifier
+                      .fillMaxWidth()
+                      .testTag("ErrorMessage"))
 
               Spacer(modifier = Modifier.height(4.dp))
             }
@@ -363,7 +379,10 @@ fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavCo
                   }
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .testTag("LoginButton")) {
                   Text("LOG IN", fontSize = 18.sp)
                 }
           }
@@ -442,20 +461,26 @@ fun RegisterLayout(
   }
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")) {
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp)
+          .testTag("RegisterScreen")) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()) {
               Row(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = 16.dp)
-                          .testTag("RegisterScreen")) {
+                  Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 16.dp)
+                      .testTag("RegisterScreen")) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Go back",
-                        modifier = Modifier.clickable {}.size(30.dp),
+                        modifier = Modifier
+                            .clickable {}
+                            .size(30.dp),
                         tint = Color.Black)
 
                     Spacer(modifier = Modifier.width(20.dp))
@@ -486,7 +511,9 @@ fun RegisterLayout(
                         if (fieldName == "Password" || fieldName == "Confirm Password")
                             PasswordVisualTransformation()
                         else VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("inputText"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("inputText"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -524,10 +551,11 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-                              Modifier.fillMaxWidth()
-                                  .menuAnchor()
-                                  .focusRequester(focusRequester)
-                                  .testTag("inputText"),
+                          Modifier
+                              .fillMaxWidth()
+                              .menuAnchor()
+                              .focusRequester(focusRequester)
+                              .testTag("inputText"),
                           trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                           },
@@ -551,7 +579,9 @@ fun RegisterLayout(
                   text = errorText,
                   color = MaterialTheme.colorScheme.error,
                   style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+                  modifier = Modifier
+                      .padding(top = 4.dp)
+                      .testTag("errorText"))
 
               if (isAddress) {
 
@@ -560,7 +590,9 @@ fun RegisterLayout(
                     onValueChange = { city = it },
                     label = { Text("city") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("cityTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("cityTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -578,7 +610,9 @@ fun RegisterLayout(
                     onValueChange = { state = it },
                     label = { Text("State") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("stateTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("stateTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -596,7 +630,9 @@ fun RegisterLayout(
                     onValueChange = { postalCode = it },
                     label = { Text("Postal Code") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("postalTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("postalTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -613,18 +649,24 @@ fun RegisterLayout(
               Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier =
-                        if (textField.isNotBlank()) {
-                          Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                        if (isKeyboardOpen().value) {
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 50.dp, start = 16.dp)
                         } else {
-                          Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End) {
                       Button(
                           onClick = { proceedWithNext() },
                           modifier =
-                              Modifier.wrapContentWidth()
-                                  .testTag("arrowButton"), // Make the button wrap its content
+                          Modifier
+                              .wrapContentWidth()
+                              .testTag("arrowButton"), // Make the button wrap its content
                           colors =
                               ButtonDefaults.buttonColors( // Set the button's background color
                                   containerColor = Color(0xFF2491DF))) {
@@ -647,11 +689,30 @@ fun RegisterLayout(
                           progress = { progress },
                           color = Color(0xFF2491DF),
                           modifier =
-                              Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                          Modifier
+                              .fillMaxWidth()
+                              .height(8.dp)
+                              .clip(RoundedCornerShape(10.dp)))
                     }
               }
             }
       }
+}
+
+@Composable
+fun isKeyboardOpen(): State<Boolean> {
+    var keyboardOpen by remember { mutableStateOf(false) }
+    val view = LocalView.current
+    val viewTreeObserver = view.viewTreeObserver
+    DisposableEffect(key1 = viewTreeObserver) {
+        val listener = ViewTreeObserver.OnGlobalLayoutListener {
+            keyboardOpen = ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) ?: true
+        }
+        viewTreeObserver.addOnGlobalLayoutListener(listener)
+        onDispose { viewTreeObserver.removeOnGlobalLayoutListener(listener) }
+    }
+
+    return rememberUpdatedState(newValue = keyboardOpen)
 }
 
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
@@ -675,6 +736,9 @@ fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
       alreadyinuse = false
     }
   }
+      .addOnFailureListener {
+          alreadyinuse = true
+      }
   isValid = email.contains('@') && email.contains('.')
 
   return Pair(isValid, alreadyinuse)
@@ -697,5 +761,5 @@ fun RegisterPreview() {
   val viewModel = remember { SignUpViewModel() } // In actual app, provide this via ViewModel
 
   val navController = rememberNavController()
-  Register(1, viewModel, navController)
+  Register(viewModel, navController)
 }
