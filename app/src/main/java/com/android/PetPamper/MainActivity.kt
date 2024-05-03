@@ -37,6 +37,7 @@ import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
+import com.android.PetPamper.ui.screen.chat.ConversationsScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
 import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
@@ -168,12 +169,11 @@ fun AppNavigation(email: String?) {
               composable("PetListScreen") {
                 PetListScreen(onBackPressed = { navController.navigateUp() })
               }
-
               val userProfile =
                   UserProfile(
                       "Stanley", "078787878", "stan@stanley.com", "1024 Ecublens", 320, "rando")
 
-              composable(BarScreen.Chat.route) { /* Search screen content */}
+              composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(userProfile = userProfile) }
