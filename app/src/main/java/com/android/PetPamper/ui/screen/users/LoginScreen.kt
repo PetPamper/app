@@ -75,7 +75,7 @@ private fun OnSignInResult(
 
 @Composable
 fun SignIn(navController: NavHostController) {
-    val db = Firebase.firestore
+  val db = Firebase.firestore
   var isGroomer by remember { mutableStateOf(false) }
 
   var signedIn by remember { mutableStateOf(false) }
@@ -107,17 +107,12 @@ fun SignIn(navController: NavHostController) {
 
     Surface(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .testTag("LoginScreen")
-            .verticalScroll(rememberScrollState())) {
+            Modifier.fillMaxSize().testTag("LoginScreen").verticalScroll(rememberScrollState())) {
           Column(horizontalAlignment = Alignment.End) {
             Image(
                 painter = painterResource(id = R.mipmap.dog_rounded_foreground),
                 contentDescription = "App Logo",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape))
+                modifier = Modifier.size(120.dp).clip(CircleShape))
           }
 
           Spacer(modifier = Modifier.height(5.dp))
@@ -125,9 +120,7 @@ fun SignIn(navController: NavHostController) {
           Column(
               horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Center,
-              modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(16.dp)) {
+              modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
@@ -157,9 +150,7 @@ fun SignIn(navController: NavHostController) {
                     onValueChange = { email = it }, // Implement logic in real implementation
                     label = { Text("Email") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("EmailTextField"))
+                    modifier = Modifier.fillMaxWidth().testTag("EmailTextField"))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -169,9 +160,7 @@ fun SignIn(navController: NavHostController) {
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("PasswordTextField"))
+                    modifier = Modifier.fillMaxWidth().testTag("PasswordTextField"))
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -183,9 +172,7 @@ fun SignIn(navController: NavHostController) {
                     text = etxt,
                     color = Color.Red,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("ErrorMessage"))
+                    modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -209,51 +196,47 @@ fun SignIn(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-              Button(
-                  onClick = {
+                Button(
+                    onClick = {
                       errorMessage = "Login failed, email or password is incorrect"
                       val groomerStr1 = if (isGroomer) "Groomer" else ""
                       val groomerStr2 = if (isGroomer) "groomer" else "user"
                       if (email.isBlank() || password.isBlank()) {
-                          login = false
+                        login = false
                       } else {
-                          firebaseConnection.loginUser(
-                              email,
-                              password,
-                              {
-                                  val userRef = db.collection(groomerStr2 + "s").document(email)
-                                  userRef
-                                      .get()
-                                      .addOnSuccessListener { document ->
-                                          if (document.exists()) {
-                                              login = true
-                                              navController.navigate(groomerStr1 + "HomeScreen/${email}")
+                        firebaseConnection.loginUser(
+                            email,
+                            password,
+                            {
+                              val userRef = db.collection(groomerStr2 + "s").document(email)
+                              userRef
+                                  .get()
+                                  .addOnSuccessListener { document ->
+                                    if (document.exists()) {
+                                      login = true
+                                      navController.navigate(groomerStr1 + "HomeScreen/${email}")
 
-                                              Log.d(
-                                                  "Firebase query",
-                                                  groomerStr1 + " found," + " name is ${document.get("name")}")
-                                          } else {
-                                              login = false
-                                              errorMessage =
-                                                  "Account is not registered as a $groomerStr2"
-                                              Log.e("Firebase query", "No such groomer")
-                                          }
-                                      }
-                                      .addOnFailureListener { exception ->
-                                          login = false
-                                          Log.e("Firebase query", "Get failed with ", exception)
-                                      }
-                              },
-                              {
-                                  login = false
-                              })
+                                      Log.d(
+                                          "Firebase query",
+                                          groomerStr1 +
+                                              " found," +
+                                              " name is ${document.get("name")}")
+                                    } else {
+                                      login = false
+                                      errorMessage = "Account is not registered as a $groomerStr2"
+                                      Log.e("Firebase query", "No such groomer")
+                                    }
+                                  }
+                                  .addOnFailureListener { exception ->
+                                    login = false
+                                    Log.e("Firebase query", "Get failed with ", exception)
+                                  }
+                            },
+                            { login = false })
                       }
                     },
                     colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .testTag("LoginButton")) {
+                    modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
                       Text("LOG IN", fontSize = 18.sp)
                     }
 
@@ -287,28 +270,25 @@ fun SignIn(navController: NavHostController) {
                       horizontalAlignment = Alignment.CenterHorizontally,
                       verticalArrangement = Arrangement.Center,
                       modifier =
-                      Modifier
-                          .height(80.dp)
-                          .fillMaxWidth() // This will make the Column fill the entire screen
+                          Modifier.height(80.dp)
+                              .fillMaxWidth() // This will make the Column fill the entire screen
                       ) {
                         Image(
                             painter = painterResource(id = R.mipmap.google_logo_rounded_foreground),
                             contentDescription = "Google Logo",
                             modifier =
-                            Modifier
-                                .size(80.dp) // Size of the image
-                                .clip(CircleShape) // Clip image to circle shape
-                                .clickable {
-                                    val signInIntent =
-                                        AuthUI
-                                            .getInstance()
-                                            .createSignInIntentBuilder()
-                                            .setAvailableProviders(providers)
-                                            .setIsSmartLockEnabled(false)
-                                            .build()
-                                    signInLauncher.launch(signInIntent)
-                                }
-                                .testTag("googleSignInButton"))
+                                Modifier.size(80.dp) // Size of the image
+                                    .clip(CircleShape) // Clip image to circle shape
+                                    .clickable {
+                                      val signInIntent =
+                                          AuthUI.getInstance()
+                                              .createSignInIntentBuilder()
+                                              .setAvailableProviders(providers)
+                                              .setIsSmartLockEnabled(false)
+                                              .build()
+                                      signInLauncher.launch(signInIntent)
+                                    }
+                                    .testTag("googleSignInButton"))
                       } // Define this composable to match the style
 
                   Spacer(modifier = Modifier.height(16.dp))
@@ -324,9 +304,7 @@ fun SignIn(navController: NavHostController) {
                             isGroomer = it
                             errorMessage = ""
                           },
-                          modifier = Modifier
-                              .offset(x = 100.dp)
-                              .testTag("GroomerToggle"))
+                          modifier = Modifier.offset(x = 100.dp).testTag("GroomerToggle"))
                       Text(
                           text = if (isGroomer) "I am a groomer" else "I am a user",
                           style =
@@ -396,43 +374,43 @@ fun CustomTextButton(
       }
 }
 
-fun userExists(userEmail: String, isGroomer: Boolean ): Pair<Boolean, String> {
-    val db = Firebase.firestore
-    var login = false
-    var errorMessage = ""
+fun userExists(userEmail: String, isGroomer: Boolean): Pair<Boolean, String> {
+  val db = Firebase.firestore
+  var login = false
+  var errorMessage = ""
 
-    val userType = if (isGroomer) "groomer" else "user"
+  val userType = if (isGroomer) "groomer" else "user"
 
-    val groomerRef = db.collection(userType + "s").document(userEmail)
-    groomerRef
-        .get()
-        .addOnSuccessListener { document ->
-            if (document.exists()) {
-                login = true
+  val groomerRef = db.collection(userType + "s").document(userEmail)
+  groomerRef
+      .get()
+      .addOnSuccessListener { document ->
+        if (document.exists()) {
+          login = true
 
-                Log.d(
-                    "Firebase query",
-                    "$userType found," +
-                            " name is ${
+          Log.d(
+              "Firebase query",
+              "$userType found," +
+                  " name is ${
                                 document.get(
                                     "name"
                                 )
                             }")
-            } else {
-                login = false
-                errorMessage = "Account is registered as a $userType"
-                Log.d("debug_error_func", errorMessage)
-                Log.e("Firebase query", "No such $userType")
-            }
+        } else {
+          login = false
+          errorMessage = "Account is registered as a $userType"
+          Log.d("debug_error_func", errorMessage)
+          Log.e("Firebase query", "No such $userType")
         }
-        .addOnFailureListener { exception ->
-            login = false
-            Log.e("Firebase query", "Get failed with ", exception)
-        }
+      }
+      .addOnFailureListener { exception ->
+        login = false
+        Log.e("Firebase query", "Get failed with ", exception)
+      }
 
-    Log.d("debug_error_func2", errorMessage)
-    Log.d("debug_error_func2", login.toString())
-    return Pair(login, errorMessage)
+  Log.d("debug_error_func2", errorMessage)
+  Log.d("debug_error_func2", login.toString())
+  return Pair(login, errorMessage)
 }
 
 @Preview
