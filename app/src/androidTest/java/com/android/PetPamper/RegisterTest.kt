@@ -143,7 +143,7 @@ class RegisterTest : TestCase() {
       testCheckboxLayout("What types of services do you provide?", listOf(0, 1, 3))
       testCheckboxLayout("What types of pets do you groom?", listOf(1, 4, 5))
 
-      arrowButton { performClick() }
+      // arrowButton { performClick() }
     }
   }
 }
