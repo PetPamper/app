@@ -180,7 +180,7 @@ fun AppNavigation(email: String?) {
               composable(BarScreen.Chat.route) { /* Search screen content */}
 
               composable(BarScreen.Map.route) { MapView(email!!) }
-              composable(BarScreen.Profile.route) { UserProfileScreen(userProfile = userProfile) }
+              composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
 
               composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }

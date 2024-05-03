@@ -1,14 +1,21 @@
 package com.android.PetPamper.model
 
+import androidx.lifecycle.ViewModel
 import com.android.PetPamper.database.FirebaseConnection
 
-class UserViewModel(uid: String) {
+class UserViewModel(uid: String) : ViewModel() {
   var uid: String = uid
   var name: String = ""
-  var email: String = ""
+  var email: String = uid
   var phoneNumber: String = ""
   var address: Address = Address("", "", "", "", LocationMap())
   var firebaseConnection: FirebaseConnection = FirebaseConnection()
+
+  init {
+    getNameFromFirebase { name -> this.name = name }
+    getPhoneNumberFromFirebase { phoneNumber -> this.phoneNumber = phoneNumber }
+    getAddressFromFirebase { address -> this.address = address }
+  }
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
     firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
@@ -16,6 +23,18 @@ class UserViewModel(uid: String) {
         val document = task.result
         if (document != null) {
           name = document.getString("name") ?: ""
+          onComplete(name)
+        }
+      }
+    }
+  }
+
+  fun getPhoneNumberFromFirebase(onComplete: (String) -> Unit) {
+    firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val document = task.result
+        if (document != null) {
+          name = document.getString("phoneNumber") ?: ""
           onComplete(name)
         }
       }
