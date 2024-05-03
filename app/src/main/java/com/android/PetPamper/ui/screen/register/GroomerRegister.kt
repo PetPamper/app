@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
@@ -448,7 +448,7 @@ fun GroomerProfilePicture(viewModel: GroomerSignUpViewModel, onNext: ((Boolean) 
             // Get a reference to the storage service
             val storageRef = FirebaseStorage.getInstance().reference
 
-            val fileRef = storageRef.child("images/${uri!!.lastPathSegment}")
+            val fileRef = storageRef.child("images/${uri.lastPathSegment}")
             val uploadTask = fileRef.putFile(uri)
 
             uploadTask
@@ -960,7 +960,7 @@ fun GalleryImagePicker(onImagePicked: (Uri?) -> Unit) {
 @Composable
 fun ImagePreview(uri: Uri) {
   // Using Accompanist's Coil to load and display an image from the URI
-  val painter = rememberImagePainter(data = uri)
+  val painter = rememberAsyncImagePainter(model = uri)
   Image(painter = painter, contentDescription = "Selected Image")
 }
 
