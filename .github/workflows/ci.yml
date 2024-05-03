@@ -91,12 +91,15 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
+          
+          
 
       # Run Unit tests
       - name: Run Unit Tests
         run: |
           # To run the CI with debug information, add --info
           ./gradlew check --parallel --build-cache
+        
 
       # Run connected tests on the emulator
       - name: Run Instrumented Tests
@@ -121,5 +124,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonar --parallel --build-cache
+
+
+      - name: Build Release APK
+        run: |
+          ./gradlew assembleRelease   
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
 
 
