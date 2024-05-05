@@ -3,7 +3,6 @@ package com.android.PetPamper
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.rule.ActivityTestRule
 import com.android.PetPamper.screen.GroomerRegisterScreen
 import com.android.PetPamper.screen.MainScreen
 import com.android.PetPamper.screen.RegisterScreen
@@ -18,7 +17,7 @@ import org.junit.runner.RunWith
 class RegisterTest : TestCase() {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
-  @get:Rule val activityRule = ActivityTestRule(MainActivity::class.java, true, false)
+  // @get:Rule val activityRule = ActivityTestRule(MainActivity::class.java, true, false)
 
   @Before fun setUp() {}
 
