@@ -22,57 +22,6 @@ class RegisterTest : TestCase() {
   @Before fun setUp() {}
 
   @Test
-  fun testRegister() = run {
-    step("Attempt to register") {
-      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
-        registerButton { performClick() }
-      }
-
-      // Now that navigation should have occurred, proceed with the RegisterScreen actions.
-      ComposeScreen.onComposeScreen<RegisterScreen>(composeTestRule) {
-        fun testStep(lblTxt: String, errTxt: String, inTxt: String) {
-          errorText { assertIsNotDisplayed() }
-          inputLabel {
-            assertIsDisplayed()
-            assertTextEquals(lblTxt)
-          }
-          arrowButton { performClick() }
-          errorText {
-            assertIsDisplayed()
-            assertTextEquals(errTxt)
-          }
-          inputText { performTextInput(inTxt) }
-          arrowButton { performClick() }
-        }
-        testStep("Let’s start with your name", "Please enter a valid name.", "John")
-        testStep(
-            "Hello John, enter your email", "Please enter a valid email.", "alikawazaki@gmail.com")
-        testStep("What’s your phone number?", "Please enter a valid phone number.", "0782074677")
-
-        errorText { assertIsNotDisplayed() }
-        inputLabel {
-          assertIsDisplayed()
-          assertTextEquals("Enter your Address?")
-        }
-
-        inputText { performTextInput("Route des toches 7") }
-
-        cityTag { performTextInput("Lausanne") }
-
-        stateTag { performTextInput("Switzerland") }
-
-        postalTag { performTextInput("1026") }
-
-        arrowButton { performClick() }
-
-        testStep(
-            "Great! Create your password", "Password must be at least 8 characters.", "12345678")
-        testStep("Confirm your password", "Passwords do not match.", "12345678")
-      }
-    }
-  }
-
-  @Test
   fun testGroomerRegister() = run {
     step("Attempt to register as groomer") {
       ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
@@ -151,6 +100,57 @@ class RegisterTest : TestCase() {
       //            testCheckboxLayout("What types of pets do you groom?", listOf(1, 4, 5))
       //
       //            arrowButton { performClick() }
+    }
+  }
+
+  @Test
+  fun testRegister() = run {
+    step("Attempt to register") {
+      ComposeScreen.onComposeScreen<MainScreen>(composeTestRule) {
+        registerButton { performClick() }
+      }
+
+      // Now that navigation should have occurred, proceed with the RegisterScreen actions.
+      ComposeScreen.onComposeScreen<RegisterScreen>(composeTestRule) {
+        fun testStep(lblTxt: String, errTxt: String, inTxt: String) {
+          errorText { assertIsNotDisplayed() }
+          inputLabel {
+            assertIsDisplayed()
+            assertTextEquals(lblTxt)
+          }
+          arrowButton { performClick() }
+          errorText {
+            assertIsDisplayed()
+            assertTextEquals(errTxt)
+          }
+          inputText { performTextInput(inTxt) }
+          arrowButton { performClick() }
+        }
+        testStep("Let’s start with your name", "Please enter a valid name.", "John")
+        testStep(
+            "Hello John, enter your email", "Please enter a valid email.", "alikawazaki@gmail.com")
+        testStep("What’s your phone number?", "Please enter a valid phone number.", "0782074677")
+
+        errorText { assertIsNotDisplayed() }
+        inputLabel {
+          assertIsDisplayed()
+          assertTextEquals("Enter your Address?")
+        }
+
+        inputText { performTextInput("Route des toches 7") }
+
+        cityTag { performTextInput("Lausanne") }
+
+        stateTag { performTextInput("Switzerland") }
+
+        postalTag { performTextInput("1026") }
+
+        arrowButton { performClick() }
+
+        testStep(
+            "Great! Create your password", "Password must be at least 8 characters.", "12345678")
+        testStep("Confirm your password", "Passwords do not match.", "12345678")
+      }
     }
   }
 }
