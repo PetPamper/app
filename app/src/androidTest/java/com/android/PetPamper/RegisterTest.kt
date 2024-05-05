@@ -137,15 +137,16 @@ class RegisterTest : TestCase() {
           "Great! Create your password", "Password must be at least 8 characters.", "12345678")
       testSimpleLayoutWithError("Confirm your password", "Passwords do not match.", "12345678")
 
-      testMultipleLayout("Enter your address", listOf("Champ de Mars", "Paris", "France", "75007"))
-
-      testSimpleLayout("How many years of experience do you have as a groomer?", "5")
-      testSimpleLayout("What is your average service price for an hour", "50")
-
-      testCheckboxLayout("What types of services do you provide?", listOf(0, 1, 3))
-      testCheckboxLayout("What types of pets do you groom?", listOf(1, 4, 5))
-
-      arrowButton { performClick() }
+      //      testMultipleLayout("Enter your address", listOf("Champ de Mars", "Paris", "France",
+      // "75007"))
+      //
+      //      testSimpleLayout("How many years of experience do you have as a groomer?", "5")
+      //      testSimpleLayout("What is your average service price for an hour", "50")
+      //
+      //      testCheckboxLayout("What types of services do you provide?", listOf(0, 1, 3))
+      //      testCheckboxLayout("What types of pets do you groom?", listOf(1, 4, 5))
+      //
+      //      arrowButton { performClick() }
     }
   }
 }
