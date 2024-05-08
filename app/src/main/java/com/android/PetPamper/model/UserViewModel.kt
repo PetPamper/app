@@ -1,5 +1,6 @@
 package com.android.PetPamper.model
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.android.PetPamper.database.FirebaseConnection
 
@@ -71,5 +72,14 @@ class UserViewModel(uid: String) : ViewModel() {
         onComplete(Address("", "", "", "", LocationMap()))
       }
     }
+  }
+
+  fun updateAddress(newAddress: Address, onComplete: () -> Unit) {
+    address = newAddress
+    firebaseConnection.addUser(
+      User(email, name, phoneNumber, newAddress),
+      onSuccess = onComplete,
+      onFailure = { exception -> Log.e("UserViewModel", "Failed to update address", exception) }
+    )
   }
 }
