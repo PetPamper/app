@@ -15,11 +15,54 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 
 class FirebaseConnection {
 
   private val db: FirebaseFirestore = Firebase.firestore
+
+    /**
+     * General function to retrieve data from Firestore
+     * @param collectionPath path to the collection (generally its name) to retrieve data from
+     * @param document identifier of the document to retrieve data from
+     * @return pair containing the retrieved document (if successful) and the success status
+     */
+    suspend fun fetchData(collectionPath: String, document: String): Pair<DocumentSnapshot, Boolean> {
+        val docRef = db.collection(collectionPath).document(document)
+        var success = false
+
+        val data = docRef.get()
+            .addOnSuccessListener { doc ->
+                if (doc != null) {
+                    success = true
+                }
+            }
+            .addOnFailureListener { _ -> success = false }
+            .await()
+        if (!data.exists()) {
+            success = false
+        }
+        return Pair(data, success)
+    }
+
+    /**
+     * General function to store data to Firestore
+     * @param collectionPath path to the collection (generally its name) to store data to
+     * @param document identifier of the document to be stored
+     * @param data object containing the data to store
+     * @return success status of the store operation
+     */
+    fun storeData(collectionPath: String, document: String, data: Any): Boolean {
+        var success = false
+
+        db.collection(collectionPath).document(document)
+            .set(data)
+            .addOnSuccessListener { success = true }
+            .addOnFailureListener { _ -> success = false}
+
+        return success
+    }
 
   fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("users")
