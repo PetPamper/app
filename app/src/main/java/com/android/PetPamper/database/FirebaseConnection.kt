@@ -23,12 +23,12 @@ class FirebaseConnection {
   private val db: FirebaseFirestore = Firebase.firestore
 
     /**
-     * General function to retrieve data from Firestore
-     * @param collectionPath path to the collection (generally its name) to retrieve data from
-     * @param document identifier of the document to retrieve data from
+     * General function to retrieve a document from Firestore
+     * @param collectionPath path to the collection (generally its name) containing the document
+     * @param document identifier of the document to be retrieved
      * @return pair containing the retrieved document (if successful) and the success status
      */
-    suspend fun fetchData(collectionPath: String, document: String): Pair<DocumentSnapshot, Boolean> {
+    fun fetchDocument(collectionPath: String, document: String): Pair<Task<DocumentSnapshot>, Boolean> {
         val docRef = db.collection(collectionPath).document(document)
         var success = false
 
@@ -39,11 +39,35 @@ class FirebaseConnection {
                 }
             }
             .addOnFailureListener { _ -> success = false }
-            .await()
-        if (!data.exists()) {
-            success = false
-        }
+
         return Pair(data, success)
+    }
+
+    /**
+     * Functions that extracts data from a document
+     * @param documentTask document to be handled
+     * @return document if successful
+     * @throws Exception if the document doesn't exist
+     */
+    suspend fun handleDocumentTask(documentTask: Task<DocumentSnapshot>): Map<String, Any> {
+        val document = documentTask.await()
+
+        return document.data ?: throw Exception("Document doesn't exist")
+    }
+
+    /**
+     * General function to retrieve data from Firestore
+     * @param collectionPath path to the collection containing the data
+     * @param document identifier of the document to retrieve data from
+     * @return fetched data
+     * @throws Exception if the document couldn't be retrieved
+     */
+    suspend fun fetchData(collectionPath: String, document: String): Map<String, Any> {
+        val (doc, success) = fetchDocument(collectionPath, document)
+        if (!success) {
+            throw Exception("Couldn't retrieve document")
+        }
+        return handleDocumentTask(doc)
     }
 
     /**
