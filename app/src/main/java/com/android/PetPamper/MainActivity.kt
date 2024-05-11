@@ -1,5 +1,6 @@
 package com.android.PetPamper
 
+import GroomerProfile
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,6 +35,7 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
+import com.android.PetPamper.model.GroomerViewModel
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
@@ -190,7 +192,21 @@ fun AppNavigation(email: String?) {
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
 
-              composable(BarScreen.Groomers.route) {
+            composable("groomer_details/{email}"){  backStackEntry ->
+                val email = backStackEntry.arguments?.getString("email")
+                var ourGroomer = GroomerViewModel(email!!)
+                var firebaseConnection  = FirebaseConnection()
+                var GroomerName = remember {mutableStateOf("") }
+                firebaseConnection.getGroomerNameFromFirebase(email){ name ->
+                    GroomerName.value = name
+                }
+
+                Log.d("Groomer12", "${GroomerName.value}")
+                GroomerProfile(ourGroomer.groomer.value!!)
+            }
+
+
+            composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
                 val firebaseConnection = FirebaseConnection()
                 val sampleGroomers = remember { mutableStateOf(listOf<GroomerReview>()) }
@@ -198,6 +214,7 @@ fun AppNavigation(email: String?) {
                 val groomersWithReviews = remember {
                   mutableStateOf(mapOf<Groomer, GroomerReviews>())
                 }
+
 
                 LaunchedEffect(email) {
                   firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
@@ -255,7 +272,7 @@ fun AppNavigation(email: String?) {
                     }
                   } else {
                     Log.d("Groomers", "${sampleGroomers.value}")
-                    GroomerList(groomers = sampleGroomers.value) // Then the list of groomers
+                    GroomerList(groomers = sampleGroomers.value, navController) // Then the list of groomers
                   }
                 }
               }
