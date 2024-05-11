@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +33,15 @@ fun GroomerProfile(groomer: Groomer) {
                 modifier = Modifier.fillMaxWidth().height(200.dp),
                 contentScale = ContentScale.Crop
             )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            InfoCard( title = "Groomable Pets", description = "Dogs, Cats")
+            InfoCard( title = "Experience years", description = "4")
+            InfoCard( title = "Location", description = "Ecublens, VD")
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -65,12 +75,30 @@ fun GroomerProfile(groomer: Groomer) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Dummy map image, replace with actual map view if needed
-        Image(
-            painter = painterResource(id = R.mipmap.petpamper_logo_round),
-            contentDescription = "Map Location",
-            modifier = Modifier.fillMaxWidth().height(150.dp),
-            contentScale = ContentScale.FillBounds
-        )
+//        Image(
+//            painter = painterResource(id = R.mipmap.petpamper_logo_round),
+//            contentDescription = "Map Location",
+//            modifier = Modifier.fillMaxWidth().height(150.dp),
+//            contentScale = ContentScale.FillBounds
+//        )
+    }
+}
+
+@Composable
+fun InfoCard( title: String, description: String) {
+    Card(
+        modifier = Modifier.padding(2.dp).width(110.dp),
+        elevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+//            Icon(icon, contentDescription = title, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = title, fontWeight = FontWeight.Medium, fontSize = 12.sp)
+            Text(text = description, fontSize = 16.sp, color = Color.Gray)
+        }
     }
 }
 

@@ -81,19 +81,13 @@ class FirebaseConnection {
     return db.collection("users").document(uid).get()
   }
 
-  fun getGroomerNameFromFirebase(email: String, onComplete: (String) -> Unit)  {
-      val test = db.collection("groomers").document(email).get()
-      Log.d("groomerdatafetch", "$test")
-      test.addOnCompleteListener { task ->
-          Log.d("groomerdatafetch", "mama")
+  fun fetchGroomerData(email: String, onComplete: (Groomer) -> Unit)  {
+      db.collection("groomers").get().addOnCompleteListener { task ->
           if (task.isSuccessful) {
-              Log.d("groomerdatafetch1", "get successful")
-              val document = task.result
-              if (document != null) {
-                  val name = document.getString("name") ?: "salam"
-                  onComplete(name)
-              }
 
+              val groomers = task.result?.toObjects(Groomer::class.java)
+              val thisGroomer = groomers?.find { it.email == email } ?: Groomer()
+              onComplete(thisGroomer)
           }
           else{
               Log.d("groomerdatafetch", "get failed with ", task.exception)
@@ -101,6 +95,7 @@ class FirebaseConnection {
 
       }
   }
+
 
 
     fun getUserUidByEmail(email: String): Task<QuerySnapshot> {

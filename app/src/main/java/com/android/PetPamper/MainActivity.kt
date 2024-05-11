@@ -122,7 +122,9 @@ fun AppNavigation(email: String?) {
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -134,7 +136,9 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier
+                              .size(40.dp)
+                              .padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -183,27 +187,12 @@ fun AppNavigation(email: String?) {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
             }
 
-              val userProfile =
-                  UserProfile(
-                      "Stanley", "078787878", "stan@stanley.com", "1024 Ecublens", 320, "rando")
-
               composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
 
-            composable("groomer_details/{email}"){  backStackEntry ->
-                val email = backStackEntry.arguments?.getString("email")
-                var ourGroomer = GroomerViewModel(email!!)
-                var firebaseConnection  = FirebaseConnection()
-                var GroomerName = remember {mutableStateOf("") }
-                firebaseConnection.getGroomerNameFromFirebase(email){ name ->
-                    GroomerName.value = name
-                }
 
-                Log.d("Groomer12", "${GroomerName.value}")
-                GroomerProfile(ourGroomer.groomer.value!!)
-            }
 
 
             composable(BarScreen.Groomers.route) {
@@ -276,6 +265,18 @@ fun AppNavigation(email: String?) {
                   }
                 }
               }
+
+            composable("groomer_details/{email}"){  backStackEntry ->
+                val email = backStackEntry.arguments?.getString("email")
+                var firebaseConnection  = FirebaseConnection()
+                var GroomerName = remember {mutableStateOf<Groomer>(Groomer()) }
+                if (email != null) {
+                    firebaseConnection.fetchGroomerData(email){ groomer ->
+                        GroomerName.value = groomer
+                    }
+                }
+                GroomerProfile(GroomerName.value)
+            }
             }
       }
 }
