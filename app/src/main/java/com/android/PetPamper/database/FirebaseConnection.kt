@@ -15,78 +15,114 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 
-class FirebaseConnection {
+class FirebaseConnection : Database() {
 
   private val db: FirebaseFirestore = Firebase.firestore
 
-    /**
-     * General function to retrieve a document from Firestore
-     * @param collectionPath path to the collection (generally its name) containing the document
-     * @param document identifier of the document to be retrieved
-     * @return pair containing the retrieved document (if successful) and the success status
-     */
-    fun fetchDocument(collectionPath: String, document: String): Pair<Task<DocumentSnapshot>, Boolean> {
-        val docRef = db.collection(collectionPath).document(document)
-        var success = false
+  /**
+   * General function to retrieve data from Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) containing the data
+   * @param document identifier of the document to retrieve data from
+   * @return pair containing - the success status and - the retrieved data if successful, otherwise
+   *   null
+   */
+  override fun fetchData(
+      collectionPath: String,
+      document: String
+  ): Pair<Boolean, Map<String, Any>?> {
+    var (success, docFound, docTask) = fetchDocument(collectionPath, document)
 
-        val data = docRef.get()
+    if (!success || !docFound) {
+      return Pair(false, null)
+    }
+
+    val (tempSuccess, data) = handleDocumentTask(docTask)
+    success = tempSuccess
+
+    return Pair(success, data)
+  }
+
+  /**
+   * Function that checks whether an entry exists in a Firestore collection
+   *
+   * @param collectionPath path to the collection
+   * @param document identifier of the document that we want to verify the existence of
+   * @return a pair containing: - the success of the operation
+   * - whether the document was found or not
+   */
+  override fun documentExists(collectionPath: String, document: String): Pair<Boolean, Boolean> {
+    val (success, docFound, _) = fetchDocument(collectionPath, document)
+    return Pair(success, docFound)
+  }
+
+  /**
+   * General function to retrieve a document from Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) containing the document
+   * @param document identifier of the document to retrieve
+   * @return triple containing: - the success status
+   * - whether the document was found or not
+   * - the document task
+   */
+  private fun fetchDocument(
+      collectionPath: String,
+      document: String
+  ): Triple<Boolean, Boolean, Task<DocumentSnapshot>> {
+    val docRef = db.collection(collectionPath).document(document)
+    var success = false
+    var docFound = false
+
+    val docTask =
+        docRef
+            .get()
             .addOnSuccessListener { doc ->
-                if (doc != null) {
-                    success = true
-                }
+              success = true
+              docFound = (doc != null)
             }
             .addOnFailureListener { _ -> success = false }
 
-        return Pair(data, success)
-    }
+    return Triple(success, docFound, docTask)
+  }
 
-    /**
-     * Functions that extracts data from a document
-     * @param documentTask document to be handled
-     * @return document if successful
-     * @throws Exception if the document doesn't exist
-     */
-    suspend fun handleDocumentTask(documentTask: Task<DocumentSnapshot>): Map<String, Any> {
-        val document = documentTask.await()
+  /**
+   * Function that extracts data from a document
+   *
+   * @param documentTask document to be handled
+   * @return pair containing: - the success status
+   * - the document if successful, otherwise null
+   */
+  private fun handleDocumentTask(
+      documentTask: Task<DocumentSnapshot>
+  ): Pair<Boolean, Map<String, Any>?> {
+    var success = false
+    var document: DocumentSnapshot? = null
+    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
 
-        return document.data ?: throw Exception("Document doesn't exist")
-    }
+    return Pair(success, document!!.data)
+  }
 
-    /**
-     * General function to retrieve data from Firestore
-     * @param collectionPath path to the collection containing the data
-     * @param document identifier of the document to retrieve data from
-     * @return fetched data
-     * @throws Exception if the document couldn't be retrieved
-     */
-    suspend fun fetchData(collectionPath: String, document: String): Map<String, Any> {
-        val (doc, success) = fetchDocument(collectionPath, document)
-        if (!success) {
-            throw Exception("Couldn't retrieve document")
-        }
-        return handleDocumentTask(doc)
-    }
+  /**
+   * General function to store data to Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) to store data to
+   * @param document identifier of the document to be stored
+   * @param data object containing the data to store
+   * @return success status of the store operation
+   */
+  override fun storeData(collectionPath: String, document: String, data: Any): Boolean {
+    var success = false
 
-    /**
-     * General function to store data to Firestore
-     * @param collectionPath path to the collection (generally its name) to store data to
-     * @param document identifier of the document to be stored
-     * @param data object containing the data to store
-     * @return success status of the store operation
-     */
-    fun storeData(collectionPath: String, document: String, data: Any): Boolean {
-        var success = false
+    db.collection(collectionPath)
+        .document(document)
+        .set(data)
+        .addOnSuccessListener { success = true }
+        .addOnFailureListener { _ -> success = false }
 
-        db.collection(collectionPath).document(document)
-            .set(data)
-            .addOnSuccessListener { success = true }
-            .addOnFailureListener { _ -> success = false}
-
-        return success
-    }
+    return success
+  }
 
   fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("users")
