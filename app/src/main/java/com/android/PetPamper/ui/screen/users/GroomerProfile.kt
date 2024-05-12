@@ -95,7 +95,7 @@ fun GroomerProfile(groomer: Groomer) {
 
         GroomerLocationMap(LatLng(groomer.address.location.latitude, groomer.address.location.longitude))
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(80.dp))
 
     }
     }
@@ -107,28 +107,33 @@ fun BottomBookingBar(price: Int) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp),  // Define a fixed height for the bottom section
+            .height(80.dp).clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+        // Define a fixed height for the bottom section
         elevation = 4.dp,
-        backgroundColor = MaterialTheme.colors.surface
+        backgroundColor = Color(0xFFEAEAEA)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 25.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Price: $${price}/hour",
+                text = "Price: \n$${price}/hour",
                 style = MaterialTheme.typography.h6
             )
             Button(
                 onClick = {
                     // Action for the book button
                     println("Book Now Clicked!")
-                }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(110.dp)
             ) {
-                Text("Book Now")
+                Text("Book Now", color = Color.White)
             }
         }
     }
@@ -174,36 +179,6 @@ fun InfoCard(title: String, description: String, iconResource: Int) {
                     .fillMaxWidth(),  // Ensures the text fills the width of the card
                 textAlign = TextAlign.Center  // Centers the text within its container
             )
-        }
-    }
-}
-
-
-@Composable
-fun PriceAndBookSection(price: Int, onBookClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(60.dp)  // Fixed height for the card
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Price: $${price}/hour",
-                style = MaterialTheme.typography.h6
-            )
-            Button(
-                onClick = onBookClick
-            ) {
-                Text("Book Now")
-            }
         }
     }
 }
