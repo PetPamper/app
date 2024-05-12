@@ -15,7 +15,9 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.concurrent.CancellationException
 
 class FirebaseConnection : Database() {
 
@@ -29,18 +31,17 @@ class FirebaseConnection : Database() {
    * @return pair containing - the success status and - the retrieved data if successful, otherwise
    *   null
    */
-  override fun fetchData(
+  override suspend fun fetchData(
       collectionPath: String,
       document: String
   ): Pair<Boolean, Map<String, Any>?> {
-    var (success, docFound, docTask) = fetchDocument(collectionPath, document)
+    var (success, doc) = fetchDocument(collectionPath, document)
 
-    if (!success || !docFound) {
+    if (!success) {
       return Pair(false, null)
     }
 
-    val (tempSuccess, data) = handleDocumentTask(docTask)
-    success = tempSuccess
+      val data = doc?.data
 
     return Pair(success, data)
   }
@@ -53,8 +54,10 @@ class FirebaseConnection : Database() {
    * @return a pair containing: - the success of the operation
    * - whether the document was found or not
    */
-  override fun documentExists(collectionPath: String, document: String): Pair<Boolean, Boolean> {
-    val (success, docFound, _) = fetchDocument(collectionPath, document)
+  override suspend fun documentExists(collectionPath: String, document: String): Pair<Boolean, Boolean> {
+    val (success, data) = fetchData(collectionPath, document)
+      val docFound = (data != null)
+      Log.d("PetTest", "documentExists: success=${success}, docFound=${docFound}")
     return Pair(success, docFound)
   }
 
@@ -67,42 +70,41 @@ class FirebaseConnection : Database() {
    * - whether the document was found or not
    * - the document task
    */
-  private fun fetchDocument(
+  private suspend fun fetchDocument(
       collectionPath: String,
       document: String
-  ): Triple<Boolean, Boolean, Task<DocumentSnapshot>> {
+  ): Pair<Boolean, DocumentSnapshot?> {
+      var success = false
     val docRef = db.collection(collectionPath).document(document)
-    var success = false
-    var docFound = false
+      var doc: DocumentSnapshot? = null
 
-    val docTask =
-        docRef
-            .get()
-            .addOnSuccessListener { doc ->
-              success = true
-              docFound = (doc != null)
-            }
-            .addOnFailureListener { _ -> success = false }
+      try {
+          doc = docRef.get().await()
+          success = true
+      } catch (e: Exception) {
+          success = false
+      }
 
-    return Triple(success, docFound, docTask)
+      Log.d("PetTest", "fetchDocument end: success=${success}")
+    return Pair(success, doc)
   }
 
-  /**
-   * Function that extracts data from a document
-   *
-   * @param documentTask document to be handled
-   * @return pair containing: - the success status
-   * - the document if successful, otherwise null
-   */
-  private fun handleDocumentTask(
-      documentTask: Task<DocumentSnapshot>
-  ): Pair<Boolean, Map<String, Any>?> {
-    var success = false
-    var document: DocumentSnapshot? = null
-    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
-
-    return Pair(success, document!!.data)
-  }
+//  /**
+//   * Function that extracts data from a document
+//   *
+//   * @param documentTask document to be handled
+//   * @return pair containing: - the success status
+//   * - the document if successful, otherwise null
+//   */
+//  private fun handleDocumentTask(
+//      documentTask: Task<DocumentSnapshot>
+//  ): Pair<Boolean, Map<String, Any>?> {
+//    var success = false
+//    var document: DocumentSnapshot? = null
+//    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
+//
+//    return Pair(success, document!!.data)
+//  }
 
   /**
    * General function to store data to Firestore

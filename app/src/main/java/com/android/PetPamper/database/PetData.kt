@@ -11,7 +11,7 @@ data class PetData(
     val id: String = "",
     val petType: String = PetType.DEFAULT.petType,
     val name: String = "Unnamed",
-    val birthDate: LocalDate = LocalDate.of(0, 1, 1),
+    val birthYear: Int = 0, val birthMonth: Int = 1, val birthDay: Int = 1,
     val description: String = "",
     val pictures: List<String> = listOf(""),
     val ownerId: String = ""
@@ -22,7 +22,7 @@ data class PetData(
       pet.id,
       pet.petType.petType,
       pet.name,
-      pet.birthDate,
+      pet.birthDate.year, pet.birthDate.monthValue, pet.birthDate.dayOfMonth,
       pet.description,
       pet.pictures,
       pet.ownerId) {}
@@ -40,7 +40,7 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
    * @return pet object corresponding to the pet retrieved from the database if successful, or null
    *   if unsuccessful
    */
-  fun retrievePetFromDatabase(petId: String): Pet? {
+  suspend fun retrievePetFromDatabase(petId: String): Pet? {
     var (success, data) = db.fetchData(petsDBPath, petId)
     if (!success) {
       return null
@@ -51,7 +51,12 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     val pet = petFactory.buildPet(data["id"] as String, data["petType"] as String)
 
     pet.name = data["name"] as String
-    pet.birthDate = data["birthDate"] as LocalDate
+      val birthYear = data["birthYear"] as Long
+      val birthMonth = data["birthMonth"] as Long
+      val birthDay = data["birthDay"] as Long
+    pet.birthDate = LocalDate.of(birthYear.toInt(),
+        birthMonth.toInt(),
+        birthDay.toInt())
     pet.description = data["description"] as String
     pet.pictures = data["pictures"] as List<String>
     pet.ownerId = data["ownerId"] as String
@@ -65,17 +70,18 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
    * @param pet pet to store to the database
    * @return success of the store operation
    */
-  fun storePetToDatabase(pet: Pet): Boolean {
+  suspend fun storePetToDatabase(pet: Pet): Boolean {
     return storePetToDatabase(PetData(pet))
   }
 
-  fun storePetToDatabase(pet: PetData): Boolean {
+  suspend fun storePetToDatabase(pet: PetData): Boolean {
     val (success, petFound) = db.documentExists(petsDBPath, pet.id)
     if (petFound) {
       Log.e("IllegalStore", "Tried to store a pet that already exists in the database")
       return false
     }
     if (!success) {
+        Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
       return false
     }
     return db.storeData(petsDBPath, pet.id, pet)
@@ -87,11 +93,11 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
    * @param pet modified pet to store to the database
    * @return success of the modification
    */
-  fun modifyPetEntry(pet: Pet): Boolean {
+  suspend fun modifyPetEntry(pet: Pet): Boolean {
     return modifyPetEntry(PetData(pet))
   }
 
-  fun modifyPetEntry(pet: PetData): Boolean {
+  suspend fun modifyPetEntry(pet: PetData): Boolean {
     val (success, petFound) = db.documentExists(petsDBPath, pet.id)
     if (!petFound) {
       Log.e("IllegalModification", "Tried to modify a pet that isn't in the database")
