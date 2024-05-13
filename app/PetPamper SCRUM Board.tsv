@@ -1,0 +1,67 @@
+Title	URL	Assignees	Status	Sprint	Card Type	Time Estimate
+Add CI for automated testing using GITHub actions	https://github.com/PetPamper/PetPamper/issues/5	Chocolat2, chtidaba	Done in “Sprint 1”	Sprint 1	Task	
+Create project template	https://github.com/PetPamper/PetPamper/issues/6	Chocolat2, chtidaba	Done in “Sprint 1”	Sprint 1	Task	
+Set up project	https://github.com/PetPamper/PetPamper/issues/4	Chocolat2, chtidaba, Ppppfff, Shinsaegae	Done in “Sprint 1”	Sprint 1	EPIC	
+Create the Figma project for the app	https://github.com/PetPamper/PetPamper/issues/3	chtidaba, karinerafla	Done in “Sprint 1”	Sprint 1	Task	
+As a user I want to be able to make a reservation with a groomer in his available hours, and get the reservation appear in the home screen and get a confirmation email			Sprint Backlog			
+As a user I want to be able to start a conversation in the chat with a another user (for now)			Sprint Backlog			
+As a groomer I want to be able add my available hours when I log in in the groomer interface			Sprint Backlog			
+as a user I wanna be able to modify my account informations from the profile screen			Sprint Backlog			
+As a user, I wanna be able to modify my location from the topbar in the groomer composable			Sprint Backlog			
+As a user, I want to be able to edit my profile			Product Backlog		User Story	
+As a user, I want to able to navigate through the different menus/screens			Product Backlog		User Story	
+As a user, I want to be able to see the different Groomers.			Product Backlog		User Story	
+As a user, I want to be able to see the different groomers displayed on a map			Product Backlog		User Story	
+As a groomer, I want to be able to see my profile			Product Backlog		User Story	
+As a groomer, I want to be able to edit my profile/info			Product Backlog		User Story	
+As a user, I want to be able to contact a groomer			Product Backlog		User Story	
+Draw Architecture Design for App	https://github.com/PetPamper/PetPamper/issues/8	karinerafla	Done in "Sprint 2"	Sprint 2	Task	
+Figma of Login and SignUp as a groomer and password recovering by e-mail	https://github.com/PetPamper/PetPamper/issues/20	B6Amine	Done in "Sprint 2"	Sprint 2	Task	
+Figma for Profile menu		karinerafla	Done in "Sprint 2"	Sprint 3	Task	
+Figma for Home Screen		chtidaba, karinerafla	Done in "Sprint 2"	Sprint 3	Task	
+Figma Sign in, sign Up, Groomer Screen with all the workflow		chtidaba	Done in "Sprint 2"	Sprint 3	Task	
+Don't forget to pass the CI and make test with test coverage > 80%	https://github.com/PetPamper/PetPamper/issues/16	B6Amine, Chocolat2, chtidaba, MaximeZmt, MJChku, Shinsaegae	Done in "Sprint 3"	Sprint 3	Task	
+Write a nice ReadMe for Milestone 1	https://github.com/PetPamper/PetPamper/issues/19	karinerafla	Done in "Sprint 3"	Sprint 3	Task	
+Review others code, and improve style, logic and limit cases like password with more 8 caracters, email checker when sign up, phone Number country code etc	https://github.com/PetPamper/PetPamper/issues/15	chtidaba, Shinsaegae	Done in "Sprint 3"	Sprint 3	Task	
+implement the groomer profile on figma asap	https://github.com/PetPamper/PetPamper/issues/29	karinerafla	Done in "Sprint 4"	Sprint 4	Task	1h-2h
+implement the Map screen	https://github.com/PetPamper/PetPamper/issues/40	karinerafla	Done in "Sprint 4"	Sprint 4	Task	1h-2h
+link up Google Maps SDK	https://github.com/PetPamper/PetPamper/issues/39	karinerafla	Done in "Sprint 4"	Sprint 4	Task	1h-2h
+implement the navigation bar	https://github.com/PetPamper/PetPamper/issues/27	chtidaba	Done in "Sprint 4"	Sprint 4	Task	8h+ (Too long, shoud be broken down)
+Implement the pet data class	https://github.com/PetPamper/PetPamper/issues/37	Chocolat2	Done in "Sprint 4"	Sprint 4	Task	2h-4h
+A user can sign up as a groomer, (No figma provided yet, ok if it's not finished by milestone1 )	https://github.com/PetPamper/PetPamper/issues/41	Shinsaegae	Done in "Sprint 4"	Sprint 4	Task	8h+ (Too long, shoud be broken down)
+change the pet pamper logo at launch	https://github.com/PetPamper/PetPamper/issues/46	chtidaba	Done in "Sprint 4"	Sprint 4	Task	<1h
+Implement Groomer page with  review screen	https://github.com/PetPamper/PetPamper/issues/35	chtidaba	Done in "Sprint 4"	Sprint 4	Task	6h-8h
+Implement the Groomer Data Class	https://github.com/PetPamper/PetPamper/issues/42	chtidaba	Done in "Sprint 4"	Sprint 4	Task	<1h
+add edit profile button on profile and for profile pic	https://github.com/PetPamper/PetPamper/issues/62	karinerafla	Done in "Sprint 6"	Sprint 6	Task	2h-4h
+figma for messages	https://github.com/PetPamper/PetPamper/issues/61	karinerafla	Done in "Sprint 6"	Sprint 6	Task	2h-4h
+Do A little Home Screen With Welcome Username for registered users	https://github.com/PetPamper/PetPamper/issues/14	chtidaba	Done in "Sprint 3"	Sprint 3	Task	
+Implement register functionality, and the main screen HomeScreen : made checks on inputs such as email, name, password etc, user can now login		chtidaba	Done in "Sprint 3"	Sprint 3	Task	
+Implement all the workflow if forget password, if a user tap forget password, it sends an email to the email given and its sends a link to modify the email		B6Amine	Done in "Sprint 3"	Sprint 3	Task	
+user can signIn using google authentificator and fill the additional information, which creates a user instance	https://github.com/PetPamper/PetPamper/issues/12	karinerafla	Done in "Sprint 3"	Sprint 3	Task	
+Implemented the nominatim api and intergrated it to all the registration screens, now it propose the address when typing and fetches the latitude and longitude		chtidaba	Done in "Sprint 5"	Sprint 5	Task	6h-8h
+made the groomer composable fetch groomers that are 10 km nearby with all their infos, and profile picture		chtidaba	Done in "Sprint 5"	Sprint 5	Task	8h+ (Too long, shoud be broken down)
+continue implementing the user profile view for the customer - still frontend	https://github.com/PetPamper/PetPamper/issues/50	karinerafla	Done in "Sprint 5"	Sprint 5	Task	6h-8h
+Implemented the interface for the profile as i the figma. with all the components displayed		karinerafla	Done in "Sprint 5"			
+Implemented the switch button to switch between user login Screen and groomer login screen		Shinsaegae	Done in "Sprint 5"			
+finished the home screen with pets and reservations		B6Amine	Done in "Sprint 5"			
+Make Main pass the CI	https://github.com/PetPamper/PetPamper/issues/58	Chocolat2	Done in "Sprint 6"			
+Add unit tests on Groomer data class	https://github.com/PetPamper/PetPamper/issues/66	Chocolat2	Done in "Sprint 6"	Sprint 6	Task	<1h
+Add unit tests on GroomerReview data class	https://github.com/PetPamper/PetPamper/issues/67	Chocolat2	Done in "Sprint 6"	Sprint 6	Task	<1h
+make the groomer interface and a calendar to enter his available hours	https://github.com/PetPamper/PetPamper/issues/76	chtidaba	Done in "Sprint 6"	Sprint 6	Task	8h+ (Too long, shoud be broken down)
+Fix some workflow buggs that crashes the app, like trying to register with an email that already exists	https://github.com/PetPamper/PetPamper/issues/77	chtidaba, Shinsaegae	Done in "Sprint 6"	Sprint 6	Task	6h-8h
+Login Switch for user and groomer	https://github.com/PetPamper/PetPamper/issues/78	Shinsaegae	Done in "Sprint 6"	Sprint 6	Task	6h-8h
+Create instrumented tests for each e2e flow	https://github.com/PetPamper/PetPamper/issues/68	Chocolat2	In Development	Sprint 6	Task	6h-8h
+modify pins on maps screen	https://github.com/PetPamper/PetPamper/issues/60	karinerafla	Done in "Sprint 6"	Sprint 6	Task	2h-4h
+fetch data for user profile		chtidaba	Done in "Sprint 6"	Sprint 6	Task	1h-2h
+add functionnality: In the groomer registration, when you click on simething the forward arrow button and the linear progression bar go above the keybord.		Shinsaegae	In Development	Sprint 6	Task	1h-2h
+move the I have already a user account button showup in the loginscreen.		Shinsaegae	In Development	Sprint 6	Task	1h-2h
+Create instrumented tests	https://github.com/PetPamper/PetPamper/pull/70	Chocolat2				
+Implement the booking functionality on the user's side	https://github.com/PetPamper/PetPamper/issues/79	chtidaba	Task Backlog	Sprint 7	Task	4h-6h
+refactor/delete old files and make sure the project follows the pattern and is well structured	https://github.com/PetPamper/PetPamper/issues/80	Chocolat2, chtidaba	Task Backlog	Sprint 7	Task	6h-8h
+Make the chat function between two users	https://github.com/PetPamper/PetPamper/issues/82	B6Amine	Task Backlog	Sprint 7	Task	6h-8h
+Fetch reservation data to appear on the user's side	https://github.com/PetPamper/PetPamper/issues/81	B6Amine	Task Backlog	Sprint 7	Task	4h-6h
+Implement a functionality that lets the user modify his address within the app (after registration)	https://github.com/PetPamper/PetPamper/issues/83	karinerafla	Task Backlog	Sprint 7	Task	6h-8h
+try to use resources.xml to create a theme for the whole app	https://github.com/PetPamper/PetPamper/issues/84	karinerafla	Task Backlog	Sprint 7	Task	4h-6h
+create the pet database: connect pet ui to database	https://github.com/PetPamper/PetPamper/issues/85	Shinsaegae	Task Backlog	Sprint 7	Task	4h-6h
+write missing tests for some UI elements	https://github.com/PetPamper/PetPamper/issues/86	Shinsaegae	Task Backlog	Sprint 7	Task	6h-8h
+Complete the reservation process with groomer using user account		chtidaba	Task Backlog			
