@@ -65,7 +65,7 @@ class DefaultPet(
     name: String = "Unnamed",
     birthDate: LocalDate = LocalDate.of(0, 1, 1),
     description: String = "",
-    pictures: List<String> = listOf(""),
+    pictures: List<String> = listOf(),
     ownerId: String = "PetPamper",
 ) : Pet(id, PetType.DEFAULT, name, birthDate, description, pictures, ownerId) {}
 
@@ -89,13 +89,13 @@ class PetFactory() {
       name: String = "Unnamed",
       birthDate: LocalDate = LocalDate.of(0, 1, 1),
       description: String = "",
-      pictures: List<String> = listOf(""),
+      pictures: List<String> = listOf(),
       ownerId: String = "PetPamper"
   ): Pet {
-    when (petType) {
-      "dog" -> pet = Dog(id = id)
-      else -> DefaultPet(id = id)
-    }
+      pet = when (petType) {
+          "dog" -> Dog(id = id)
+          else -> DefaultPet(id = id)
+      }
 
     val pet: Pet = pet!!
 
