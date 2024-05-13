@@ -2,6 +2,7 @@ package com.android.PetPamper
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.ActivityTestRule
 import com.android.PetPamper.screen.MainScreen
 import com.android.PetPamper.screen.RegisterScreen
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -13,6 +14,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class RegisterTest : TestCase() {
+
+  @get:Rule val activityRule = ActivityTestRule(MainActivity::class.java, true, false)
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
