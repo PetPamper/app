@@ -248,6 +248,7 @@ fun GroomerScreen(
                 address = userViewModel.address,
                 onUpdateAddress = { newAddress ->
                     userViewModel.updateAddress(newAddress) {
+
                         // Optional: Show a success message or update the UI accordingly
                     }
                 }

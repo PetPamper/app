@@ -20,7 +20,6 @@ import java.util.Calendar
 class FirebaseConnection {
 
   private val db: FirebaseFirestore = Firebase.firestore
-
   fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("users")
         .document(user.email)
@@ -29,7 +28,21 @@ class FirebaseConnection {
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
-  // method to verify if an email is already registered
+    fun updateUserAddress(uid: String, addressData: Map<String, Any>, onComplete: () -> Unit) {
+        db.collection("users").document(uid)
+            .update(addressData)
+            .addOnSuccessListener {
+                onComplete()
+            }
+            .addOnFailureListener { exception ->
+                println("Error updating address: ${exception.localizedMessage}")
+                onComplete()
+            }
+    }
+
+
+    // method to verify if an email is already registered
+
   fun verifyEmail(email: String, userType: String): Task<Boolean> {
     val source = TaskCompletionSource<Boolean>()
 
