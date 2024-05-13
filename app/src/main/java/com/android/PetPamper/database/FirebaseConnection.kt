@@ -91,23 +91,6 @@ class FirebaseConnection : Database() {
     return Pair(success, doc)
   }
 
-  //  /**
-  //   * Function that extracts data from a document
-  //   *
-  //   * @param documentTask document to be handled
-  //   * @return pair containing: - the success status
-  //   * - the document if successful, otherwise null
-  //   */
-  //  private fun handleDocumentTask(
-  //      documentTask: Task<DocumentSnapshot>
-  //  ): Pair<Boolean, Map<String, Any>?> {
-  //    var success = false
-  //    var document: DocumentSnapshot? = null
-  //    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
-  //
-  //    return Pair(success, document!!.data)
-  //  }
-
   /**
    * General function to store data to Firestore
    *
