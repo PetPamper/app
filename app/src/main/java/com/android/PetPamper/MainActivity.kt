@@ -53,6 +53,7 @@ import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
 import com.android.PetPamper.ui.screen.users.BarScreen
+import com.android.PetPamper.ui.screen.users.BookingScreen
 import com.android.PetPamper.ui.screen.users.GroomerList
 import com.android.PetPamper.ui.screen.users.GroomerReview
 import com.android.PetPamper.ui.screen.users.GroomerTopBar
@@ -187,6 +188,13 @@ fun AppNavigation(email: String?) {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
             }
 
+            composable("BookingScreen/{Groomer}") {backStackEntry ->
+                val groomerEmail = backStackEntry.arguments?.getString("Groomer")
+                if (groomerEmail != null) {
+                    BookingScreen(groomerEmail)
+                }
+            }
+
               composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
@@ -275,7 +283,7 @@ fun AppNavigation(email: String?) {
                         GroomerName.value = groomer
                     }
                 }
-                GroomerProfile(GroomerName.value)
+                GroomerProfile(GroomerName.value, navController)
             }
             }
       }

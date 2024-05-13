@@ -94,7 +94,60 @@ class FirebaseConnection {
           }
 
       }
+
+
   }
+
+
+
+    fun fetchAvailableDates(email: String, onDatesFetched: (List<String>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val datesRef = db.collection("groomerAvailabilities").document(email).collection("dates")
+
+        datesRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val documents = task.result
+                if (documents != null) {
+                    val datesList = documents.documents.mapNotNull { it.id }
+                    onDatesFetched(datesList)
+                } else {
+                    println("No dates found for $email")
+                    onDatesFetched(emptyList())
+                }
+            } else {
+                println("Error fetching available dates: ${task.exception?.localizedMessage}")
+                onDatesFetched(emptyList())
+            }
+        }
+    }
+
+    fun fetchAvailableHours(email: String, date: String, onHoursFetched: (List<String>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection("groomerAvailabilities").document(email).collection("dates").document(date)
+
+        docRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val document = task.result
+                if (document != null && document.exists()) {
+                    val timestamps = document.get("availableHours") as? List<Timestamp> ?: listOf()
+                    // Convert Timestamps to "hour:minute" strings
+                    val hoursList = timestamps.map { ts ->
+                        val calendar = Calendar.getInstance().apply {
+                            timeInMillis = ts.seconds * 1000  // Convert seconds to milliseconds
+                        }
+                        "${calendar.get(Calendar.HOUR_OF_DAY)}:${String.format("%02d", calendar.get(Calendar.MINUTE))}"
+                    }
+                    onHoursFetched(hoursList)
+                } else {
+                    println("No available hours found for $date")
+                    onHoursFetched(emptyList())
+                }
+            } else {
+                println("Error fetching available hours: ${task.exception?.localizedMessage}")
+                onHoursFetched(emptyList())
+            }
+        }
+    }
 
 
 

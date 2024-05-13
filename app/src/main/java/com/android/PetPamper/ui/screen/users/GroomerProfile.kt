@@ -38,20 +38,24 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun GroomerProfile(groomer: Groomer) {
+fun GroomerProfile(groomer: Groomer, navController: NavController) {
     Scaffold(
-        bottomBar = { BottomBookingBar(groomer.price) }  // This will place the booking bar at the bottom
+        bottomBar = { BottomBookingBar(groomer.price, navController, groomer) }  // This will place the booking bar at the bottom
     ) { innerPadding ->
+
+
         Column(modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()))
 
         {
+
         Card(
             shape = RoundedCornerShape(10.dp),
             elevation = 4.dp,
@@ -91,7 +95,7 @@ fun GroomerProfile(groomer: Groomer) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Location", fontSize = 18.sp, color = Color.Black, modifier = Modifier.padding(8.dp))
+        Text(text = "Location", fontSize = 18.sp, color = Color.Black, modifier = Modifier.padding(8.dp), fontWeight = FontWeight.Bold,)
 
         GroomerLocationMap(LatLng(groomer.address.location.latitude, groomer.address.location.longitude))
 
@@ -103,11 +107,12 @@ fun GroomerProfile(groomer: Groomer) {
 
 
 @Composable
-fun BottomBookingBar(price: Int) {
+fun BottomBookingBar(price: Int, navController: NavController, groomer : Groomer) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp).clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+            .height(80.dp)
+            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         // Define a fixed height for the bottom section
         elevation = 4.dp,
         backgroundColor = Color(0xFFEAEAEA)
@@ -125,7 +130,7 @@ fun BottomBookingBar(price: Int) {
             )
             Button(
                 onClick = {
-                    // Action for the book button
+                    navController.navigate("BookingScreen/${groomer.email}")
                     println("Book Now Clicked!")
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
@@ -231,6 +236,7 @@ fun ServicesSection(ListOfServices: List<String>) {
         Text(
             text = "Types of services provided",
             fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 9.dp)
         )
@@ -250,9 +256,10 @@ fun ServiceItem(serviceName: String) {
     Button(
         onClick = { /* Do something when clicked */ },
         shape = MaterialTheme.shapes.medium, // Rounded corners
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF7F7F7)),
         modifier = Modifier
             .padding(4.dp)
+            .clip(RoundedCornerShape(50.dp))
     ) {
         Text(
             text = serviceName,
@@ -372,19 +379,19 @@ fun SummarySection(summaryText: String) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewGroomerProfile() {
-    GroomerProfile(groomer = Groomer(
-        name = "Will Parker",
-        email = "will.parker@example.com",
-        phoneNumber = "123-456-7890",
-        address = Address("1234", "Street", "City", "State", LocationMap(0.0, 0.0, "Location")),
-        yearsExperience = "5",
-        services = listOf("Bathing and Drying", "Haircuts and Trimming", "Ear Cleaning", "Nail Trimming"),
-        petTypes = listOf("Dogs", "Cats"),
-        profilePic = "https://example.com/profile.jpg",
-        price = 100
-    )
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewGroomerProfile() {
+//    GroomerProfile(groomer = Groomer(
+//        name = "Will Parker",
+//        email = "will.parker@example.com",
+//        phoneNumber = "123-456-7890",
+//        address = Address("1234", "Street", "City", "State", LocationMap(0.0, 0.0, "Location")),
+//        yearsExperience = "5",
+//        services = listOf("Bathing and Drying", "Haircuts and Trimming", "Ear Cleaning", "Nail Trimming"),
+//        petTypes = listOf("Dogs", "Cats"),
+//        profilePic = "https://example.com/profile.jpg",
+//        price = 100
+//    ), navController = remember navController()
+//    )
+//}

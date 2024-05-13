@@ -20,55 +20,6 @@ class GroomerViewModel(var email: String) : ViewModel() {
     var groomer: MutableLiveData<Groomer> = MutableLiveData()
     private var firebaseConnection: FirebaseConnection = FirebaseConnection()
 
-    init {
-        fetchGroomerData(email)
-    }
-
-    private fun fetchGroomerData(email: String) {
-        val db = FirebaseFirestore.getInstance()
-        val groomerDocRef = db.collection("groomers").document(email)
-        groomerDocRef.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val document = task.result
-                if (document != null && document.exists()) {
-                    val fetchedGroomer = Groomer(
-                        name = document.getString("name") ?: "",
-                        email = email,
-                        phoneNumber = document.getString("phoneNumber") ?: "",
-                        address = Address(
-                            street = document.getString("address.street") ?: "",
-                            city = document.getString("address.city") ?: "",
-                            state = document.getString("address.state") ?: "",
-                            postalCode = document.getString("address.postalCode") ?: "",
-                            location = LocationMap(
-                                latitude = (document.get("address .location.latitude") as Double?) ?: 0.0,
-                                longitude = (document.get("address.location.longitude") as Double?) ?: 0.0
-                            ),
-                        ),
-                        yearsExperience = (document.getLong("yearsExperience") ?: 0L).toString(),
-                        services = (document.get("services") as? List<*>)?.map { it.toString() } ?: listOf(),
-                        petTypes = (document.get("petTypes") as? List<*>)?.map { it.toString() } ?: listOf(),
-                        profilePic = document.getString("profilePic") ?: "",
-                        price = (document.getLong("price") ?: 0L).toInt()
-                    )
-                    groomer.postValue(fetchedGroomer)
-                } else {
-                    Log.d("groomerdatafetch", "get failed with ", task.exception)
-                    println("No such document with email $email")
-                }
-            } else {
-                println("Failed to fetch user data: ${task.exception?.message}")
-            }
-        }
-    }
-
-
-    // function to get the name of the groomer from firebase
-
-
-
-
-
     fun getNameFromFirebase(onComplete: (String) -> Unit) {
         firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
             if (task.isSuccessful) {
