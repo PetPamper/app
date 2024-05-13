@@ -5,9 +5,9 @@ import com.android.PetPamper.database.PetData
 import com.android.PetPamper.database.PetDataHandler
 import com.android.PetPamper.model.Dog
 import com.android.PetPamper.model.Pet
+import java.time.LocalDate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -23,7 +23,10 @@ class PetDataTest {
 
     val _data: MutableMap<String, Map<String, Map<String, Any>>> = mutableMapOf()
 
-    override suspend fun documentExists(collectionPath: String, document: String): Pair<Boolean, Boolean> {
+    override suspend fun documentExists(
+        collectionPath: String,
+        document: String
+    ): Pair<Boolean, Boolean> {
       return Pair(true, collectionPath in _data && document in _data[collectionPath]!!)
     }
 
@@ -44,8 +47,8 @@ class PetDataTest {
       newEntry += Pair("petType", pet.petType)
       newEntry += Pair("name", pet.name)
       newEntry += Pair("birthYear", pet.birthYear.toLong())
-        newEntry += Pair("birthMonth", pet.birthMonth.toLong())
-        newEntry += Pair("birthDay", pet.birthDay.toLong())
+      newEntry += Pair("birthMonth", pet.birthMonth.toLong())
+      newEntry += Pair("birthDay", pet.birthDay.toLong())
       newEntry += Pair("description", pet.description)
       newEntry += Pair("pictures", pet.pictures)
       newEntry += Pair("ownerId", pet.ownerId)
@@ -94,19 +97,13 @@ class PetDataTest {
         )
 
     var storeSuccess = false
-      runBlocking {
-          launch {
-              storeSuccess = petDataHandler.storePetToDatabase(storedPet)
-          }
-      }
+    runBlocking { launch { storeSuccess = petDataHandler.storePetToDatabase(storedPet) } }
     assertTrue(storeSuccess)
 
     var retrievedPet: Pet? = null
-      runBlocking {
-          launch {
-              retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String)
-          }
-      }
+    runBlocking {
+      launch { retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String) }
+    }
     assertNotNull(retrievedPet)
 
     assertEquals(testMap["id"], retrievedPet!!.id)
@@ -123,12 +120,8 @@ class PetDataTest {
     val db = MockPetDB()
     val petDataHandler = PetDataHandler(db)
 
-      var retrievedPet1: Pet? = null
-      runBlocking {
-          launch {
-              retrievedPet1 = petDataHandler.retrievePetFromDatabase("123")
-          }
-      }
+    var retrievedPet1: Pet? = null
+    runBlocking { launch { retrievedPet1 = petDataHandler.retrievePetFromDatabase("123") } }
     assertNull(retrievedPet1)
 
     // Initialize map holding test values
@@ -153,14 +146,14 @@ class PetDataTest {
             ownerId = testMap["ownerId"] as String,
         )
 
-      var retrievedPet2: Pet? = null
+    var retrievedPet2: Pet? = null
 
-      runBlocking {
-          launch {
-              petDataHandler.storePetToDatabase(storedPet)
-              retrievedPet2 =  petDataHandler.retrievePetFromDatabase("124")
-          }
+    runBlocking {
+      launch {
+        petDataHandler.storePetToDatabase(storedPet)
+        retrievedPet2 = petDataHandler.retrievePetFromDatabase("124")
       }
+    }
 
     assertNull(retrievedPet2)
   }
@@ -203,29 +196,19 @@ class PetDataTest {
         )
 
     // Check that the first store is successful
-      var storeSuccess = false
-      runBlocking {
-          launch {
-              storeSuccess = petDataHandler.storePetToDatabase(storedPet1)
-          }
-      }
+    var storeSuccess = false
+    runBlocking { launch { storeSuccess = petDataHandler.storePetToDatabase(storedPet1) } }
     assertTrue(storeSuccess)
 
     // Check that storing a pet with the same ID as an existing one is unsuccessful
-      runBlocking {
-          launch {
-              storeSuccess = petDataHandler.storePetToDatabase(storedPet2)
-          }
-      }
+    runBlocking { launch { storeSuccess = petDataHandler.storePetToDatabase(storedPet2) } }
     assertFalse(storeSuccess)
 
     // Check that the retrieved pet has the same attributes as the first pet
-      var retrievedPet: Pet? = null
-      runBlocking {
-          launch {
-              retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String)
-          }
-      }
+    var retrievedPet: Pet? = null
+    runBlocking {
+      launch { retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String) }
+    }
     assertNotNull(retrievedPet)
 
     assertEquals(testMap["id"], retrievedPet!!.id)
@@ -274,12 +257,8 @@ class PetDataTest {
         )
 
     // Check that the store is successful
-      var storeSuccess = false
-      runBlocking {
-          launch {
-              storeSuccess = petDataHandler.storePetToDatabase(storedPet)
-          }
-      }
+    var storeSuccess = false
+    runBlocking { launch { storeSuccess = petDataHandler.storePetToDatabase(storedPet) } }
     assertTrue(storeSuccess)
 
     // Modify attributes of the pet and store modifications in database
@@ -290,20 +269,14 @@ class PetDataTest {
     storedPet.ownerId = modifiedTestMap["ownerId"] as String
 
     var modifySuccess = false
-      runBlocking {
-          launch {
-              modifySuccess = petDataHandler.modifyPetEntry(storedPet)
-          }
-      }
+    runBlocking { launch { modifySuccess = petDataHandler.modifyPetEntry(storedPet) } }
     assertTrue(modifySuccess)
 
     // Check that the retrieved pet's attributes are modified correctly
-      var retrievedPet: Pet? = null
-      runBlocking {
-          launch {
-              retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String)
-          }
-      }
+    var retrievedPet: Pet? = null
+    runBlocking {
+      launch { retrievedPet = petDataHandler.retrievePetFromDatabase(testMap["id"] as String) }
+    }
     assertNotNull(retrievedPet)
 
     assertEquals(modifiedTestMap["id"], retrievedPet!!.id)

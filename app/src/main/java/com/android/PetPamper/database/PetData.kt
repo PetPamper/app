@@ -11,7 +11,9 @@ data class PetData(
     val id: String = "",
     val petType: String = PetType.DEFAULT.petType,
     val name: String = "Unnamed",
-    val birthYear: Int = 0, val birthMonth: Int = 1, val birthDay: Int = 1,
+    val birthYear: Int = 0,
+    val birthMonth: Int = 1,
+    val birthDay: Int = 1,
     val description: String = "",
     val pictures: List<String> = listOf(""),
     val ownerId: String = ""
@@ -22,7 +24,9 @@ data class PetData(
       pet.id,
       pet.petType.petType,
       pet.name,
-      pet.birthDate.year, pet.birthDate.monthValue, pet.birthDate.dayOfMonth,
+      pet.birthDate.year,
+      pet.birthDate.monthValue,
+      pet.birthDate.dayOfMonth,
       pet.description,
       pet.pictures,
       pet.ownerId) {}
@@ -51,12 +55,10 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     val pet = petFactory.buildPet(data["id"] as String, data["petType"] as String)
 
     pet.name = data["name"] as String
-      val birthYear = data["birthYear"] as Long
-      val birthMonth = data["birthMonth"] as Long
-      val birthDay = data["birthDay"] as Long
-    pet.birthDate = LocalDate.of(birthYear.toInt(),
-        birthMonth.toInt(),
-        birthDay.toInt())
+    val birthYear = data["birthYear"] as Long
+    val birthMonth = data["birthMonth"] as Long
+    val birthDay = data["birthDay"] as Long
+    pet.birthDate = LocalDate.of(birthYear.toInt(), birthMonth.toInt(), birthDay.toInt())
     pet.description = data["description"] as String
     pet.pictures = data["pictures"] as List<String>
     pet.ownerId = data["ownerId"] as String
@@ -81,7 +83,7 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
       return false
     }
     if (!success) {
-        Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
+      Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
       return false
     }
     return db.storeData(petsDBPath, pet.id, pet)

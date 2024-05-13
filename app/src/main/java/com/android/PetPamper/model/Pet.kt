@@ -92,10 +92,11 @@ class PetFactory() {
       pictures: List<String> = listOf(),
       ownerId: String = "PetPamper"
   ): Pet {
-      pet = when (petType) {
+    pet =
+        when (petType) {
           "dog" -> Dog(id = id)
           else -> DefaultPet(id = id)
-      }
+        }
 
     val pet: Pet = pet!!
 

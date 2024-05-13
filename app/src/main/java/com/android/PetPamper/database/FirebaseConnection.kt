@@ -15,9 +15,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.tasks.await
 import java.util.Calendar
-import java.util.concurrent.CancellationException
+import kotlinx.coroutines.tasks.await
 
 class FirebaseConnection : Database() {
 
@@ -41,7 +40,7 @@ class FirebaseConnection : Database() {
       return Pair(false, null)
     }
 
-      val data = doc?.data
+    val data = doc?.data
 
     return Pair(success, data)
   }
@@ -54,10 +53,13 @@ class FirebaseConnection : Database() {
    * @return a pair containing: - the success of the operation
    * - whether the document was found or not
    */
-  override suspend fun documentExists(collectionPath: String, document: String): Pair<Boolean, Boolean> {
+  override suspend fun documentExists(
+      collectionPath: String,
+      document: String
+  ): Pair<Boolean, Boolean> {
     val (success, data) = fetchData(collectionPath, document)
-      val docFound = (data != null)
-      Log.d("PetTest", "documentExists: success=${success}, docFound=${docFound}")
+    val docFound = (data != null)
+    Log.d("PetTest", "documentExists: success=${success}, docFound=${docFound}")
     return Pair(success, docFound)
   }
 
@@ -74,37 +76,37 @@ class FirebaseConnection : Database() {
       collectionPath: String,
       document: String
   ): Pair<Boolean, DocumentSnapshot?> {
-      var success = false
+    var success = false
     val docRef = db.collection(collectionPath).document(document)
-      var doc: DocumentSnapshot? = null
+    var doc: DocumentSnapshot? = null
 
-      try {
-          doc = docRef.get().await()
-          success = true
-      } catch (e: Exception) {
-          success = false
-      }
+    try {
+      doc = docRef.get().await()
+      success = true
+    } catch (e: Exception) {
+      success = false
+    }
 
-      Log.d("PetTest", "fetchDocument end: success=${success}")
+    Log.d("PetTest", "fetchDocument end: success=${success}")
     return Pair(success, doc)
   }
 
-//  /**
-//   * Function that extracts data from a document
-//   *
-//   * @param documentTask document to be handled
-//   * @return pair containing: - the success status
-//   * - the document if successful, otherwise null
-//   */
-//  private fun handleDocumentTask(
-//      documentTask: Task<DocumentSnapshot>
-//  ): Pair<Boolean, Map<String, Any>?> {
-//    var success = false
-//    var document: DocumentSnapshot? = null
-//    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
-//
-//    return Pair(success, document!!.data)
-//  }
+  //  /**
+  //   * Function that extracts data from a document
+  //   *
+  //   * @param documentTask document to be handled
+  //   * @return pair containing: - the success status
+  //   * - the document if successful, otherwise null
+  //   */
+  //  private fun handleDocumentTask(
+  //      documentTask: Task<DocumentSnapshot>
+  //  ): Pair<Boolean, Map<String, Any>?> {
+  //    var success = false
+  //    var document: DocumentSnapshot? = null
+  //    documentTask.addOnSuccessListener { document = it }.addOnFailureListener { success = false }
+  //
+  //    return Pair(success, document!!.data)
+  //  }
 
   /**
    * General function to store data to Firestore

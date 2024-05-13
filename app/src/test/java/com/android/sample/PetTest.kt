@@ -85,20 +85,22 @@ class PetTest {
     dog.birthDate = LocalDate.of(2026, 3, 28)
     assertEquals(LocalDate.of(2024, 3, 28), dog.birthDate)
   }
-    
-    @Test
-    fun checkPetFactory() {
-        val testMap: MutableMap<String, Any> = mutableMapOf()
-        testMap += Pair("id", "123")
-        testMap += Pair("petType", "dog")
-        testMap += Pair("name", "Snoopy")
-        testMap += Pair("birthDate", LocalDate.of(1950, 10, 4))
-        testMap += Pair("description", "he is a good boi")
-        testMap += Pair("pictures", listOf<String>())
-        testMap += Pair("ownerId", "Charlie Brown")
-        
-        val petFactory = PetFactory()
-        val pet = petFactory.buildPet(testMap["id"] as String,
+
+  @Test
+  fun checkPetFactory() {
+    val testMap: MutableMap<String, Any> = mutableMapOf()
+    testMap += Pair("id", "123")
+    testMap += Pair("petType", "dog")
+    testMap += Pair("name", "Snoopy")
+    testMap += Pair("birthDate", LocalDate.of(1950, 10, 4))
+    testMap += Pair("description", "he is a good boi")
+    testMap += Pair("pictures", listOf<String>())
+    testMap += Pair("ownerId", "Charlie Brown")
+
+    val petFactory = PetFactory()
+    val pet =
+        petFactory.buildPet(
+            testMap["id"] as String,
             testMap["petType"] as String,
             testMap["name"] as String,
             testMap["birthDate"] as LocalDate,
@@ -106,35 +108,35 @@ class PetTest {
             testMap["pictures"] as List<String>,
             testMap["ownerId"] as String)
 
-        assertEquals(testMap["id"], pet.id)
-        assertEquals(testMap["petType"], pet.petType.petType)
-        assertEquals(testMap["name"], pet.name)
-        assertEquals(testMap["birthDate"], pet.birthDate)
-        assertEquals(testMap["description"], pet.description)
-        assertEquals(testMap["pictures"], pet.pictures)
-        assertEquals(testMap["ownerId"], pet.ownerId)
-    }
+    assertEquals(testMap["id"], pet.id)
+    assertEquals(testMap["petType"], pet.petType.petType)
+    assertEquals(testMap["name"], pet.name)
+    assertEquals(testMap["birthDate"], pet.birthDate)
+    assertEquals(testMap["description"], pet.description)
+    assertEquals(testMap["pictures"], pet.pictures)
+    assertEquals(testMap["ownerId"], pet.ownerId)
+  }
 
-    @Test
-    fun checkPetFactoryDefault() {
-        val testMap: MutableMap<String, Any> = mutableMapOf()
-        testMap += Pair("id", "")
-        testMap += Pair("petType", "default")
-        testMap += Pair("name", "Unnamed")
-        testMap += Pair("birthDate", LocalDate.of(0, 1, 1))
-        testMap += Pair("description", "")
-        testMap += Pair("pictures", listOf<String>())
-        testMap += Pair("ownerId", "PetPamper")
+  @Test
+  fun checkPetFactoryDefault() {
+    val testMap: MutableMap<String, Any> = mutableMapOf()
+    testMap += Pair("id", "")
+    testMap += Pair("petType", "default")
+    testMap += Pair("name", "Unnamed")
+    testMap += Pair("birthDate", LocalDate.of(0, 1, 1))
+    testMap += Pair("description", "")
+    testMap += Pair("pictures", listOf<String>())
+    testMap += Pair("ownerId", "PetPamper")
 
-        val petFactory = PetFactory()
-        val pet = petFactory.buildPet("", "")
+    val petFactory = PetFactory()
+    val pet = petFactory.buildPet("", "")
 
-        assertEquals(testMap["id"], pet.id)
-        assertEquals(testMap["petType"], pet.petType.petType)
-        assertEquals(testMap["name"], pet.name)
-        assertEquals(testMap["birthDate"], pet.birthDate)
-        assertEquals(testMap["description"], pet.description)
-        assertEquals(testMap["pictures"], pet.pictures)
-        assertEquals(testMap["ownerId"], pet.ownerId)
-    }
+    assertEquals(testMap["id"], pet.id)
+    assertEquals(testMap["petType"], pet.petType.petType)
+    assertEquals(testMap["name"], pet.name)
+    assertEquals(testMap["birthDate"], pet.birthDate)
+    assertEquals(testMap["description"], pet.description)
+    assertEquals(testMap["pictures"], pet.pictures)
+    assertEquals(testMap["ownerId"], pet.ownerId)
+  }
 }
