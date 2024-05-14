@@ -16,9 +16,7 @@ import org.junit.runner.RunWith
 class RegisterTest : TestCase() {
 
   @get:Rule val activityRule = ActivityTestRule(MainActivity::class.java, true, false)
-
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
-  @get:Rule val activityRule = ActivityTestRule(MainActivity::class.java, true, false)
 
   @Before fun setUp() {}
 
