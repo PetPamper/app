@@ -81,7 +81,8 @@ class MainActivity : ComponentActivity() {
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
 
-      composable("RegisterScreen1") { Register(1, signUp, navController) }
+      composable("RegisterScreen1") { Register(signUp, navController) }
+      composable("RegisterScreenAlreadyGroomer") { Register(signUp, navController, true) }
 
       composable("RegisterScreenGoogle/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
@@ -90,6 +91,9 @@ class MainActivity : ComponentActivity() {
       }
 
       composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
+      composable("GroomerRegisterScreenAlreadyUser") {
+        GroomerRegister(groomerSignUp, navController, true)
+      }
       composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
       composable("HomeScreen/{email}") { backStackEntry ->
