@@ -1,9 +1,12 @@
 package com.android.PetPamper.database
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
+import com.android.PetPamper.model.Reservation
 import com.android.PetPamper.model.User
 import com.android.PetPamper.resources.distance
 import com.google.android.gms.tasks.Task
@@ -97,6 +100,24 @@ class FirebaseConnection {
 
 
   }
+
+    fun addReservationToFirebase(
+        reservation: Reservation,
+        context: Context,
+        onConfirmation: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        db.collection("reservations").document(reservation.reservationId)
+            .set(reservation)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Reservation confirmed!", Toast.LENGTH_SHORT).show()
+                onConfirmation()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Failed to confirm reservation: ${e.message}", Toast.LENGTH_LONG).show()
+                onError(e.message ?: "Unknown error")
+            }
+    }
 
 
 

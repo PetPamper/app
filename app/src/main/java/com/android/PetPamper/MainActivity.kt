@@ -37,6 +37,7 @@ import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.GroomerViewModel
 import com.android.PetPamper.model.LocationMap
+import com.android.PetPamper.model.Reservation
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.ChatScreen
@@ -60,6 +61,7 @@ import com.android.PetPamper.ui.screen.users.GroomerTopBar
 import com.android.PetPamper.ui.screen.users.HomeScreen
 import com.android.PetPamper.ui.screen.users.MapView
 import com.android.PetPamper.ui.screen.users.PetListScreen
+import com.android.PetPamper.ui.screen.users.ReservationConfirmation
 import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
 import com.android.PetPamper.ui.screen.users.UserProfile
@@ -191,8 +193,14 @@ fun AppNavigation(email: String?) {
             composable("BookingScreen/{Groomer}") {backStackEntry ->
                 val groomerEmail = backStackEntry.arguments?.getString("Groomer")
                 if (groomerEmail != null) {
-                    BookingScreen(groomerEmail)
+                    if (email != null) {
+                        BookingScreen(groomerEmail, email, navController)
+                    }
                 }
+            }
+
+            composable("ReservationConfirmation/{groomerEmail}/{userEmail}/{selectedDate}/{selectedHour}") { backStackEntry ->
+                ReservationConfirmation(navController, backStackEntry)
             }
 
               composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }

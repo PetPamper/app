@@ -138,42 +138,7 @@ fun CarouselCard(navController: NavController, email: String?) {
             Icon(Icons.Default.KeyboardArrowRight, null)
           }
     }
-    /*Row(
-        Modifier
-            .height(50.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        repeat(sliderList.size){it ->
-            val color =
-                if (pageState.currentPage == it) Color.DarkGray else Color.LightGray
-            Box(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clip(CircleShape)
-                    .size(20.dp)
-                    .background(color)
-                    .clickable {
-                        scope.launch {
-                            pageState.animateScrollToPage(it)
-                        }
-                    }
-            ){
 
-            }
-        }
-    }*/
-
-    //            ClickableText(
-    //                text = AnnotatedString("Show your pets"),
-    //                modifier = Modifier
-    //                    .align(Alignment.CenterHorizontally),
-    //                style = TextStyle(
-    //                    textAlign = TextAlign.Center),
-    //                onClick = {
-    //                    navController.navigate("PetListScreen/$email")
-    //                }
-    //            )
     Spacer(modifier = Modifier.height(10.dp))
 
     Button(
@@ -283,40 +248,7 @@ fun CarouselCard(navController: NavController, email: String?) {
             Icon(Icons.Default.KeyboardArrowRight, null)
           }
     }
-    /*Row(
-        Modifier
-            .height(50.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        repeat(sliderList.size){it ->
-            val color =
-                if (pageState2.currentPage == it) Color.DarkGray else Color.LightGray
-            Box(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .clip(CircleShape)
-                    .size(20.dp)
-                    .background(color)
-                    .clickable {
-                        scope2.launch {
-                            pageState2.animateScrollToPage(it)
-                        }
-                    }
-            ){
 
-            }
-        }
-    }*/
-
-    //        ClickableText(
-    //            text = AnnotatedString("Show your Reservations"),
-    //            modifier = Modifier.align(Alignment.CenterHorizontally),
-    //            style = TextStyle(textAlign = TextAlign.Center),
-    //            onClick = {
-    //                navController.navigate("ReservationsScreen/$email")
-    //            }
-    //        )
 
     Spacer(modifier = Modifier.height(10.dp))
     Button(

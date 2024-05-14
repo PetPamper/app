@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,19 +37,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.Reservation
 import com.android.PetPamper.ui.screen.groomers.ConfirmButton
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 
 @Composable
-fun BookingScreen(groomerEmail: String) {
+fun BookingScreen(groomerEmail: String, userEmail: String, navController: NavController) {
     val dateList = remember { mutableStateListOf<String>() }
     val hoursList = remember { mutableStateListOf<String>() }
     val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
-    val selectedHoursMap = remember { mutableStateMapOf<String, MutableList<Int>>() }
+    val selectedHoursMap = remember { mutableStateMapOf<String, Int>() }
 
     val firebaseConnection = FirebaseConnection()
     LaunchedEffect(groomerEmail) {
@@ -59,7 +66,7 @@ fun BookingScreen(groomerEmail: String) {
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Select Date", style = MaterialTheme.typography.titleMedium)
+        Text(text = "Select Date", style = MaterialTheme.typography.titleMedium, color = Color(0xFF2196F3) , fontWeight = FontWeight.Bold)
 
         MonthYearPicker(selectedDate) { date ->
             selectedDate.value = date
@@ -77,7 +84,30 @@ fun BookingScreen(groomerEmail: String) {
         }
 
         HourPicker(selectedDate.value, hoursList, selectedHoursMap)
+        val selectedHourKey = selectedDateToString(selectedDate.value)
+
+        val selectedHour = selectedHoursMap[selectedHourKey]?.let { "$it:00" }
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (selectedHour != null) {
+            ConfirmReservation(
+                groomerEmail = groomerEmail,
+                userEmail = userEmail,
+                selectedDate = selectedDateToString(selectedDate.value),
+                selectedHour = selectedHour,
+                onConfirmation = {
+                    navController.navigate("reservationConfirmation/${groomerEmail}/${userEmail}/${selectedDateToString(selectedDate.value)}/${selectedHour}")
+                    println("Reservation Confirmed")
+                },
+                onError = { errorMessage ->
+                    // Handle error scenario, e.g., show an error message
+                    println("Error: $errorMessage")
+                }
+            )
+        }
+
+
+
     }
 }
 
@@ -168,9 +198,9 @@ fun getDaysInMonth(calendar: Calendar): List<Int> {
 }
 
 @Composable
-fun HourPicker(selectedDate: Calendar, hourList: List<String>, selectedHoursMap: MutableMap<String, MutableList<Int>>) {
+fun HourPicker(selectedDate: Calendar, hourList: List<String>, selectedHoursMap: MutableMap<String, Int>) {
     val dateKey = selectedDateToString(selectedDate)
-    val hoursForDate = selectedHoursMap[dateKey] ?: mutableListOf()
+    val selectedHour = selectedHoursMap[dateKey]
 
     Text(
         "Select Hour",
@@ -190,17 +220,14 @@ fun HourPicker(selectedDate: Calendar, hourList: List<String>, selectedHoursMap:
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(availableHours) { hour ->
-            val isSelected = hoursForDate.contains(hour)
+            val isSelected = hour == selectedHour
             HourBox(hour, isSelected) {
-                if (isSelected) {
-                    selectedHoursMap[dateKey] = hoursForDate.filter { it != hour }.toMutableList()
-                } else {
-                    selectedHoursMap[dateKey] = (hoursForDate + hour).toMutableList()
-                }
+                selectedHoursMap[dateKey] = hour // Set the selected hour directly
             }
         }
     }
 }
+
 
 fun selectedDateToString(calendar: Calendar): String =
     SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
@@ -222,3 +249,40 @@ fun HourBox(hour: Int, isSelected: Boolean, onClick: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
     }
 }
+
+@Composable
+fun ConfirmReservation(
+    groomerEmail: String,
+    userEmail: String,
+    selectedDate: String,
+    selectedHour: String,
+    onConfirmation: () -> Unit,
+    onError: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val firebaseConnection = FirebaseConnection()
+
+    // Button to confirm the reservation
+    Button(
+        onClick = {
+            val reservationId = UUID.randomUUID().toString()  // Generate a unique ID for the reservation
+            val reservation = Reservation(
+                reservationId = reservationId,
+                groomerEmail = groomerEmail,
+                userEmail = userEmail,
+                date = selectedDate,
+                hour = selectedHour
+            )
+            firebaseConnection.addReservationToFirebase(reservation, context, onConfirmation, onError)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(Color(0xFF2196F3)),
+        content = {
+            Text("Confirm Reservation")
+        }
+    )
+}
+
+
+
+
