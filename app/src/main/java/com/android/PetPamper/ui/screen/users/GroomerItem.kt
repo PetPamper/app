@@ -50,12 +50,12 @@ fun GroomerItem(groomer: GroomerReview, navController: NavController) {
   Card(
       backgroundColor = Color(0xFFF7F7F7),
       elevation = 4.dp,
-      modifier = Modifier.fillMaxWidth().padding(8.dp)
-          .clickable(
-              onClick = { navController.navigate("groomer_details/${groomer.email}") }
-          ))
-    {
-              //   Navigate to groomer profile) {
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .clickable(
+                  onClick = { navController.navigate("groomer_details/${groomer.email}") })) {
+        //   Navigate to groomer profile) {
         Column(modifier = Modifier.padding(16.dp)) {
           Row(
               verticalAlignment = Alignment.Top, // Ensure vertical alignment to top
@@ -266,7 +266,7 @@ fun PreviewGroomerList() {
               53,
               4.8,
               "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg"))
-//  MaterialTheme { GroomerList(groomers = sampleGroomers, navController = ) }
+  //  MaterialTheme { GroomerList(groomers = sampleGroomers, navController = ) }
 }
 
 @Preview(showBackground = true)

@@ -249,7 +249,6 @@ fun CarouselCard(navController: NavController, email: String?) {
           }
     }
 
-
     Spacer(modifier = Modifier.height(10.dp))
     Button(
         onClick = { navController.navigate("ReservationsScreen") },

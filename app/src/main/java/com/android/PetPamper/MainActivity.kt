@@ -35,9 +35,7 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
-import com.android.PetPamper.model.GroomerViewModel
 import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.model.Reservation
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.ChatScreenPreview
@@ -63,7 +61,6 @@ import com.android.PetPamper.ui.screen.users.PetListScreen
 import com.android.PetPamper.ui.screen.users.ReservationConfirmation
 import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
-import com.android.PetPamper.ui.screen.users.UserProfile
 import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import kotlin.math.round
 
@@ -124,9 +121,7 @@ fun AppNavigation(email: String?) {
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -138,9 +133,7 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier
-                              .size(40.dp)
-                              .padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -187,18 +180,20 @@ fun AppNavigation(email: String?) {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
               }
 
-            composable("BookingScreen/{Groomer}") {backStackEntry ->
+              composable("BookingScreen/{Groomer}") { backStackEntry ->
                 val groomerEmail = backStackEntry.arguments?.getString("Groomer")
                 if (groomerEmail != null) {
-                    if (email != null) {
-                        BookingScreen(groomerEmail, email, navController)
-                    }
+                  if (email != null) {
+                    BookingScreen(groomerEmail, email, navController)
+                  }
                 }
-            }
+              }
 
-            composable("ReservationConfirmation/{groomerEmail}/{userEmail}/{selectedDate}/{selectedHour}") { backStackEntry ->
-                ReservationConfirmation(navController, backStackEntry)
-            }
+              composable(
+                  "ReservationConfirmation/{groomerEmail}/{userEmail}/{selectedDate}/{selectedHour}") {
+                      backStackEntry ->
+                    ReservationConfirmation(navController, backStackEntry)
+                  }
 
               composable(BarScreen.Chat.route) {
                 ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
@@ -207,10 +202,7 @@ fun AppNavigation(email: String?) {
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
 
-
-
-
-            composable(BarScreen.Groomers.route) {
+              composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
                 val firebaseConnection = FirebaseConnection()
                 val sampleGroomers = remember { mutableStateOf(listOf<GroomerReview>()) }
@@ -218,7 +210,6 @@ fun AppNavigation(email: String?) {
                 val groomersWithReviews = remember {
                   mutableStateOf(mapOf<Groomer, GroomerReviews>())
                 }
-
 
                 LaunchedEffect(email) {
                   firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
@@ -276,22 +267,23 @@ fun AppNavigation(email: String?) {
                     }
                   } else {
                     Log.d("Groomers", "${sampleGroomers.value}")
-                    GroomerList(groomers = sampleGroomers.value, navController) // Then the list of groomers
+                    GroomerList(
+                        groomers = sampleGroomers.value, navController) // Then the list of groomers
                   }
                 }
               }
 
-            composable("groomer_details/{email}"){  backStackEntry ->
+              composable("groomer_details/{email}") { backStackEntry ->
                 val email = backStackEntry.arguments?.getString("email")
-                var firebaseConnection  = FirebaseConnection()
-                var GroomerName = remember {mutableStateOf<Groomer>(Groomer()) }
+                var firebaseConnection = FirebaseConnection()
+                var GroomerName = remember { mutableStateOf<Groomer>(Groomer()) }
                 if (email != null) {
-                    firebaseConnection.fetchGroomerData(email){ groomer ->
-                        GroomerName.value = groomer
-                    }
+                  firebaseConnection.fetchGroomerData(email) { groomer ->
+                    GroomerName.value = groomer
+                  }
                 }
                 GroomerProfile(GroomerName.value, navController)
-            }
+              }
             }
       }
 }
