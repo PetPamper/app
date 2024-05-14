@@ -91,12 +91,15 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
+          
+          
 
       # Run Unit tests
       - name: Run Unit Tests
         run: |
           # To run the CI with debug information, add --info
           ./gradlew check --parallel --build-cache
+        
 
       # Run connected tests on the emulator
       - name: Run Instrumented Tests
@@ -111,15 +114,34 @@ jobs:
           script: ./gradlew connectedCheck --parallel --build-cache
 
       # This step generates the coverage report which will be uploaded to sonar
+      # This step generates the coverage report which will be uploaded to SonarCloud
       - name: Generate Coverage Report
         run: |
           ./gradlew jacocoTestReport
 
-      # Upload the various reports to sonar
+      # Upload the various reports to SonarCloud
       - name: Upload report to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --parallel --build-cache
+        run: ./gradlew sonarqube --parallel --build-cache
 
+      # Sign the APK
+      - name: Sign app APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNINGKEYBASE64 }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTOREPASSWORD }}
+          keyPassword: ${{ secrets.KEYPASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
 
+      # Upload the signed APK as an artifact
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: Signed app APK
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}

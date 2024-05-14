@@ -40,7 +40,6 @@ import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.Reservation
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
-import com.android.PetPamper.ui.screen.chat.ChatScreen
 import com.android.PetPamper.ui.screen.chat.ChatScreenPreview
 import com.android.PetPamper.ui.screen.chat.ConversationsScreen
 import com.android.PetPamper.ui.screen.chat.UsersScreen
@@ -182,13 +181,11 @@ fun AppNavigation(email: String?) {
                 PetListScreen(onBackPressed = { navController.navigateUp() })
               }
 
-            composable("ChatScreen") {
-                ChatScreenPreview()
-            }
+              composable("ChatScreen") { ChatScreenPreview() }
 
-            composable("UsersScreen") {
+              composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
-            }
+              }
 
             composable("BookingScreen/{Groomer}") {backStackEntry ->
                 val groomerEmail = backStackEntry.arguments?.getString("Groomer")
@@ -203,7 +200,9 @@ fun AppNavigation(email: String?) {
                 ReservationConfirmation(navController, backStackEntry)
             }
 
-              composable(BarScreen.Chat.route) { ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController) }
+              composable(BarScreen.Chat.route) {
+                ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
+              }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
