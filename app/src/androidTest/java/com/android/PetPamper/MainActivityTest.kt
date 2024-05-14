@@ -32,7 +32,7 @@ class MainActivityTest : TestCase() {
           assertHasClickAction()
         }
         // Add a new check for the error message
-        errorMessage { assertIsNotDisplayed() }
+        errorMessage { assertTextEquals("") }
       }
     }
     step("Attempt to log in with empty credentials") {

@@ -218,6 +218,12 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
 }
 
+configurations {
+    all {
+        exclude(module = "protobuf-lite")
+    }
+}
+
 tasks.withType<Test> {
     // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
