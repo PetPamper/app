@@ -2,6 +2,7 @@ package com.android.PetPamper.ui.screen.users
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
 import com.android.PetPamper.model.Address
@@ -44,11 +46,16 @@ data class GroomerReview(
 )
 
 @Composable
-fun GroomerItem(groomer: GroomerReview) {
+fun GroomerItem(groomer: GroomerReview, navController: NavController) {
   Card(
       backgroundColor = Color(0xFFF7F7F7),
       elevation = 4.dp,
-      modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(8.dp)
+              .clickable(
+                  onClick = { navController.navigate("groomer_details/${groomer.email}") })) {
+        //   Navigate to groomer profile) {
         Column(modifier = Modifier.padding(16.dp)) {
           Row(
               verticalAlignment = Alignment.Top, // Ensure vertical alignment to top
@@ -141,9 +148,9 @@ fun GroomerItem(groomer: GroomerReview) {
 }
 
 @Composable
-fun GroomerList(groomers: List<GroomerReview>) {
+fun GroomerList(groomers: List<GroomerReview>, navController: NavController) {
   LazyColumn(Modifier.background(Color.White)) {
-    items(groomers) { groomer -> GroomerItem(groomer = groomer) }
+    items(groomers) { groomer -> GroomerItem(groomer = groomer, navController) }
   }
 }
 
@@ -259,7 +266,7 @@ fun PreviewGroomerList() {
               53,
               4.8,
               "https://cdn-s-www.ledauphine.com/images/0A36430E-64F8-4FC1-A61F-6BEDB90FDC94/NW_raw/le-depart-de-cristiano-ronaldo-vers-la-juventus-turin-a-ete-officialise-par-le-real-madrid-mardi-soir-quelques-heures-avant-la-demi-finale-de-coupe-du-monde-france-belgique-photo-ander-gillenea-afp-1531297805.jpg"))
-  MaterialTheme { GroomerList(groomers = sampleGroomers) }
+  //  MaterialTheme { GroomerList(groomers = sampleGroomers, navController = ) }
 }
 
 @Preview(showBackground = true)
