@@ -40,7 +40,7 @@ import java.util.Locale
 
 @Composable
 fun GroomerHome(email: String) {
-  val groomerViewModel = remember { mutableStateOf(GroomerViewModel("", email)) }
+  val groomerViewModel = remember { mutableStateOf(GroomerViewModel(email)) }
   val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
   // Map to store selected hours for multiple dates
   val selectedHoursMap = remember { mutableStateMapOf<String, MutableList<Int>>() }
