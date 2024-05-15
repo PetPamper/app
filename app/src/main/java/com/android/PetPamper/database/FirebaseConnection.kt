@@ -40,6 +40,10 @@ class FirebaseConnection {
             }
     }
 
+    fun changeAddress(email: String, address: Address){
+        db.collection("users").document(email)
+            .update("address", address)
+    }
 
     // method to verify if an email is already registered
 

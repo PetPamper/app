@@ -188,7 +188,7 @@ fun AppNavigation(email: String?) {
 
                 Log.d("GroomersOutLaunched", "${groomersNearby.value}")
 
-                LaunchedEffect(groomersNearby.value, groomersWithReviews.value) {
+                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, address.value) {
                     sampleGroomers.value =
                         groomersNearby.value.map { groomer ->
                             val distanceWithGroomer =
@@ -216,14 +216,8 @@ fun AppNavigation(email: String?) {
                         address.value,
                         onUpdateAddress = { updatedAddress ->
                             address.value = updatedAddress
-                            // Trigger an update of groomers based on the new address
-                            firebaseConnection.fetchNearbyGroomers(updatedAddress).addOnSuccessListener { groomers ->
-                                groomersNearby.value = groomers
-                                groomers.forEach { groomer ->
-                                    firebaseConnection.fetchGroomerReviews(groomer.email).addOnSuccessListener { reviews ->
-                                        groomersWithReviews.value += (groomer to reviews)
-                                    }
-                                }
+                            if (email != null) {
+                                firebaseConnection.changeAddress(email, updatedAddress)
                             }
                         }
                     )

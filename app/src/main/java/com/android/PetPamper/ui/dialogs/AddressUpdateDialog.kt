@@ -25,15 +25,11 @@ fun AddressUpdateDialog(
     var locationName by remember { mutableStateOf(initialAddress.location.name) }
 
     val coroutineScope = rememberCoroutineScope()
-    var suggestions by remember { mutableStateOf(emptyList<LocationMap>()) }
+    var suggestions = remember { mutableStateListOf<LocationMap>() }
+    var locationView = LocationViewModel()
+    var location by remember { mutableStateOf(Address()) }
 
-    LaunchedEffect(street, city) {
-        coroutineScope.launch {
-            viewModel.fetchLocation("$street, $city") { result ->
-                suggestions = result ?: emptyList()
-            }
-        }
-    }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -42,7 +38,15 @@ fun AddressUpdateDialog(
             Column {
                 OutlinedTextField(
                     value = street,
-                    onValueChange = { street = it },
+                    onValueChange = {
+                        street = it
+                        locationView.fetchLocation(street) { result ->
+                            if (result != null){
+                                suggestions.clear()
+                                suggestions.addAll(result)
+                            }
+                        }
+                    },
                     label = { Text("Street") },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 )
@@ -70,6 +74,7 @@ fun AddressUpdateDialog(
                         TextButton(onClick = {
                             street = suggestion.name
                             locationName = suggestion.name
+                            location = Address(suggestion.name, city, state, postalCode, suggestion)
                         }) {
                             Text(suggestion.name)
                         }
@@ -80,7 +85,7 @@ fun AddressUpdateDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val updatedAddress = Address(street, city, state, postalCode, LocationMap(name = locationName))
+                    val updatedAddress = location
                     onSave(updatedAddress)
                 }
             ) {
