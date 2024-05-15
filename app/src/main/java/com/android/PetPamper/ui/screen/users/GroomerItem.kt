@@ -14,6 +14,10 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +37,7 @@ import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
+import com.android.PetPamper.ui.dialogs.AddressUpdateDialog
 
 data class GroomerReview(
     val email: String,
@@ -185,14 +190,30 @@ fun RatingBox(rating: Double, starPainter: Painter) {
 }
 
 @Composable
-fun GroomerTopBar(address: Address) {
+fun GroomerTopBar(
+    address: Address,
+    onUpdateAddress: (Address) -> Unit,
+    onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
+) {
+  var showDialog by remember { mutableStateOf(false) }
+
+  if (showDialog) {
+    AddressUpdateDialog(
+        initialAddress = address,
+        onDismiss = { showDialog = false },
+        onSave = {
+          onUpdateAddress(it)
+          showDialog = false
+        })
+  }
+
   TopAppBar(modifier = Modifier.height(80.dp), backgroundColor = Color.White, elevation = 4.dp) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
           // Location and dropdown arrow
-
           Column {
             Text(text = "Current Location : ", style = MaterialTheme.typography.subtitle1)
 
@@ -208,22 +229,24 @@ fun GroomerTopBar(address: Address) {
                   fontSize = 18.sp,
                   fontWeight = FontWeight.Bold)
 
-              Icon(
-                  imageVector = Icons.Default.ArrowDropDown,
-                  contentDescription = "Dropdown",
-                  modifier = Modifier.size(24.dp))
+              IconButton(onClick = { showDialog = true }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    modifier = Modifier.size(24.dp))
+              }
             }
           }
 
           // Search and notification icons
           Row {
-            IconButton(onClick = { /* TODO: Handle search click */}) {
+            IconButton(onClick = onSearchClick) {
               Icon(
                   imageVector = Icons.Default.Search,
                   contentDescription = "Search",
                   modifier = Modifier.size(24.dp))
             }
-            IconButton(onClick = { /* TODO: Handle notifications click */}) {
+            IconButton(onClick = onNotificationsClick) {
               Icon(
                   imageVector = Icons.Default.Notifications,
                   contentDescription = "Notifications",
@@ -273,6 +296,8 @@ fun PreviewGroomerList() {
 @Composable
 fun PreviewGroomerTopBar() {
   MaterialTheme {
-    GroomerTopBar(address = Address("1234 Main St", "City", "State", "12345", LocationMap()))
+    GroomerTopBar(
+        address = Address("1234 Main St", "City", "State", "12345", LocationMap()),
+        onUpdateAddress = { /* Preview does not update address */})
   }
 }

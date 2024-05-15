@@ -5,51 +5,33 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
-import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.*
 import com.android.PetPamper.model.Groomer
-import com.android.PetPamper.model.GroomerReviews
-import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
-import com.android.PetPamper.ui.screen.chat.ChatScreenPreview
-import com.android.PetPamper.ui.screen.chat.ConversationsScreen
-import com.android.PetPamper.ui.screen.chat.UsersScreen
-import com.android.PetPamper.ui.screen.forgotPass.EmailScreen
-import com.android.PetPamper.ui.screen.forgotPass.EmailViewModel
+import com.android.PetPamper.ui.screen.chat.*
+import com.android.PetPamper.ui.screen.forgotPass.*
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
+import com.android.PetPamper.ui.screen.register.*
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.android.PetPamper.ui.screen.users.*
 import com.android.PetPamper.ui.screen.users.BarScreen
 import com.android.PetPamper.ui.screen.users.BookingScreen
 import com.android.PetPamper.ui.screen.users.GroomerList
@@ -72,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
   @Composable
   fun AppNavigation() {
-    val navController = rememberNavController() // Create the NavHostController
+    val navController = rememberNavController()
     val signUp = SignUpViewModel()
     val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
@@ -157,8 +139,7 @@ fun AppNavigation(email: String?) {
         NavHost(
             navController = navController,
             startDestination = BarScreen.Home.route,
-            modifier = Modifier.padding(innerPadding) // Apply the padding here
-            ) {
+            modifier = Modifier.padding(innerPadding)) {
               composable(BarScreen.Home.route) {
                 val nameUser = remember { mutableStateOf("") }
                 val firebaseConnection = FirebaseConnection()
@@ -242,7 +223,7 @@ fun AppNavigation(email: String?) {
 
                 Log.d("GroomersOutLaunched", "${groomersNearby.value}")
 
-                LaunchedEffect(groomersNearby.value, groomersWithReviews.value) {
+                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, address.value) {
                   sampleGroomers.value =
                       groomersNearby.value.map { groomer ->
                         val distanceWithGroomer =
@@ -264,15 +245,21 @@ fun AppNavigation(email: String?) {
                 }
 
                 Column {
-                  GroomerTopBar(address.value) // Call the top bar here
+                  GroomerTopBar(
+                      address.value,
+                      onUpdateAddress = { updatedAddress ->
+                        address.value = updatedAddress
+                        if (email != null) {
+                          firebaseConnection.changeAddress(email, updatedAddress)
+                        }
+                      })
                   if (sampleGroomers.value.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                      Text(text = "No groomers found") // Show a message if there are no groomers
+                      Text(text = "No groomers found")
                     }
                   } else {
                     Log.d("Groomers", "${sampleGroomers.value}")
-                    GroomerList(
-                        groomers = sampleGroomers.value, navController) // Then the list of groomers
+                    GroomerList(groomers = sampleGroomers.value, navController)
                   }
                 }
               }
