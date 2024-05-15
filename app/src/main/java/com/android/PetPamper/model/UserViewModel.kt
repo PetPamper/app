@@ -1,6 +1,5 @@
 package com.android.PetPamper.model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.android.PetPamper.database.FirebaseConnection
 
@@ -54,17 +53,16 @@ class UserViewModel(val uid: String) : ViewModel() {
           val location = document.get("address.location") as HashMap<*, *>
 
           // Construct an Address object
-          val address = Address(
-            street,
-            city,
-            state,
-            postalCode,
-            LocationMap(
-              location["latitude"] as Double,
-              location["longitude"] as Double,
-              location["name"] as String
-            )
-          )
+          val address =
+              Address(
+                  street,
+                  city,
+                  state,
+                  postalCode,
+                  LocationMap(
+                      location["latitude"] as Double,
+                      location["longitude"] as Double,
+                      location["name"] as String))
           onComplete(address)
         }
       } else {
@@ -76,15 +74,15 @@ class UserViewModel(val uid: String) : ViewModel() {
 
   fun updateAddress(newAddress: Address, onComplete: () -> Unit) {
     address = newAddress
-    val addressData = mapOf(
-      "address.street" to newAddress.street,
-      "address.city" to newAddress.city,
-      "address.state" to newAddress.state,
-      "address.postalCode" to newAddress.postalCode,
-      "address.location.latitude" to newAddress.location.latitude,
-      "address.location.longitude" to newAddress.location.longitude,
-      "address.location.name" to newAddress.location.name
-    )
+    val addressData =
+        mapOf(
+            "address.street" to newAddress.street,
+            "address.city" to newAddress.city,
+            "address.state" to newAddress.state,
+            "address.postalCode" to newAddress.postalCode,
+            "address.location.latitude" to newAddress.location.latitude,
+            "address.location.longitude" to newAddress.location.longitude,
+            "address.location.name" to newAddress.location.name)
 
     firebaseConnection.updateUserAddress(uid, addressData, onComplete)
   }
