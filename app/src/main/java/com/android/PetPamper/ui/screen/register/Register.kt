@@ -2,6 +2,7 @@ package com.android.PetPamper.ui.screen.register
 
 import LocationViewModel
 import android.util.Log
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +38,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +54,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,6 +66,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
@@ -83,21 +90,22 @@ class SignUpViewModel {
 }
 
 @Composable
-fun Register(currentStep1: Int, viewModel: SignUpViewModel, navController: NavController) {
+fun Register(
+    viewModel: SignUpViewModel,
+    navController: NavController,
+    hasGroomerAccount: Boolean = false
+) {
   val firebaseConnection = FirebaseConnection()
   val db = Firebase.firestore
 
-  var currentStep by remember { mutableIntStateOf(currentStep1) }
+  val initialStep = if (!hasGroomerAccount) 1 else 10
+  var currentStep by remember { mutableIntStateOf(initialStep) }
 
   var registeredAsGroomer by remember { mutableStateOf(false) }
 
   when (currentStep) {
     1 -> {
       Column {
-        CustomTextButton(
-            tag = "I already have a groomer account", testTag = "AlreadyGroomerButton") {
-              currentStep = 10
-            }
         RegisterLayout(
             viewModel = viewModel,
             1,
@@ -613,7 +621,7 @@ fun RegisterLayout(
               Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier =
-                        if (textField.isNotBlank()) {
+                        if (isKeyboardOpen().value) {
                           Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
                         } else {
                           Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
@@ -654,6 +662,24 @@ fun RegisterLayout(
       }
 }
 
+@Composable
+fun isKeyboardOpen(): State<Boolean> {
+  var keyboardOpen by remember { mutableStateOf(false) }
+  val view = LocalView.current
+  val viewTreeObserver = view.viewTreeObserver
+  DisposableEffect(key1 = viewTreeObserver) {
+    val listener =
+        ViewTreeObserver.OnGlobalLayoutListener {
+          keyboardOpen =
+              ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) ?: true
+        }
+    viewTreeObserver.addOnGlobalLayoutListener(listener)
+    onDispose { viewTreeObserver.removeOnGlobalLayoutListener(listener) }
+  }
+
+  return rememberUpdatedState(newValue = keyboardOpen)
+}
+
 fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
 
 fun isValidEmail(email: String) =
@@ -663,18 +689,21 @@ fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
   val firebaseConnection = FirebaseConnection()
   var alreadyinuse = false
   var isValid = false
-  firebaseConnection.verifyEmail(email, "groomer").addOnCompleteListener { isExist ->
-    if (isExist.isSuccessful) {
-      val emailExists = isExist.result
-      if (emailExists) {
-        alreadyinuse = true
-      } else {
-        alreadyinuse = false
+  firebaseConnection
+      .verifyEmail(email, "groomer")
+      .addOnCompleteListener { isExist ->
+        if (isExist.isSuccessful) {
+          val emailExists = isExist.result
+          if (emailExists) {
+            alreadyinuse = true
+          } else {
+            alreadyinuse = false
+          }
+        } else {
+          alreadyinuse = false
+        }
       }
-    } else {
-      alreadyinuse = false
-    }
-  }
+      .addOnFailureListener { alreadyinuse = true }
   isValid = email.contains('@') && email.contains('.')
 
   return Pair(isValid, alreadyinuse)
@@ -697,5 +726,5 @@ fun RegisterPreview() {
   val viewModel = remember { SignUpViewModel() } // In actual app, provide this via ViewModel
 
   val navController = rememberNavController()
-  Register(1, viewModel, navController)
+  Register(viewModel, navController)
 }

@@ -120,7 +120,7 @@ fun SignUpScreenLayoutGoogle(
   var textField by remember { mutableStateOf("") }
   var city by remember { mutableStateOf("") }
   var state by remember { mutableStateOf("") }
-  var postaleCode by remember { mutableStateOf("") }
+  var postalCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
   var expandedState by remember { mutableStateOf(false) }
   val locationOptions = remember { mutableStateListOf<LocationMap>() }
@@ -163,7 +163,7 @@ fun SignUpScreenLayoutGoogle(
     if (isValidInput) {
       errorText = ""
       if (isAddress) {
-        onNextAddress?.invoke(textField, city, state, postaleCode)
+        onNextAddress?.invoke(textField, city, state, postalCode)
       } else {
         onNext?.invoke(textField)
       }
@@ -311,8 +311,8 @@ fun SignUpScreenLayoutGoogle(
                   Spacer(modifier = Modifier.height(8.dp))
 
                   OutlinedTextField(
-                      value = postaleCode,
-                      onValueChange = { postaleCode = it },
+                      value = postalCode,
+                      onValueChange = { postalCode = it },
                       label = { Text("Postal Code") },
                       singleLine = true,
                       modifier = Modifier.fillMaxWidth().testTag("postalTag"),

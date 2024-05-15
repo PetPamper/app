@@ -2,21 +2,22 @@ package com.android.PetPamper.model
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.PetPamper.database.FirebaseConnection
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 
-class GroomerViewModel(uid: String, email: String) : ViewModel() {
-  var uid: String = uid
+class GroomerViewModel(var email: String) : ViewModel() {
+  var uid: String = email
   var name: String = ""
   var phoneNumber: String = ""
   var address: Address = Address("", "", "", "", LocationMap())
-  var availableHours: List<Calendar> = listOf()
-  var firebaseConnection: FirebaseConnection = FirebaseConnection()
-  var email: String = email
   var allHours: MutableState<Map<String, List<Calendar>>> = mutableStateOf(mapOf())
+
+  var groomer: MutableLiveData<Groomer> = MutableLiveData()
+  private var firebaseConnection: FirebaseConnection = FirebaseConnection()
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
     firebaseConnection.getUserData(uid).addOnCompleteListener { task ->

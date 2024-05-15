@@ -1,5 +1,6 @@
 package com.android.PetPamper
 
+import GroomerProfile
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -25,6 +26,25 @@ import com.android.PetPamper.ui.screen.forgotPass.*
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
 import com.android.PetPamper.ui.screen.register.*
 import com.android.PetPamper.ui.screen.users.*
+
+import com.android.PetPamper.ui.screen.register.GroomerRegister
+import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
+import com.android.PetPamper.ui.screen.register.Register
+import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
+import com.android.PetPamper.ui.screen.register.SignUpViewModel
+import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.android.PetPamper.ui.screen.users.BarScreen
+import com.android.PetPamper.ui.screen.users.BookingScreen
+import com.android.PetPamper.ui.screen.users.GroomerList
+import com.android.PetPamper.ui.screen.users.GroomerReview
+import com.android.PetPamper.ui.screen.users.GroomerTopBar
+import com.android.PetPamper.ui.screen.users.HomeScreen
+import com.android.PetPamper.ui.screen.users.MapView
+import com.android.PetPamper.ui.screen.users.PetListScreen
+import com.android.PetPamper.ui.screen.users.ReservationConfirmation
+import com.android.PetPamper.ui.screen.users.ReservationsScreen
+import com.android.PetPamper.ui.screen.users.SignIn
+import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import kotlin.math.round
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +64,9 @@ class MainActivity : ComponentActivity() {
         NavHost(navController = navController, startDestination = "LoginScreen") {
             composable("LoginScreen") { SignIn(navController) }
 
-            composable("RegisterScreen1") { Register(1, signUp, navController) }
+
+      composable("RegisterScreen1") { Register(signUp, navController) }
+      composable("RegisterScreenAlreadyGroomer") { Register(signUp, navController, true) }
 
             composable("RegisterScreenGoogle/{email}") { backStackEntry ->
                 val email = backStackEntry.arguments?.getString("email")
@@ -52,8 +74,12 @@ class MainActivity : ComponentActivity() {
                 SignUpScreenGoogle(signUp1, navController, email!!)
             }
 
-            composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
-            composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
+
+      composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
+      composable("GroomerRegisterScreenAlreadyUser") {
+        GroomerRegister(groomerSignUp, navController, true)
+      }
+      composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
             composable("HomeScreen/{email}") { backStackEntry ->
                 val email = backStackEntry.arguments?.getString("email")
@@ -145,7 +171,23 @@ fun AppNavigation(email: String?) {
 
             composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
-            }
+
+              }
+
+              composable("BookingScreen/{Groomer}") { backStackEntry ->
+                val groomerEmail = backStackEntry.arguments?.getString("Groomer")
+                if (groomerEmail != null) {
+                  if (email != null) {
+                    BookingScreen(groomerEmail, email, navController)
+                  }
+                }
+              }
+
+              composable(
+                  "ReservationConfirmation/{groomerEmail}/{userEmail}/{selectedDate}/{selectedHour}") {
+                      backStackEntry ->
+                    ReservationConfirmation(navController, backStackEntry)
+                  }
 
             composable(BarScreen.Chat.route) {
                 ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
@@ -229,7 +271,26 @@ fun AppNavigation(email: String?) {
                         Log.d("Groomers", "${sampleGroomers.value}")
                         GroomerList(groomers = sampleGroomers.value)
                     }
+
+                  } else {
+                    Log.d("Groomers", "${sampleGroomers.value}")
+                    GroomerList(
+                        groomers = sampleGroomers.value, navController) // Then the list of groomers
+                  }
                 }
+              }
+
+              composable("groomer_details/{email}") { backStackEntry ->
+                val email = backStackEntry.arguments?.getString("email")
+                var firebaseConnection = FirebaseConnection()
+                var GroomerName = remember { mutableStateOf<Groomer>(Groomer()) }
+                if (email != null) {
+                  firebaseConnection.fetchGroomerData(email) { groomer ->
+                    GroomerName.value = groomer
+                  }
+                }
+                GroomerProfile(GroomerName.value, navController)
+              }
             }
         }
     }

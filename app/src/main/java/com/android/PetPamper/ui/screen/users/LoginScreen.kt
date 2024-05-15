@@ -75,15 +75,15 @@ private fun OnSignInResult(
 
 @Composable
 fun SignIn(navController: NavHostController) {
-  var isGroomer by remember { mutableStateOf(false) }
   val db = Firebase.firestore
+  var isGroomer by remember { mutableStateOf(false) }
 
   var signedIn by remember { mutableStateOf(false) }
   var GoogleEmail by remember { mutableStateOf("") }
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection()
   var login by remember { mutableStateOf(true) }
 
   var errorMessage by remember { mutableStateOf("Login failed, email or password is incorrect") }
@@ -150,7 +150,7 @@ fun SignIn(navController: NavHostController) {
                     onValueChange = { email = it }, // Implement logic in real implementation
                     label = { Text("Email") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("EmailTextField"))
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -160,31 +160,47 @@ fun SignIn(navController: NavHostController) {
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth())
+                    modifier = Modifier.fillMaxWidth().testTag("PasswordTextField"))
 
                 Spacer(modifier = Modifier.height(15.dp))
 
+                var etxt = ""
                 if (!login) {
-                  Text(
-                      text = errorMessage,
-                      color = Color.Red,
-                      textAlign = TextAlign.Center,
-                      modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
+                  etxt = errorMessage
+                }
+                Text(
+                    text = etxt,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
 
-                  Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+
+                CustomTextButton("Forgot password?", "", "forgetButton") {
+                  navController.navigate("EmailScreen")
                 }
 
+                Spacer(modifier = Modifier.height(24.dp))
+
                 CustomTextButton(
-                    "Forgot password?",
-                    "",
-                    "forgetButton",
-                    { navController.navigate("EmailScreen") })
+                    tag =
+                        if (!isGroomer) "I already have a groomer account"
+                        else "I already have a user account",
+                    testTag = "AlreadyGroomerButton") {
+                      if (!isGroomer) {
+                        navController.navigate("RegisterScreenAlreadyGroomer")
+                      } else {
+                        navController.navigate("GroomerRegisterScreenAlreadyUser")
+                      }
+                    }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
                       errorMessage = "Login failed, email or password is incorrect"
+                      val groomerStr1 = if (isGroomer) "Groomer" else ""
+                      val groomerStr2 = if (isGroomer) "groomer" else "user"
                       if (email.isBlank() || password.isBlank()) {
                         login = false
                       } else {
@@ -192,32 +208,29 @@ fun SignIn(navController: NavHostController) {
                             email,
                             password,
                             {
-                              if (!isGroomer) {
-                                login = true
-                                navController.navigate("HomeScreen/${email}")
-                              } else {
-                                val groomerRef = db.collection("groomers").document(email)
-                                groomerRef
-                                    .get()
-                                    .addOnSuccessListener { document ->
-                                      if (document.exists()) {
-                                        login = true
-                                        navController.navigate("GroomerHomeScreen/${email}")
+                              val userRef = db.collection(groomerStr2 + "s").document(email)
+                              userRef
+                                  .get()
+                                  .addOnSuccessListener { document ->
+                                    if (document.exists()) {
+                                      login = true
+                                      navController.navigate(groomerStr1 + "HomeScreen/${email}")
 
-                                        Log.d(
-                                            "Firebase query",
-                                            "Groomer found," + " name is ${document.get("name")}")
-                                      } else {
-                                        login = false
-                                        errorMessage = "User is not registered as a groomer"
-                                        Log.e("Firebase query", "No such groomer")
-                                      }
-                                    }
-                                    .addOnFailureListener { exception ->
+                                      Log.d(
+                                          "Firebase query",
+                                          groomerStr1 +
+                                              " found," +
+                                              " name is ${document.get("name")}")
+                                    } else {
                                       login = false
-                                      Log.e("Firebase query", "Get failed with ", exception)
+                                      errorMessage = "Account is not registered as a $groomerStr2"
+                                      Log.e("Firebase query", "No such groomer")
                                     }
-                              }
+                                  }
+                                  .addOnFailureListener { exception ->
+                                    login = false
+                                    Log.e("Firebase query", "Get failed with ", exception)
+                                  }
                             },
                             { login = false })
                       }
@@ -287,8 +300,11 @@ fun SignIn(navController: NavHostController) {
                     modifier = Modifier.fillMaxWidth()) {
                       Switch(
                           checked = isGroomer,
-                          onCheckedChange = { isGroomer = it },
-                          modifier = Modifier.offset(x = 100.dp))
+                          onCheckedChange = {
+                            isGroomer = it
+                            errorMessage = ""
+                          },
+                          modifier = Modifier.offset(x = 100.dp).testTag("GroomerToggle"))
                       Text(
                           text = if (isGroomer) "I am a groomer" else "I am a user",
                           style =
@@ -356,6 +372,45 @@ fun CustomTextButton(
             modifier = Modifier.testTag(testTag),
             onClick = { onRegisterClick() })
       }
+}
+
+fun userExists(userEmail: String, isGroomer: Boolean): Pair<Boolean, String> {
+  val db = Firebase.firestore
+  var login = false
+  var errorMessage = ""
+
+  val userType = if (isGroomer) "groomer" else "user"
+
+  val groomerRef = db.collection(userType + "s").document(userEmail)
+  groomerRef
+      .get()
+      .addOnSuccessListener { document ->
+        if (document.exists()) {
+          login = true
+
+          Log.d(
+              "Firebase query",
+              "$userType found," +
+                  " name is ${
+                                document.get(
+                                    "name"
+                                )
+                            }")
+        } else {
+          login = false
+          errorMessage = "Account is registered as a $userType"
+          Log.d("debug_error_func", errorMessage)
+          Log.e("Firebase query", "No such $userType")
+        }
+      }
+      .addOnFailureListener { exception ->
+        login = false
+        Log.e("Firebase query", "Get failed with ", exception)
+      }
+
+  Log.d("debug_error_func2", errorMessage)
+  Log.d("debug_error_func2", login.toString())
+  return Pair(login, errorMessage)
 }
 
 @Preview
