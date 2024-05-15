@@ -19,10 +19,100 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import java.util.Calendar
+import kotlinx.coroutines.tasks.await
 
-class FirebaseConnection {
+class FirebaseConnection : Database() {
 
   private val db: FirebaseFirestore = Firebase.firestore
+
+  /**
+   * General function to retrieve data from Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) containing the data
+   * @param document identifier of the document to retrieve data from
+   * @return pair containing - the success status and - the retrieved data if successful, otherwise
+   *   null
+   */
+  override suspend fun fetchData(
+      collectionPath: String,
+      document: String
+  ): Pair<Boolean, Map<String, Any>?> {
+    var (success, doc) = fetchDocument(collectionPath, document)
+
+    if (!success) {
+      return Pair(false, null)
+    }
+
+    val data = doc?.data
+
+    return Pair(success, data)
+  }
+
+  /**
+   * Function that checks whether an entry exists in a Firestore collection
+   *
+   * @param collectionPath path to the collection
+   * @param document identifier of the document that we want to verify the existence of
+   * @return a pair containing: - the success of the operation
+   * - whether the document was found or not
+   */
+  override suspend fun documentExists(
+      collectionPath: String,
+      document: String
+  ): Pair<Boolean, Boolean> {
+    val (success, data) = fetchData(collectionPath, document)
+    val docFound = (data != null)
+    Log.d("PetTest", "documentExists: success=${success}, docFound=${docFound}")
+    return Pair(success, docFound)
+  }
+
+  /**
+   * General function to retrieve a document from Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) containing the document
+   * @param document identifier of the document to retrieve
+   * @return triple containing: - the success status
+   * - whether the document was found or not
+   * - the document task
+   */
+  private suspend fun fetchDocument(
+      collectionPath: String,
+      document: String
+  ): Pair<Boolean, DocumentSnapshot?> {
+    var success = false
+    val docRef = db.collection(collectionPath).document(document)
+    var doc: DocumentSnapshot? = null
+
+    try {
+      doc = docRef.get().await()
+      success = true
+    } catch (e: Exception) {
+      success = false
+    }
+
+    Log.d("PetTest", "fetchDocument end: success=${success}")
+    return Pair(success, doc)
+  }
+
+  /**
+   * General function to store data to Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) to store data to
+   * @param document identifier of the document to be stored
+   * @param data object containing the data to store
+   * @return success status of the store operation
+   */
+  override fun storeData(collectionPath: String, document: String, data: Any): Boolean {
+    var success = false
+
+    db.collection(collectionPath)
+        .document(document)
+        .set(data)
+        .addOnSuccessListener { success = true }
+        .addOnFailureListener { _ -> success = false }
+
+    return success
+  }
 
   fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("users")
