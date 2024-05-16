@@ -107,7 +107,9 @@ fun AppNavigation(email: String?) {
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -119,7 +121,9 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier
+                              .size(40.dp)
+                              .padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -141,13 +145,6 @@ fun AppNavigation(email: String?) {
             startDestination = BarScreen.Home.route,
             modifier = Modifier.padding(innerPadding)) {
               composable(BarScreen.Home.route) {
-                val nameUser = remember { mutableStateOf("") }
-                val firebaseConnection = FirebaseConnection()
-                firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-                  val uid = documents.documents[0]?.id.toString()
-                  val userViewModel = UserViewModel(uid)
-                  userViewModel.getNameFromFirebase { name -> nameUser.value = name }
-                }
                 HomeScreen(navController, email)
               }
 
@@ -185,7 +182,7 @@ fun AppNavigation(email: String?) {
               }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
-              composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
+              composable(BarScreen.Profile.route) { UserProfileScreen(userVM = UserViewModel(email!!)) }
 
               composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }

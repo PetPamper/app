@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -84,7 +85,9 @@ class FirebaseConnection : Database() {
     var doc: DocumentSnapshot? = null
 
     try {
-      doc = docRef.get().await()
+      docRef.addSnapshotListener { value, error ->
+           doc = value
+      }
       success = true
     } catch (e: Exception) {
       success = false
@@ -186,8 +189,27 @@ class FirebaseConnection : Database() {
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
-  fun getUserData(uid: String): Task<DocumentSnapshot> {
-    return db.collection("users").document(uid).get()
+  fun getUserData(uid: String): DocumentReference {
+    val docRef = db.collection("users").document(uid)
+      docRef.addSnapshotListener { snapshot, e ->
+          if (e != null){
+              Log.w("TAG","Listen failed.", e)
+              return@addSnapshotListener
+          }
+
+          val src = if (snapshot != null && snapshot.metadata.hasPendingWrites()){
+              "Local"
+          } else {
+              "Server"
+          }
+
+          if (snapshot != null && snapshot.exists()){
+              Log.d("TAG", "$src data: ${snapshot.data}")
+          } else {
+              Log.d("TAG", "$src data: null")
+          }
+      }
+      return docRef
   }
 
   fun fetchGroomerData(email: String, onComplete: (Groomer) -> Unit) {
