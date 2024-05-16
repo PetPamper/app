@@ -8,8 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,45 +26,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.PetPamper.R
+import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
+import com.android.PetPamper.model.User
 
-data class UserProfile(
-    val name: String,
-    val phoneNumber: String,
-    val email: String,
-    val address: String,
-    val pawPoints: Int,
-    val profilePictureUrl: String
-)
 
 @Composable
-fun UserProfileScreen(email: String) {
-  var userviewModel = UserViewModel(email)
-  val _phoneNumber = remember { mutableStateOf<String>("") }
-  val _addressStreet = remember { mutableStateOf<String>("") }
-  val _name = remember { mutableStateOf<String>("") }
+fun UserProfileScreen(modifier: Modifier = Modifier, userVM: UserViewModel) {
+    var user by remember { mutableStateOf(userVM.getUser()) }
 
-  userviewModel.getPhoneNumberFromFirebase { name -> _phoneNumber.value = name }
-
-  userviewModel.getAddressFromFirebase { address -> _addressStreet.value = address.street }
-
-  userviewModel.getNameFromFirebase { name -> _name.value = name }
-
-  var userProfile =
-      UserProfile(
-          name = userviewModel.name,
-          phoneNumber = _phoneNumber.value,
-          email = userviewModel.email,
-          address = _addressStreet.value,
-          pawPoints = 75,
-          profilePictureUrl = "https://yourimageurl.com/image.jpg")
-
-  Log.d("UserProfile1", "phone: ${userviewModel.phoneNumber}")
+    var showEditProfile by remember { mutableStateOf(false) }
+  if (showEditProfile){
+    EditProfileDialog(onDismiss = { showEditProfile = false },
+        onSave = {
+            userVM.updateUser(name = it.name, email = it.email, phone = it.phoneNumber)
+            showEditProfile = false },
+        user)
+  }
+  Log.d("UserProfile1", "phone: ${user.phoneNumber}")
 
   Column(modifier = Modifier.padding(12.dp)) { // Adding padding around the entire screen content
     // user name
     Text(
-        text = _name.value,
+        text = user.name,
         style =
             TextStyle(
                 fontSize = 38.sp,
@@ -71,15 +58,18 @@ fun UserProfileScreen(email: String) {
                 color = Color(0xFF2490DF),
                 // textAlign = TextAlign.Center
             ),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp) // Space after the title
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp) // Space after the title
         )
     Box(
         modifier =
-            Modifier.fillMaxWidth()
-                .height(194.dp)
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(8.dp))
-                .padding(12.dp)) {
+        Modifier
+            .fillMaxWidth()
+            .height(194.dp)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(8.dp))
+            .padding(12.dp)) {
           Row(
               horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
               verticalAlignment = Alignment.Top,
@@ -93,9 +83,10 @@ fun UserProfileScreen(email: String) {
               Button(
                   onClick = { /* Handle your click here */},
                   modifier =
-                      Modifier.width(90.dp) // Adjusted for visual balance
-                          .height(40.dp)
-                          .padding(start = 75.dp),
+                  Modifier
+                      .width(90.dp) // Adjusted for visual balance
+                      .height(40.dp)
+                      .padding(start = 75.dp),
                   // Adjusted for visual balance
                   colors = ButtonDefaults.buttonColors(Color.Transparent),
                   contentPadding =
@@ -105,8 +96,9 @@ fun UserProfileScreen(email: String) {
                         contentAlignment =
                             Alignment.Center, // This centers the content inside the Box
                         modifier =
-                            Modifier.fillMaxSize()
-                                .padding(0.dp) // This makes the Box fill the Button
+                        Modifier
+                            .fillMaxSize()
+                            .padding(0.dp) // This makes the Box fill the Button
                         ) {
                           Row(
                               modifier = Modifier.fillMaxSize(), // Ensure the Row fills the Box
@@ -144,30 +136,38 @@ fun UserProfileScreen(email: String) {
                 ) {
                   Image(
                       painter = painterResource(id = R.drawable.phone_symbol),
-                      modifier = Modifier.width(21.dp).height(23.dp),
+                      modifier = Modifier
+                          .width(21.dp)
+                          .height(23.dp),
                       contentDescription = "image description",
                       contentScale = ContentScale.FillBounds)
                   Image(
                       painter = painterResource(id = R.drawable.email),
-                      modifier = Modifier.width(16.dp).height(15.dp),
+                      modifier = Modifier
+                          .width(16.dp)
+                          .height(15.dp),
                       contentDescription = "image description",
                       contentScale = ContentScale.FillBounds)
                   Image(
                       painter = painterResource(id = R.drawable.home),
-                      modifier = Modifier.width(16.dp).height(19.dp),
+                      modifier = Modifier
+                          .width(16.dp)
+                          .height(19.dp),
                       contentDescription = "image description",
                       contentScale = ContentScale.FillBounds)
                 }
             Text(
                 text =
-                    "${userProfile.phoneNumber}\n${userProfile.email.take(20)}\n${userProfile.address.take(20)}",
+                    "${user.phoneNumber}\n${user.email.take(20)}\n${user.address.street.take(20)}",
                 style =
                     TextStyle(
                         fontSize = 13.sp,
                         lineHeight = 30.sp,
                         fontWeight = FontWeight.W400,
                         color = Color(0xFF11347A)),
-                modifier = Modifier.fillMaxWidth().padding(top = 15.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp))
           }
         }
     Spacer(modifier = Modifier.height(8.dp)) // Space between the sections
@@ -177,11 +177,12 @@ fun UserProfileScreen(email: String) {
     ) {
       Box(
           modifier =
-              Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-                  .width(216.dp)
-                  .height(100.dp)
-                  .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))
-                  .padding(12.dp) // Simplified padding application
+          Modifier
+              .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+              .width(216.dp)
+              .height(100.dp)
+              .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))
+              .padding(12.dp) // Simplified padding application
           ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp) // Space between Text and Row
@@ -203,7 +204,9 @@ fun UserProfileScreen(email: String) {
                             painter = painterResource(id = R.drawable.ellipse1),
                             contentDescription = "image description",
                             modifier =
-                                Modifier.size(58.dp).padding(1.dp) // Padding around the image
+                            Modifier
+                                .size(58.dp)
+                                .padding(1.dp) // Padding around the image
                             )
 
                         Column(
@@ -212,12 +215,16 @@ fun UserProfileScreen(email: String) {
                                 Arrangement.spacedBy(8.dp) // Space between two surface blocks
                             ) {
                               Surface(
-                                  modifier = Modifier.width(93.dp).height(18.dp),
+                                  modifier = Modifier
+                                      .width(93.dp)
+                                      .height(18.dp),
                                   color = Color(0x7A2490DF),
                                   shape = RoundedCornerShape(8.dp),
                               ) {
                                 Text(
-                                    modifier = Modifier.width(50.dp).height(11.dp),
+                                    modifier = Modifier
+                                        .width(50.dp)
+                                        .height(11.dp),
                                     text = "My rewards",
                                     style =
                                         TextStyle(
@@ -230,11 +237,15 @@ fun UserProfileScreen(email: String) {
                               }
 
                               Surface(
-                                  modifier = Modifier.width(93.dp).height(18.dp),
+                                  modifier = Modifier
+                                      .width(93.dp)
+                                      .height(18.dp),
                                   shape = RoundedCornerShape(8.dp),
                                   color = Color(0x7A2490DF)) {
                                     Text(
-                                        modifier = Modifier.width(61.dp).height(7.dp),
+                                        modifier = Modifier
+                                            .width(61.dp)
+                                            .height(7.dp),
                                         text = "My reviews",
                                         style =
                                             TextStyle(
@@ -259,15 +270,18 @@ fun UserProfileScreen(email: String) {
             // First Surface block
             Box(
                 modifier =
-                    Modifier.width(172.dp)
-                        .height(43.dp)
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-                        .clip(
-                            RoundedCornerShape(
-                                8.dp)) // Ensures that the background is clipped to the rounded
-                        // corners
-                        .background(Color(0xFFF4F3F3))
-                        .padding(8.dp),
+                Modifier
+                    .width(172.dp)
+                    .height(43.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            8.dp
+                        )
+                    ) // Ensures that the background is clipped to the rounded
+                    // corners
+                    .background(Color(0xFFF4F3F3))
+                    .padding(8.dp),
                 // shape = RoundedCornerShape(8.dp)
             ) {
               Row(
@@ -295,15 +309,18 @@ fun UserProfileScreen(email: String) {
             // Second Surface block
             Box(
                 modifier =
-                    Modifier.width(172.dp)
-                        .height(43.dp)
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-                        .clip(
-                            RoundedCornerShape(
-                                8.dp)) // Ensures that the background is clipped to the rounded
-                        // corners
-                        .background(Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))
-                        .padding(8.dp),
+                Modifier
+                    .width(172.dp)
+                    .height(43.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            8.dp
+                        )
+                    ) // Ensures that the background is clipped to the rounded
+                    // corners
+                    .background(Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))
+                    .padding(8.dp),
                 // shape = RoundedCornerShape(8.dp)
             ) {
               Row(
@@ -333,11 +350,14 @@ fun UserProfileScreen(email: String) {
     Box(
         contentAlignment = Alignment.Center, // Centers the Text over the Button
         modifier =
-            Modifier.width(395.dp)
-                .height(43.dp)
-                .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))) {
+        Modifier
+            .width(395.dp)
+            .height(43.dp)
+            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))) {
           Button(
-              onClick = { /* Handle your click here */},
+              onClick = {
+                  user = userVM.getUser(true)
+                  showEditProfile = true},
               modifier =
                   Modifier.matchParentSize(), // Ensures the Button matches the size of the Box
               colors =
@@ -368,15 +388,18 @@ fun UserProfileScreen(email: String) {
     Spacer(modifier = Modifier.height(4.dp))
     // Two smaller squares underneath
     Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp), // Adds padding around the row
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp), // Adds padding around the row
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically) {
           // First square with shadow and rounded corners
           Surface(
               modifier =
-                  Modifier.size(width = 126.dp, height = 129.dp)
-                      .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-                      .padding(4.dp),
+              Modifier
+                  .size(width = 126.dp, height = 129.dp)
+                  .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+                  .padding(4.dp),
               shape = RoundedCornerShape(32.dp),
               color = Color(0xFFF4F3F3) // Sets the background color of the Surface
               ) {
@@ -389,7 +412,9 @@ fun UserProfileScreen(email: String) {
                     ) {
                       Image(
                           painter = painterResource(id = R.drawable.wallet),
-                          modifier = Modifier.width(88.dp).height(82.dp),
+                          modifier = Modifier
+                              .width(88.dp)
+                              .height(82.dp),
                           contentDescription = "image description",
                           contentScale = ContentScale.FillBounds)
                       Text(
@@ -407,9 +432,10 @@ fun UserProfileScreen(email: String) {
           // Second square with shadow and rounded corners
           Surface(
               modifier =
-                  Modifier.size(width = 126.dp, height = 129.dp)
-                      .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-                      .padding(4.dp),
+              Modifier
+                  .size(width = 126.dp, height = 129.dp)
+                  .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+                  .padding(4.dp),
               shape = RoundedCornerShape(32.dp),
               color = Color(0xFFF4F3F3) // Sets the background color of the Surface
               ) {
@@ -422,7 +448,9 @@ fun UserProfileScreen(email: String) {
                     ) {
                       Image(
                           painter = painterResource(id = R.drawable.favorites),
-                          modifier = Modifier.width(88.dp).height(82.dp),
+                          modifier = Modifier
+                              .width(88.dp)
+                              .height(82.dp),
                           contentDescription = "image description",
                           contentScale = ContentScale.FillBounds)
                       Text(
@@ -440,7 +468,8 @@ fun UserProfileScreen(email: String) {
         }
     Spacer(modifier = Modifier.height(124.dp))
     Box(
-        Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+        Modifier
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
             .width(395.dp)
             .height(75.dp)
             .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp)),
@@ -450,13 +479,17 @@ fun UserProfileScreen(email: String) {
           verticalAlignment = Alignment.Top,
       ) {
         Image(
-            modifier = Modifier.width(30.dp).height(65.dp),
+            modifier = Modifier
+                .width(30.dp)
+                .height(65.dp),
             painter = painterResource(id = R.drawable.settings),
             contentDescription = "image description",
             contentScale = ContentScale.FillBounds)
         Text(
             text = "Settings",
-            modifier = Modifier.width(357.dp).height(65.dp),
+            modifier = Modifier
+                .width(357.dp)
+                .height(65.dp),
             style =
                 TextStyle(
                     fontSize = 24.sp,
@@ -471,7 +504,9 @@ fun UserProfileScreen(email: String) {
 
 @Composable
 fun UserProfileDetail(label: String, detail: String) {
-  Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+  Column(modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 16.dp, vertical = 8.dp)) {
     Text(text = label, fontSize = 16.sp, color = Color.Gray)
     Text(text = detail, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
   }
@@ -482,13 +517,12 @@ fun UserProfileDetail(label: String, detail: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewUserProfile() {
-  val sampleUserProfile =
-      UserProfile(
-          name = "Stanley Cohen",
-          phoneNumber = "+33 6 77 66 55 44",
-          email = "stanley.coh@gmail.com",
-          address = "Rue Louis Favre 4, 1024 Ecublens",
-          pawPoints = 75,
-          profilePictureUrl = "https://yourimageurl.com/image.jpg")
-  MaterialTheme { UserProfileScreen("alitennis131800@gmail.com") }
+    class previewUVM: UserViewModel("alitennis131800@gmail.com"){
+        override fun getUser(force: Boolean): User {
+            return User("Ali Tennis",super.uid,"0041234567890", Address("Rte des Essai 40, Apt. 4","Essex","Suisse","1234",
+                LocationMap()
+            ))
+        }
+    }
+  MaterialTheme { UserProfileScreen(userVM = previewUVM()) }
 }
