@@ -190,9 +190,13 @@ class FirebaseConnection {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
+      val auth = FirebaseAuth.getInstance()
+      auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
         task ->
       if (task.isSuccessful) {
+          auth.currentUser?.uid?.let {
+              getUserData(it)
+          }
         onSuccess()
       } else {
         onFailure(task.exception ?: Exception("Login failed"))

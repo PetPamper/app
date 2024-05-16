@@ -32,6 +32,7 @@ import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.firebase.auth.FirebaseAuth
 
 class SignUpViewModelGoogle() {
 
@@ -85,17 +86,22 @@ fun SignUpScreenGoogle(
             "Street",
             viewModel,
             onNextAddress = { street, city, state, postalcode ->
-              viewModel.address.city = city
-              viewModel.address.state = state
-              viewModel.address.street = street
-              viewModel.address.postalCode = postalcode
-              viewModel.address.location = viewModel.locationMap
+                viewModel.address.apply {
+                    this.city = city
+                    this.state = state
+                    this.street = street
+                    this.postalCode = postalcode
+                    this.location = viewModel.locationMap
+                }
 
-              val firebaseConnection = FirebaseConnection()
-              firebaseConnection.addUser(
-                  User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address),
-                  onSuccess = { currentStep++ },
-                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+                val firebaseConnection = FirebaseConnection()
+                firebaseConnection.addUser(
+                    User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address, uid),
+                    onSuccess = { currentStep++ },
+                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
+                )
             })
     4 -> navController.navigate("LoginScreen")
   }
