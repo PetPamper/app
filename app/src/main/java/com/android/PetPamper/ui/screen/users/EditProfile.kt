@@ -54,13 +54,13 @@ fun EditProfileDialog(
                 OutlinedTextField(
                     value = _name.value,
                     onValueChange = {
-
+                        _name.value = it
                     },
                     label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(
                     value = _email.value,
-                    onValueChange = { _email.value = it },
+                    onValueChange = {},
                     label = { Text("Email") },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(
