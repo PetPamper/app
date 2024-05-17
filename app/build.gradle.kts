@@ -138,7 +138,10 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(platform(libs.compose.bom))
     testImplementation(libs.junit)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.test.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
 
@@ -150,7 +153,13 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:2.7.0-rc01")
     implementation ("androidx.compose.material:material:1.3.0")
 
+    implementation("io.getstream:stream-chat-android-compose:6.0.8")
+    implementation("io.getstream:stream-chat-android-offline:6.0.8")
 
+    implementation ("io.getstream:stream-chat-android-client:6.0.8")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0-alpha08")
+
+    implementation("androidx.compose.material:material-icons-extended:1.6.0-alpha08")
 
 
 
