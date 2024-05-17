@@ -5,8 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
-import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,13 +16,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.android.PetPamper.R
 import com.android.PetPamper.model.UserViewModel
 
@@ -36,7 +39,7 @@ data class UserProfile(
 )
 
 @Composable
-fun UserProfileScreen(email: String) {
+fun UserProfileScreen(email: String, navController: NavController) {
   var userviewModel = UserViewModel(email)
   val _phoneNumber = remember { mutableStateOf<String>("") }
   val _addressStreet = remember { mutableStateOf<String>("") }
@@ -274,8 +277,9 @@ fun UserProfileScreen(email: String) {
                   horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
                   verticalAlignment = Alignment.Top,
               ) {
-                Text(
-                    text = "My pets",
+                ClickableText(
+                    onClick = { navController.navigate("PetListScreen") },
+                    text = AnnotatedString("My pets"),
                     modifier = Modifier.weight(1f),
                     style =
                         TextStyle(
@@ -490,5 +494,6 @@ fun PreviewUserProfile() {
           address = "Rue Louis Favre 4, 1024 Ecublens",
           pawPoints = 75,
           profilePictureUrl = "https://yourimageurl.com/image.jpg")
-  MaterialTheme { UserProfileScreen("alitennis131800@gmail.com") }
+  MaterialTheme { UserProfileScreen("alitennis131800@gmail.com",
+      NavController(context = LocalContext.current)) }
 }

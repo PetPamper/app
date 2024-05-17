@@ -46,27 +46,24 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.android.PetPamper.R
+import com.android.PetPamper.database.PetDataHandler
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.Year
 
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
     // Text(text = "Home screen")
-    CarouselCard(navController, email)
+    CarouselCard(navController, email, PetListViewModel(email!!, PetDataHandler()))
   }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CarouselCard(navController: NavController, email: String?) {
-  val sliderList =
-      listOf(
-          "https://picsum.photos/id/237/800/500",
-          "https://picsum.photos/id/244/800/500",
-          "https://picsum.photos/id/239/800/500",
-          "https://picsum.photos/id/243/800/500",
-          "https://picsum.photos/id/236/800/500")
+fun CarouselCard(navController: NavController, email: String?, petListViewModel: PetListViewModel) {
+  val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
   Column(modifier = Modifier.fillMaxSize()) {
@@ -83,7 +80,11 @@ fun CarouselCard(navController: NavController, email: String?) {
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
+          modifier = Modifier
+              .height(300.dp)
+              .width(350.dp)
+              .weight(1f)) { page ->
+          val pet = petListViewModel.petsList[page]
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -99,26 +100,30 @@ fun CarouselCard(navController: NavController, email: String?) {
                               start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
                   Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Floyd", fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
-                    Text(text = "11 years old", color = Color.DarkGray)
+                      // Pet name
+                    Text(text = pet.name, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
+                      // Pet age
+                    Text(text = "${pet.birthDate.until(LocalDate.now()).years} years old",
+                        color = Color.DarkGray)
+                      // Pet description
                     Text(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
                     Text(
-                        text =
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
+                        text = petListViewModel.petsList[page].description,
                         color = Color.DarkGray)
                   }
                   Box(
                       modifier =
-                          Modifier.fillMaxWidth()
-                              .aspectRatio(16f / 9f), // or your desired aspect ratio
+                      Modifier
+                          .fillMaxWidth()
+                          .aspectRatio(16f / 9f), // or your desired aspect ratio
                       contentAlignment = Alignment.Center) {
                         AsyncImage(
                             model =
                                 ImageRequest.Builder(LocalContext.current)
-                                    .data(sliderList[page])
+                                    .data(sliderList[page].pictures.getOrNull(0))
                                     .crossfade(true)
                                     .scale(Scale.FILL)
                                     .build(),
@@ -129,7 +134,9 @@ fun CarouselCard(navController: NavController, email: String?) {
                             )
                       }
 
-                  Spacer(modifier = Modifier.height(8.dp).width(10.dp))
+                  Spacer(modifier = Modifier
+                      .height(8.dp)
+                      .width(10.dp))
                 }
           }
       IconButton(
@@ -175,7 +182,9 @@ fun CarouselCard(navController: NavController, email: String?) {
       HorizontalPager(
           state = pageState2,
           contentPadding = PaddingValues(horizontal = 10.dp),
-          modifier = Modifier.height(180.dp).weight(1f)) { page ->
+          modifier = Modifier
+              .height(180.dp)
+              .weight(1f)) { page ->
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -192,19 +201,24 @@ fun CarouselCard(navController: NavController, email: String?) {
                     }) {
                   Box(
                       modifier =
-                          Modifier.padding(16.dp)
-                              // .background(Color.White, RoundedCornerShape(10.dp))
-                              .height(150.dp)
-                              .fillMaxWidth()) {
+                      Modifier
+                          .padding(16.dp)
+                          // .background(Color.White, RoundedCornerShape(10.dp))
+                          .height(150.dp)
+                          .fillMaxWidth()) {
                         Row(modifier = Modifier.padding(8.dp)) {
                           // Profile picture
                           Image(
                               painter = painterResource(id = R.drawable.profile),
                               contentDescription = "Profile Picture",
-                              modifier = Modifier.size(60.dp).clip(CircleShape))
+                              modifier = Modifier
+                                  .size(60.dp)
+                                  .clip(CircleShape))
 
                           // Spacer
-                          Spacer(modifier = Modifier.height(8.dp).width(10.dp))
+                          Spacer(modifier = Modifier
+                              .height(8.dp)
+                              .width(10.dp))
 
                           // Details: Name, age, distance
                           Column {

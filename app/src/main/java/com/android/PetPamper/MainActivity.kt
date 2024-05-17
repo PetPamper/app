@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.database.PetDataHandler
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
@@ -50,6 +51,8 @@ import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.android.PetPamper.ui.screen.users.AddPetScreen
+import com.android.PetPamper.ui.screen.users.AddPetScreenViewModel
 import com.android.PetPamper.ui.screen.users.BarScreen
 import com.android.PetPamper.ui.screen.users.BookingScreen
 import com.android.PetPamper.ui.screen.users.GroomerList
@@ -58,6 +61,7 @@ import com.android.PetPamper.ui.screen.users.GroomerTopBar
 import com.android.PetPamper.ui.screen.users.HomeScreen
 import com.android.PetPamper.ui.screen.users.MapView
 import com.android.PetPamper.ui.screen.users.PetListScreen
+import com.android.PetPamper.ui.screen.users.PetListViewModel
 import com.android.PetPamper.ui.screen.users.ReservationConfirmation
 import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
@@ -125,7 +129,9 @@ fun AppNavigation(email: String?) {
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -137,7 +143,9 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier
+                              .size(40.dp)
+                              .padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -175,8 +183,19 @@ fun AppNavigation(email: String?) {
               }
 
               composable("PetListScreen") {
-                PetListScreen(onBackPressed = { navController.navigateUp() })
+                PetListScreen(
+                    viewModel = PetListViewModel(email!!, PetDataHandler()),
+                    onBackPressed = { navController.navigateUp() },
+                    navController = navController
+                )
               }
+
+            composable("AddPetScreen") {
+                AddPetScreen(
+                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler()),
+                    onBackPressed = { navController.navigateUp() }
+                )
+            }
 
               composable("ChatScreen") { ChatScreenPreview() }
 
@@ -204,7 +223,7 @@ fun AppNavigation(email: String?) {
               }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
-              composable(BarScreen.Profile.route) { UserProfileScreen(email!!) }
+              composable(BarScreen.Profile.route) { UserProfileScreen(email!!, navController) }
 
               composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }

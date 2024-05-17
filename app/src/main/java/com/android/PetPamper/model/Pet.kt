@@ -3,13 +3,13 @@ package com.android.PetPamper.model
 import java.time.LocalDate
 
 enum class PetType(val petType: String) {
-  DEFAULT("default"),
-  DOG("dog"),
+    DOG("dog"),
+  OTHER("other"),
 }
 
 sealed class Pet(
     protected open val _id: String = "",
-    protected open var _petType: PetType = PetType.DEFAULT,
+    protected open var _petType: PetType = PetType.OTHER,
     protected open var _name: String = "Unnamed",
     protected open var _birthDate: LocalDate = LocalDate.of(0, 1, 1),
     protected open var _description: String = "",
@@ -67,7 +67,7 @@ class DefaultPet(
     description: String = "",
     pictures: List<String> = listOf(),
     ownerId: String = "PetPamper",
-) : Pet(id, PetType.DEFAULT, name, birthDate, description, pictures, ownerId) {}
+) : Pet(id, PetType.OTHER, name, birthDate, description, pictures, ownerId) {}
 
 class Dog(
     id: String = "",
