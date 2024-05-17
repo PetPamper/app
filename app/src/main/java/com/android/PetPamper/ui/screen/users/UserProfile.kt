@@ -494,6 +494,7 @@ fun PreviewUserProfile() {
           address = "Rue Louis Favre 4, 1024 Ecublens",
           pawPoints = 75,
           profilePictureUrl = "https://yourimageurl.com/image.jpg")
-  MaterialTheme { UserProfileScreen("alitennis131800@gmail.com",
-      NavController(context = LocalContext.current)) }
+  MaterialTheme {
+    UserProfileScreen("alitennis131800@gmail.com", NavController(context = LocalContext.current))
+  }
 }

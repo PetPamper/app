@@ -39,27 +39,27 @@ val petsFields = listOf("id", "petType", "name", "birthDate", "description", "pi
 
 class PetDataHandler(private val db: Database = FirebaseConnection()) {
 
-    /**
-     * Converts map representing pet to Pet object
-     *
-     * @param data map containing the pet's data
-     * @return pet object initialized from the map's values
-     */
-    private fun petFromMap(data: Map<String, Any>): Pet {
-        val petFactory = PetFactory()
-        val pet = petFactory.buildPet(data["id"] as String, data["petType"] as String)
+  /**
+   * Converts map representing pet to Pet object
+   *
+   * @param data map containing the pet's data
+   * @return pet object initialized from the map's values
+   */
+  private fun petFromMap(data: Map<String, Any>): Pet {
+    val petFactory = PetFactory()
+    val pet = petFactory.buildPet(data["id"] as String, data["petType"] as String)
 
-        pet.name = data["name"] as String
-        val birthYear = data["birthYear"] as Long
-        val birthMonth = data["birthMonth"] as Long
-        val birthDay = data["birthDay"] as Long
-        pet.birthDate = LocalDate.of(birthYear.toInt(), birthMonth.toInt(), birthDay.toInt())
-        pet.description = data["description"] as String
-        pet.pictures = data["pictures"] as List<String>
-        pet.ownerId = data["ownerId"] as String
+    pet.name = data["name"] as String
+    val birthYear = data["birthYear"] as Long
+    val birthMonth = data["birthMonth"] as Long
+    val birthDay = data["birthDay"] as Long
+    pet.birthDate = LocalDate.of(birthYear.toInt(), birthMonth.toInt(), birthDay.toInt())
+    pet.description = data["description"] as String
+    pet.pictures = data["pictures"] as List<String>
+    pet.ownerId = data["ownerId"] as String
 
-        return pet
-    }
+    return pet
+  }
 
   /**
    * Retrieves a pet from the database
@@ -78,24 +78,24 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     return petFromMap(data)
   }
 
-    /**
-     * Retrieves owner's pets as a list
-     *
-     * @param ownerId ID of the pet owner to retrieve pets from
-     * @return list of pets from owner if successful, or null if unsuccessful
-     */
-    suspend fun retrievePetsFromOwner(ownerId: String): List<Pet>? {
-        if (db !is FirebaseConnection) {
-            throw Exception("Query is not supported")
-        }
-
-        val (success, data) = db.query(petsDBPath, Filter.equalTo("ownerId", ownerId))
-        if (!success) {
-            return null
-        }
-
-        return data.map { petData -> petFromMap(petData!!) }
+  /**
+   * Retrieves owner's pets as a list
+   *
+   * @param ownerId ID of the pet owner to retrieve pets from
+   * @return list of pets from owner if successful, or null if unsuccessful
+   */
+  suspend fun retrievePetsFromOwner(ownerId: String): List<Pet>? {
+    if (db !is FirebaseConnection) {
+      throw Exception("Query is not supported")
     }
+
+    val (success, data) = db.query(petsDBPath, Filter.equalTo("ownerId", ownerId))
+    if (!success) {
+      return null
+    }
+
+    return data.map { petData -> petFromMap(petData!!) }
+  }
 
   /**
    * Stores a pet to the database
@@ -108,15 +108,15 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
   }
 
   private suspend fun storePetToDatabase(pet: PetData): Boolean {
-      val (success, petFound) = db.documentExists(petsDBPath, pet.id)
-      if (petFound) {
-          Log.e("IllegalStore", "Tried to store a pet that already exists in the database")
-          return false
-      }
-      if (!success) {
-          Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
-          return false
-      }
+    val (success, petFound) = db.documentExists(petsDBPath, pet.id)
+    if (petFound) {
+      Log.e("IllegalStore", "Tried to store a pet that already exists in the database")
+      return false
+    }
+    if (!success) {
+      Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
+      return false
+    }
     return db.storeData(petsDBPath, pet.id, pet)
   }
 
@@ -142,12 +142,12 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     return db.storeData(petsDBPath, pet.id, pet)
   }
 
-    /**
-     * Function that generates a UID for a newly registered pet
-     *
-     * @return UID as a string
-     */
-    fun generateNewId(): String {
-        return UUID.randomUUID().toString()
-    }
+  /**
+   * Function that generates a UID for a newly registered pet
+   *
+   * @return UID as a string
+   */
+  fun generateNewId(): String {
+    return UUID.randomUUID().toString()
+  }
 }

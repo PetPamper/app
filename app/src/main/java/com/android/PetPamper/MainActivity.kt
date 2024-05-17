@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
-import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.*
+import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
@@ -33,9 +33,9 @@ import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+import com.android.PetPamper.ui.screen.users.*
 import com.android.PetPamper.ui.screen.users.AddPetScreen
 import com.android.PetPamper.ui.screen.users.AddPetScreenViewModel
-import com.android.PetPamper.ui.screen.users.*
 import com.android.PetPamper.ui.screen.users.BarScreen
 import com.android.PetPamper.ui.screen.users.BookingScreen
 import com.android.PetPamper.ui.screen.users.GroomerList
@@ -112,9 +112,7 @@ fun AppNavigation(email: String?) {
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -126,9 +124,7 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier
-                              .size(40.dp)
-                              .padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -168,16 +164,14 @@ fun AppNavigation(email: String?) {
                 PetListScreen(
                     viewModel = PetListViewModel(email!!, PetDataHandler()),
                     onBackPressed = { navController.navigateUp() },
-                    navController = navController
-                )
+                    navController = navController)
               }
 
-            composable("AddPetScreen") {
+              composable("AddPetScreen") {
                 AddPetScreen(
                     viewModel = AddPetScreenViewModel(email!!, PetDataHandler()),
-                    onBackPressed = { navController.navigateUp() }
-                )
-            }
+                    onBackPressed = { navController.navigateUp() })
+              }
 
               composable("ChatScreen") { ChatScreenPreview() }
 

@@ -3,7 +3,7 @@ package com.android.PetPamper.model
 import java.time.LocalDate
 
 enum class PetType(val petType: String) {
-    DOG("dog"),
+  DOG("dog"),
   OTHER("other"),
 }
 

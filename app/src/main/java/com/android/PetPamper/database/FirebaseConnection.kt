@@ -19,9 +19,9 @@ import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import java.util.Calendar
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.Calendar
 import kotlinx.coroutines.tasks.await
 
 class FirebaseConnection : Database() {
@@ -51,23 +51,24 @@ class FirebaseConnection : Database() {
     return Pair(true, data)
   }
 
-    suspend fun query(collectionPath: String, filter: Filter): Pair<Boolean, List<Map<String, Any>?>> {
-        val query = db.collection(collectionPath).where(filter)
+  suspend fun query(
+      collectionPath: String,
+      filter: Filter
+  ): Pair<Boolean, List<Map<String, Any>?>> {
+    val query = db.collection(collectionPath).where(filter)
 
-        var querySnapshot: QuerySnapshot? = null
-        try {
-            querySnapshot = query.get().await()
-        } catch (e: Exception) {
-            return Pair(false, listOf())
-        }
-
-        val docTasks = querySnapshot!!.documents
-        val data = docTasks.map {doc ->
-            doc.data
-        }
-
-        return Pair(true, data)
+    var querySnapshot: QuerySnapshot? = null
+    try {
+      querySnapshot = query.get().await()
+    } catch (e: Exception) {
+      return Pair(false, listOf())
     }
+
+    val docTasks = querySnapshot!!.documents
+    val data = docTasks.map { doc -> doc.data }
+
+    return Pair(true, data)
+  }
 
   /**
    * Function that checks whether an entry exists in a Firestore collection
@@ -124,24 +125,22 @@ class FirebaseConnection : Database() {
    * @return success status of the store operation
    */
   override fun storeData(collectionPath: String, document: String, data: Any): Boolean {
-      var success = false
-      runBlocking {
-          launch {
-              success = try {
-                  db.collection(collectionPath)
-                      .document(document)
-                      .set(data)
-                      .await()
-          //      .addOnSuccessListener { success = true }
-          //      .addOnFailureListener { _ -> success = false }
-                  true
-              } catch (e: Exception) {
-                  false
-              }
-          }
+    var success = false
+    runBlocking {
+      launch {
+        success =
+            try {
+              db.collection(collectionPath).document(document).set(data).await()
+              //      .addOnSuccessListener { success = true }
+              //      .addOnFailureListener { _ -> success = false }
+              true
+            } catch (e: Exception) {
+              false
+            }
       }
+    }
 
-      Log.d("storeData", "store success status: $success")
+    Log.d("storeData", "store success status: $success")
     return success
   }
 

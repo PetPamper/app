@@ -1,7 +1,6 @@
 package com.android.PetPamper.ui.screen.users
 
 import android.annotation.SuppressLint
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -37,7 +35,11 @@ import com.android.PetPamper.model.Pet
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun PetListScreen(viewModel: PetListViewModel, onBackPressed: () -> Unit, navController: NavController) {
+fun PetListScreen(
+    viewModel: PetListViewModel,
+    onBackPressed: () -> Unit,
+    navController: NavController
+) {
   val pets = viewModel.petsList
 
   Scaffold(
@@ -51,37 +53,31 @@ fun PetListScreen(viewModel: PetListViewModel, onBackPressed: () -> Unit, navCon
             })
       },
       floatingActionButton = {
-          FloatingActionButton(
-              onClick = { navController.navigate("AddPetScreen") },
-              backgroundColor = Color.Blue,
-              contentColor = Color.White,
-              content = { Icon(Icons.Filled.Add, "") })
+        FloatingActionButton(
+            onClick = { navController.navigate("AddPetScreen") },
+            backgroundColor = Color.Blue,
+            contentColor = Color.White,
+            content = { Icon(Icons.Filled.Add, "") })
       },
-      ) {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              items(pets) { pet -> PetCard(pet) }
-            }
-
-      }
+  ) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+          items(pets) { pet -> PetCard(pet) }
+        }
+  }
 }
 
 @Composable
 fun PetCard(pet: Pet) {
-  Card(modifier = Modifier
-      .fillMaxWidth()
-      .padding(16.dp), elevation = 4.dp) {
+  Card(modifier = Modifier.fillMaxWidth().padding(16.dp), elevation = 4.dp) {
     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
       Image(
-          painter = rememberAsyncImagePainter(model = pet.pictures.getOrNull(0)), //painterResource(id = pet.pictureRes),
+          painter =
+              rememberAsyncImagePainter(
+                  model = pet.pictures.getOrNull(0)), // painterResource(id = pet.pictureRes),
           contentDescription = null,
-          modifier = Modifier
-              .size(64.dp)
-              .clip(CircleShape))
-      Column(modifier = Modifier
-          .weight(1f)
-          .padding(start = 16.dp)) {
+          modifier = Modifier.size(64.dp).clip(CircleShape))
+      Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
         Text(text = pet.name, style = MaterialTheme.typography.subtitle1)
         Text(text = pet.description, style = MaterialTheme.typography.body2)
         Text(text = "Date of Birth: ${pet.birthDate}", style = MaterialTheme.typography.caption)
@@ -90,9 +86,9 @@ fun PetCard(pet: Pet) {
   }
 }
 
-//data class Pet(
+// data class Pet(
 //    val name: String,
 //    val description: String,
 //    val dateOfBirth: String,
 //    @DrawableRes val pictureRes: Int
-//)
+// )

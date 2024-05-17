@@ -47,10 +47,9 @@ import coil.request.ImageRequest
 import coil.size.Scale
 import com.android.PetPamper.R
 import com.android.PetPamper.database.PetDataHandler
+import java.time.LocalDate
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.Year
 
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
@@ -80,11 +79,8 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier
-              .height(300.dp)
-              .width(350.dp)
-              .weight(1f)) { page ->
-          val pet = petListViewModel.petsList[page]
+          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
+            val pet = petListViewModel.petsList[page]
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -100,25 +96,23 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                               start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
                   Column(modifier = Modifier.padding(16.dp)) {
-                      // Pet name
+                    // Pet name
                     Text(text = pet.name, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
-                      // Pet age
-                    Text(text = "${pet.birthDate.until(LocalDate.now()).years} years old",
+                    // Pet age
+                    Text(
+                        text = "${pet.birthDate.until(LocalDate.now()).years} years old",
                         color = Color.DarkGray)
-                      // Pet description
+                    // Pet description
                     Text(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
-                    Text(
-                        text = petListViewModel.petsList[page].description,
-                        color = Color.DarkGray)
+                    Text(text = petListViewModel.petsList[page].description, color = Color.DarkGray)
                   }
                   Box(
                       modifier =
-                      Modifier
-                          .fillMaxWidth()
-                          .aspectRatio(16f / 9f), // or your desired aspect ratio
+                          Modifier.fillMaxWidth()
+                              .aspectRatio(16f / 9f), // or your desired aspect ratio
                       contentAlignment = Alignment.Center) {
                         AsyncImage(
                             model =
@@ -134,9 +128,7 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                             )
                       }
 
-                  Spacer(modifier = Modifier
-                      .height(8.dp)
-                      .width(10.dp))
+                  Spacer(modifier = Modifier.height(8.dp).width(10.dp))
                 }
           }
       IconButton(
@@ -182,9 +174,7 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
       HorizontalPager(
           state = pageState2,
           contentPadding = PaddingValues(horizontal = 10.dp),
-          modifier = Modifier
-              .height(180.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(180.dp).weight(1f)) { page ->
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -201,24 +191,19 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                     }) {
                   Box(
                       modifier =
-                      Modifier
-                          .padding(16.dp)
-                          // .background(Color.White, RoundedCornerShape(10.dp))
-                          .height(150.dp)
-                          .fillMaxWidth()) {
+                          Modifier.padding(16.dp)
+                              // .background(Color.White, RoundedCornerShape(10.dp))
+                              .height(150.dp)
+                              .fillMaxWidth()) {
                         Row(modifier = Modifier.padding(8.dp)) {
                           // Profile picture
                           Image(
                               painter = painterResource(id = R.drawable.profile),
                               contentDescription = "Profile Picture",
-                              modifier = Modifier
-                                  .size(60.dp)
-                                  .clip(CircleShape))
+                              modifier = Modifier.size(60.dp).clip(CircleShape))
 
                           // Spacer
-                          Spacer(modifier = Modifier
-                              .height(8.dp)
-                              .width(10.dp))
+                          Spacer(modifier = Modifier.height(8.dp).width(10.dp))
 
                           // Details: Name, age, distance
                           Column {
