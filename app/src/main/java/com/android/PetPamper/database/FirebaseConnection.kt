@@ -153,7 +153,23 @@ class FirebaseConnection : Database() {
         .addOnFailureListener { exception -> onFailure(exception) }
   }
 
+  fun updateUserAddress(uid: String, addressData: Map<String, Any>, onComplete: () -> Unit) {
+    db.collection("users")
+        .document(uid)
+        .update(addressData)
+        .addOnSuccessListener { onComplete() }
+        .addOnFailureListener { exception ->
+          println("Error updating address: ${exception.localizedMessage}")
+          onComplete()
+        }
+  }
+
+  fun changeAddress(email: String, address: Address) {
+    db.collection("users").document(email).update("address", address)
+  }
+
   // method to verify if an email is already registered
+
   fun verifyEmail(email: String, userType: String): Task<Boolean> {
     val source = TaskCompletionSource<Boolean>()
 
