@@ -344,6 +344,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
               }
 
+
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!, navController) }
 
