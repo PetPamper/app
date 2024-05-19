@@ -4,12 +4,14 @@ import android.util.Log
 import com.android.PetPamper.model.Pet
 import com.android.PetPamper.model.PetFactory
 import com.android.PetPamper.model.PetType
+import com.google.firebase.firestore.Filter
 import java.time.LocalDate
+import java.util.UUID
 
 /** Class representing pet data entry in Firestore */
 data class PetData(
-    val id: String = "",
-    val petType: String = PetType.DEFAULT.petType,
+    var id: String = "",
+    val petType: String = PetType.OTHER.petType,
     val name: String = "Unnamed",
     val birthYear: Int = 0,
     val birthMonth: Int = 1,
@@ -38,19 +40,12 @@ val petsFields = listOf("id", "petType", "name", "birthDate", "description", "pi
 class PetDataHandler(private val db: Database = FirebaseConnection()) {
 
   /**
-   * Retrieves a pet from the database
+   * Converts map representing pet to Pet object
    *
-   * @param petId ID of the pet to retrieve from the database
-   * @return pet object corresponding to the pet retrieved from the database if successful, or null
-   *   if unsuccessful
+   * @param data map containing the pet's data
+   * @return pet object initialized from the map's values
    */
-  suspend fun retrievePetFromDatabase(petId: String): Pet? {
-    var (success, data) = db.fetchData(petsDBPath, petId)
-    if (!success) {
-      return null
-    }
-    data = data!!
-
+  private fun petFromMap(data: Map<String, Any>): Pet {
     val petFactory = PetFactory()
     val pet = petFactory.buildPet(data["id"] as String, data["petType"] as String)
 
@@ -67,6 +62,42 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
   }
 
   /**
+   * Retrieves a pet from the database
+   *
+   * @param petId ID of the pet to retrieve from the database
+   * @return pet object corresponding to the pet retrieved from the database if successful, or null
+   *   if unsuccessful
+   */
+  suspend fun retrievePetFromDatabase(petId: String): Pet? {
+    var (success, data) = db.fetchData(petsDBPath, petId)
+    if (!success) {
+      return null
+    }
+    data = data!!
+
+    return petFromMap(data)
+  }
+
+  /**
+   * Retrieves owner's pets as a list
+   *
+   * @param ownerId ID of the pet owner to retrieve pets from
+   * @return list of pets from owner if successful, or null if unsuccessful
+   */
+  suspend fun retrievePetsFromOwner(ownerId: String): List<Pet>? {
+    if (db !is FirebaseConnection) {
+      throw Exception("Query is not supported")
+    }
+
+    val (success, data) = db.query(petsDBPath, Filter.equalTo("ownerId", ownerId))
+    if (!success) {
+      return null
+    }
+
+    return data.map { petData -> petFromMap(petData!!) }
+  }
+
+  /**
    * Stores a pet to the database
    *
    * @param pet pet to store to the database
@@ -76,7 +107,7 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     return storePetToDatabase(PetData(pet))
   }
 
-  suspend fun storePetToDatabase(pet: PetData): Boolean {
+  private suspend fun storePetToDatabase(pet: PetData): Boolean {
     val (success, petFound) = db.documentExists(petsDBPath, pet.id)
     if (petFound) {
       Log.e("IllegalStore", "Tried to store a pet that already exists in the database")
@@ -99,7 +130,7 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     return modifyPetEntry(PetData(pet))
   }
 
-  suspend fun modifyPetEntry(pet: PetData): Boolean {
+  private suspend fun modifyPetEntry(pet: PetData): Boolean {
     val (success, petFound) = db.documentExists(petsDBPath, pet.id)
     if (!petFound) {
       Log.e("IllegalModification", "Tried to modify a pet that isn't in the database")
@@ -109,5 +140,14 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
       return false
     }
     return db.storeData(petsDBPath, pet.id, pet)
+  }
+
+  /**
+   * Function that generates a UID for a newly registered pet
+   *
+   * @return UID as a string
+   */
+  fun generateNewId(): String {
+    return UUID.randomUUID().toString()
   }
 }

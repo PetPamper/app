@@ -121,7 +121,7 @@ class PetTest {
   fun checkPetFactoryDefault() {
     val testMap: MutableMap<String, Any> = mutableMapOf()
     testMap += Pair("id", "")
-    testMap += Pair("petType", "default")
+    testMap += Pair("petType", "other")
     testMap += Pair("name", "Unnamed")
     testMap += Pair("birthDate", LocalDate.of(0, 1, 1))
     testMap += Pair("description", "")
