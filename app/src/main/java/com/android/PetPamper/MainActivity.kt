@@ -57,12 +57,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat.startActivity
 import com.example.PetPamper.ChannelActivity
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryChannelRequest
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
+import io.getstream.chat.android.compose.ui.messages.MessagesScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
+import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.core.internal.exhaustive
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.InitializationState
+import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.extensions.watchChannelAsState
@@ -84,58 +88,78 @@ class MainActivity : ComponentActivity() {
             .logLevel(ChatLogLevel.ALL) // Set to NOTHING in production
             .build()
 
+
+
         setContent {
             AppNavigation(client)
         }
     }
 
 
-
-
-
-    private fun createChannel(client: ChatClient) {
-        Log.d("salam", "Creating channel")
-        val channelId = "dm_channel_id"
-        val channelClient = client.channel(
-            channelType = "messaging",
-            channelId = channelId
-        )
-
-        val members = listOf("user1-id", "user2-id")
-        val extraData = mapOf("name" to "Direct Message between User One and User Two")
-
-        channelClient.create(members, extraData).enqueue { result ->
-            if (result.isSuccess) {
-                val channel: Channel = result.getOrThrow()
-                Log.d("salam", "Channel created: ${channel.cid}")
-            } else {
-                Log.e("salam", "Error creating channel: ")
-            }
-        }
-    }
 }
 
-fun createOrLoadChannel(client: ChatClient, userId: String, groomerId: String, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
-    val channelId = "channel-$userId-$groomerId"
+fun createChannel(client: ChatClient, userId: String, groomerId: String, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+    Log.d("salam", "Creating channel")
+    val channelId = "dm_channel_id"
     val channelClient = client.channel(
         channelType = "messaging",
         channelId = channelId
     )
 
     val members = listOf(userId, groomerId)
-    val extraData = mapOf("name" to "Chat between $userId and $groomerId")
+    Log.d("Members", "Members: $members")
+    val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
+
 
     channelClient.create(members, extraData).enqueue { result ->
         if (result.isSuccess) {
             val channel: Channel = result.getOrThrow()
-            Log.d("ChatApp", "Channel created: ${channel.cid}")
+
+            channel.members.forEach {
+                Log.d("salam", "Member: ${it.user.id}")
+            }
+            Log.d("salam", "current user: ${client.getCurrentUser()}")
+            Log.d("salam", "Channel created: ${channel.cid}")
+
+            val message = Message(text = "Hello, this is a message.")
+
+            // Send the message
+            channelClient.sendMessage(message).enqueue { sendMessageResult ->
+                if (sendMessageResult.isSuccess) {
+                    Log.d("salam", "Message sent successfully")
+                } else {
+                    Log.e("salam", "Error sending message: ${sendMessageResult.errorOrNull()?.message}")
+                }
+            }
+
             onSuccess(channel.cid)
         } else {
-            Log.e("ChatApp", "Error creating channel: ${result.errorOrNull()?.message}")
+            Log.e("salam", "Error creating channel: ")
             onError(result.errorOrNull()?.message ?: "Unknown error")
         }
     }
 }
+
+fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
+
+    val token = client.devToken(user.id) // Ensure the token is correct
+
+    if (client.getCurrentUser() != null) {
+        Log.d("ChatApp", "User already connected")
+        onSuccess()
+    } else {
+        client.connectUser(user, token).enqueue { result ->
+            if (result.isSuccess) {
+                Log.d("ChatApp", "User connected: ${user.id}")
+                onSuccess()
+            } else {
+                Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
+                onError(result.errorOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+}
+
 
 
 
@@ -172,25 +196,13 @@ fun createOrLoadChannel(client: ChatClient, userId: String, groomerId: String, o
       composable("GroomerHomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         if (email != null) {
+
           GroomerHome(email)
         }
       }
     }
   }
 
-fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
-    val token = client.devToken(user.id) // Ensure the token is correct
-
-    client.connectUser(user, token).enqueue { result ->
-        if (result.isSuccess) {
-            Log.d("ChatApp", "User connected: ${user.id}")
-            onSuccess()
-        } else {
-            Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
-            onError(result.errorOrNull()?.message ?: "Unknown error")
-        }
-    }
-}
 
 
 
@@ -207,22 +219,30 @@ fun AppNavigation(email: String?, client: ChatClient) {
       )
 
 
-    val user1Id = remember { mutableStateOf("") }
+
+    val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
     val firebaseConnection = FirebaseConnection()
-    firebaseConnection.fetchChatId(email!!, onComplete = { UserId, UserName ->
-        user1Id.value = UserId
-          val user1 = User(
-                id = UserId,
-                name = UserName,
-                image = "https://bit.ly/2TIt8NR")
 
-        connectUser(client, user1, onSuccess = {
-            Log.d("ChatApp", "User connected")
-        }, onError = {
-            Log.e("ChatApp", "Error connecting user: $it")
-        })
-    })
+    LaunchedEffect(email) {
+        if (email != null) {
+            firebaseConnection.fetchChatId(email, onComplete = { userName, userId ->
+                user1Id.value = userId
+                val user1 = User(
+                    id = userId,
+                    name = userName,
+                    image = "https://e7.pngegg.com/pngimages/81/556/png-clipart-graphy-graphy-royalty-free-microphone-child.png",
+                )
+
+                connectUser(client, user1, onSuccess = {
+                     Log.d("ChatApp", "User connected")
+                }, onError = {
+                     Log.e("ChatApp", "Error connecting user: $it")
+                })
+
+            })
+        }
+    }
 
 
 
@@ -272,13 +292,19 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
                   val uid = documents.documents[0]?.id.toString()
                   val userViewModel = UserViewModel(uid)
-                  userViewModel.getNameFromFirebase { name -> nameUser.value = name }
+                  userViewModel.getNameFromFirebase { name ->
+                      nameUser.value = name }
                 }
                 HomeScreen(navController, email)
               }
 
               composable("ReservationsScreen") {
-                ReservationsScreen(onBackPressed = { navController.navigateUp() })
+                  val reservations = remember { mutableStateOf(listOf<Reservation>()) }
+                  firebaseConnection.fetchReservations(email!!) { res ->
+                      reservations.value = res
+                  }
+
+                ReservationsScreen(reservations = reservations.value, onBackPressed = { navController.navigateUp() })
               }
 
               composable("PetListScreen") {
@@ -322,7 +348,6 @@ fun AppNavigation(email: String?, client: ChatClient) {
                     when (clientInitialisationState) {
                         InitializationState.COMPLETE -> {
                             val context = LocalContext.current
-
                             ChannelsScreen(
                                 title = stringResource(id = R.string.app_name),
                                 isShowingSearch = true,
@@ -432,7 +457,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
                     GroomerName.value = groomer
                   }
                 }
-                GroomerProfile(GroomerName.value, navController, user1Id.value)
+                GroomerProfile(GroomerName.value, navController, user1Id.value, client)
               }
             }
       }

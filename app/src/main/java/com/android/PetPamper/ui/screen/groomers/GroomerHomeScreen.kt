@@ -32,7 +32,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.android.PetPamper.connectUser
 import com.android.PetPamper.model.GroomerViewModel
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.models.User
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Calendar
@@ -44,6 +47,12 @@ fun GroomerHome(email: String) {
   val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
   // Map to store selected hours for multiple dates
   val selectedHoursMap = remember { mutableStateMapOf<String, MutableList<Int>>() }
+
+    connectUser(ChatClient.instance(), User(groomerViewModel.value.email, groomerViewModel.value.name, "https://bit.ly/3kgrh3e"), onSuccess = {
+        println("User connected successfully")
+    }, onError = {
+        println("Error connecting user: $it")
+    })
 
   Column(modifier = Modifier.padding(16.dp)) {
     MonthYearPicker(selectedDate) { date -> selectedDate.value = date }

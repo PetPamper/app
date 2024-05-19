@@ -1,5 +1,6 @@
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -31,7 +32,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
 import com.android.PetPamper.connectUser
-import com.android.PetPamper.createOrLoadChannel
+import com.android.PetPamper.createChannel
 import com.android.PetPamper.model.Groomer
 import com.example.PetPamper.ChannelActivity
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -39,10 +40,13 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.compose.ui.messages.MessagesScreen
+import io.getstream.chat.android.compose.ui.theme.ChatTheme
+import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.models.User
 
 @Composable
-fun GroomerProfile(groomer: Groomer, navController: NavController, userId: String) {
+fun GroomerProfile(groomer: Groomer, navController: NavController, userId: String, client: ChatClient) {
   Scaffold(
       bottomBar = {
         BottomBookingBar(groomer.price, navController, groomer)
@@ -123,7 +127,8 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
                   profilePic = groomer.profilePic,
                   groomerName = groomer.name,
                   groomerId = groomer.email,
-                  userId = userId
+                  userId = userId,
+                  client = client
               )
 
               Spacer(modifier = Modifier.height(80.dp))
@@ -166,8 +171,7 @@ fun BottomBookingBar(price: Int, navController: NavController, groomer: Groomer)
 
 
 @Composable
-fun ChatWithGroomerButton(context: Context, profilePic: String, groomerName: String, groomerId: String, userId: String) {
-    val client = ChatClient.instance()
+fun ChatWithGroomerButton(client: ChatClient, context: Context, profilePic: String, groomerName: String, groomerId: String, userId: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
@@ -175,29 +179,26 @@ fun ChatWithGroomerButton(context: Context, profilePic: String, groomerName: Str
                 val groomer = User(
                     id = groomerId,
                     name = groomerName,
-                    image = profilePic
+                    image = profilePic,
+
                 )
 
                 // First, connect the groomer
-                if (client.getCurrentUser() == null || client.getCurrentUser()?.id != groomer.id) {
-                    connectUser(client, groomer, onSuccess = {
                         // Then, create or load the channel
-                        createOrLoadChannel(client, userId, groomerId, onSuccess = { channelId ->
-                            val intent = ChannelActivity.getIntent(context, channelId)
-                            ContextCompat.startActivity(context, intent, null)
-                        }, onError = { error ->
-                            Toast.makeText(
-                                context,
-                                "Error creating channel: $error",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        })
-                    }, onError = { error ->
-                        Toast.makeText(context, "Error connecting user: $error", Toast.LENGTH_LONG)
-                            .show()
-                    })
-                }
-            }
+                createChannel(client, userId, groomerId, onSuccess = { channelId ->
+                    val intent = ChannelActivity.getIntent(context, channelId)
+                    context.startActivity(intent)
+                    Log.d("ChatWithGroomerButton", "Channel created: $channelId, current user : ${client.getCurrentUser()}")
+                }, onError = { error ->
+                    Toast.makeText(
+                        context,
+                        "Error creating channel: $error",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
+
+
+            },
         ) {
             Row {
                 Spacer(modifier = Modifier.width(8.dp))
