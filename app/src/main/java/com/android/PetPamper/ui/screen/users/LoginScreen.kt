@@ -324,6 +324,7 @@ fun SignIn(navController: NavHostController) {
         if (documents != null && documents.isNotEmpty()) {
           // If documents are found, it means there is a user ID associated with the email
           // Navigate to the home screen
+
           navController.navigate("HomeScreen/$GoogleEmail")
         } else {
           // If no documents are found, it means no user ID is associated with the email
