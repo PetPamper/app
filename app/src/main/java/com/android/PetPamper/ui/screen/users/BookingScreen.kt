@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.Reservation
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -263,6 +264,8 @@ fun ConfirmReservation(
 ) {
   val context = LocalContext.current
   val firebaseConnection = FirebaseConnection()
+  val groomer = remember { mutableStateOf(Groomer()) }
+  firebaseConnection.fetchGroomerData(groomerEmail) { groomer.value = it }
 
   // Button to confirm the reservation
   Button(
@@ -271,6 +274,10 @@ fun ConfirmReservation(
         val reservation =
             Reservation(
                 reservationId = reservationId,
+                groomerName = groomer.value.name,
+                price = groomer.value.price.toString(),
+                services = groomer.value.services.joinToString(", "),
+                experienceYears = groomer.value.yearsExperience,
                 groomerEmail = groomerEmail,
                 userEmail = userEmail,
                 date = selectedDate,

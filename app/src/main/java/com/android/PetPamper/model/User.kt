@@ -7,4 +7,5 @@ data class User(
     var address: Address = Address(),
     var pawPoints: Int = 0,
     var profilePictureUrl: String  = "",
+    val userId: String = ""
 ) {}

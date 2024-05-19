@@ -29,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,27 +48,39 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.android.PetPamper.R
+import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.database.PetDataHandler
+import com.android.PetPamper.model.Reservation
+import java.time.LocalDate
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
+    val firebaseConnection = FirebaseConnection()
+    var resa = remember { mutableStateOf(listOf<Reservation>()) }
+    firebaseConnection.fetchReservations(email!!) { resa.value = it }
+
+    if (resa.value.isNotEmpty()) {
+      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
+    }
+
     // Text(text = "Home screen")
-    CarouselCard(navController, email)
+
   }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CarouselCard(navController: NavController, email: String?) {
-  val sliderList =
-      listOf(
-          "https://picsum.photos/id/237/800/500",
-          "https://picsum.photos/id/244/800/500",
-          "https://picsum.photos/id/239/800/500",
-          "https://picsum.photos/id/243/800/500",
-          "https://picsum.photos/id/236/800/500")
+fun CarouselCard(
+    navController: NavController,
+    email: String?,
+    petListViewModel: PetListViewModel,
+    reservation: List<Reservation>
+) {
+
+  val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
   Column(modifier = Modifier.fillMaxSize()) {
@@ -84,6 +98,7 @@ fun CarouselCard(navController: NavController, email: String?) {
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
           modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
+            val pet = petListViewModel.petsList[page]
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -99,16 +114,18 @@ fun CarouselCard(navController: NavController, email: String?) {
                               start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
                   Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Floyd", fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
-                    Text(text = "11 years old", color = Color.DarkGray)
+                    // Pet name
+                    Text(text = pet.name, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
+                    // Pet age
+                    Text(
+                        text = "${pet.birthDate.until(LocalDate.now()).years} years old",
+                        color = Color.DarkGray)
+                    // Pet description
                     Text(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
-                    Text(
-                        text =
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-                        color = Color.DarkGray)
+                    Text(text = petListViewModel.petsList[page].description, color = Color.DarkGray)
                   }
                   Box(
                       modifier =
@@ -118,7 +135,7 @@ fun CarouselCard(navController: NavController, email: String?) {
                         AsyncImage(
                             model =
                                 ImageRequest.Builder(LocalContext.current)
-                                    .data(sliderList[page])
+                                    .data(sliderList[page].pictures.getOrNull(0))
                                     .crossfade(true)
                                     .scale(Scale.FILL)
                                     .build(),
@@ -152,8 +169,9 @@ fun CarouselCard(navController: NavController, email: String?) {
 
     // second one
 
-    val pageState2 = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
+    val pageState2 = rememberPagerState(initialPage = 0, pageCount = { reservation.size })
     val scope2 = rememberCoroutineScope()
+    val currentReservations = reservation[pageState2.currentPage]
 
     Row(modifier = Modifier.padding(15.dp)) {
       Text(
@@ -208,9 +226,14 @@ fun CarouselCard(navController: NavController, email: String?) {
 
                           // Details: Name, age, distance
                           Column {
-                            Text(text = "John Doe", fontWeight = FontWeight.Bold)
-                            Text(text = "Age: 30")
-                            Text(text = "Distance: 5 km")
+                            Text(
+                                text = currentReservations.groomerName,
+                                fontWeight = FontWeight.Bold)
+                            Text(text = "Price: ${currentReservations.price}")
+                            Text(
+                                text =
+                                    "Experience Years: ${currentReservations.experienceYears} years")
+                            Text(text = "Services: ${currentReservations.services}")
                           }
                         }
 
@@ -221,9 +244,8 @@ fun CarouselCard(navController: NavController, email: String?) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.align(Alignment.BottomCenter)) {
-                              Text(text = "Service Type: Service XYZ")
-                              Text(text = "Date: Jan 1, 2024")
-                              Text(text = "Total: $100")
+                              Text(text = "Date : ${currentReservations.date}")
+                              Text(text = "Hour: ${currentReservations.hour}")
                               Spacer(modifier = Modifier.height(10.dp))
                             }
 
@@ -240,6 +262,7 @@ fun CarouselCard(navController: NavController, email: String?) {
                       }
                 }
           }
+
       IconButton(
           enabled = pageState2.currentPage < pageState2.pageCount - 1,
           onClick = {

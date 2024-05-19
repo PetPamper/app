@@ -1,4 +1,7 @@
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -24,14 +28,23 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
+import com.android.PetPamper.createChannel
 import com.android.PetPamper.model.Groomer
+import com.example.PetPamper.ChannelActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.models.User
 
 @Composable
-fun GroomerProfile(groomer: Groomer, navController: NavController) {
+fun GroomerProfile(
+    groomer: Groomer,
+    navController: NavController,
+    userId: String,
+    client: ChatClient
+) {
   Scaffold(
       bottomBar = {
         BottomBookingBar(groomer.price, navController, groomer)
@@ -100,6 +113,16 @@ fun GroomerProfile(groomer: Groomer, navController: NavController) {
               GroomerLocationMap(
                   LatLng(groomer.address.location.latitude, groomer.address.location.longitude))
 
+              Spacer(modifier = Modifier.height(16.dp))
+
+              ChatWithGroomerButton(
+                  context = LocalContext.current,
+                  profilePic = groomer.profilePic,
+                  groomerName = groomer.name,
+                  groomerId = groomer.email,
+                  userId = userId,
+                  client = client)
+
               Spacer(modifier = Modifier.height(80.dp))
             }
       }
@@ -131,6 +154,52 @@ fun BottomBookingBar(price: Int, navController: NavController, groomer: Groomer)
                   }
             }
       }
+}
+
+@Composable
+fun ChatWithGroomerButton(
+    client: ChatClient,
+    context: Context,
+    profilePic: String,
+    groomerName: String,
+    groomerId: String,
+    userId: String
+) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+    Button(
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
+        onClick = {
+          val groomer =
+              User(
+                  id = groomerId,
+                  name = groomerName,
+                  image = profilePic,
+              )
+
+          // First, connect the groomer
+          // Then, create or load the channel
+          createChannel(
+              client,
+              userId,
+              groomerId,
+              onSuccess = { channelId ->
+                val intent = ChannelActivity.getIntent(context, channelId)
+                context.startActivity(intent)
+                Log.d(
+                    "ChatWithGroomerButton",
+                    "Channel created: $channelId, current user : ${client.getCurrentUser()}")
+              },
+              onError = { error ->
+                Toast.makeText(context, "Error creating channel: $error", Toast.LENGTH_SHORT).show()
+              })
+        },
+    ) {
+      Row {
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = "Chat with this groomer", color = Color.White)
+      }
+    }
+  }
 }
 
 @Composable

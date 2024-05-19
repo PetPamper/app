@@ -3,6 +3,7 @@ package com.android.PetPamper.database
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.android.PetPamper.data.COLLECTION_USER
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
@@ -15,10 +16,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import java.util.Calendar
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 class FirebaseConnection : Database() {
@@ -37,7 +41,7 @@ class FirebaseConnection : Database() {
       collectionPath: String,
       document: String
   ): Pair<Boolean, Map<String, Any>?> {
-    var (success, doc) = fetchDocument(collectionPath, document)
+    val (success, doc) = fetchDocument(collectionPath, document)
 
     if (!success) {
       return Pair(false, null)
@@ -45,7 +49,26 @@ class FirebaseConnection : Database() {
 
     val data = doc?.data
 
-    return Pair(success, data)
+    return Pair(true, data)
+  }
+
+  suspend fun query(
+      collectionPath: String,
+      filter: Filter
+  ): Pair<Boolean, List<Map<String, Any>?>> {
+    val query = db.collection(collectionPath).where(filter)
+
+    var querySnapshot: QuerySnapshot? = null
+    try {
+      querySnapshot = query.get().await()
+    } catch (e: Exception) {
+      return Pair(false, listOf())
+    }
+
+    val docTasks = querySnapshot!!.documents
+    val data = docTasks.map { doc -> doc.data }
+
+    return Pair(true, data)
   }
 
   /**
@@ -104,13 +127,21 @@ class FirebaseConnection : Database() {
    */
   override fun storeData(collectionPath: String, document: String, data: Any): Boolean {
     var success = false
+    runBlocking {
+      launch {
+        success =
+            try {
+              db.collection(collectionPath).document(document).set(data).await()
+              //      .addOnSuccessListener { success = true }
+              //      .addOnFailureListener { _ -> success = false }
+              true
+            } catch (e: Exception) {
+              false
+            }
+      }
+    }
 
-    db.collection(collectionPath)
-        .document(document)
-        .set(data)
-        .addOnSuccessListener { success = true }
-        .addOnFailureListener { _ -> success = false }
-
+    Log.d("storeData", "store success status: $success")
     return success
   }
 
@@ -276,7 +307,7 @@ class FirebaseConnection : Database() {
   }
 
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
-    return db.collection("users").whereEqualTo("email", email).get()
+    return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
 
   fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
@@ -341,6 +372,23 @@ class FirebaseConnection : Database() {
     return source.task
   }
 
+  fun fetchChatId(email: String, onComplete: (String, String) -> Unit) {
+    db.collection("users").whereEqualTo("email", email).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val user = task.result?.toObjects(User::class.java)
+        if (user != null && user.isNotEmpty()) {
+          val name = user[0].name
+          val Id = user[0].email
+          onComplete(name, Id)
+        } else {
+          Log.d("ChatId", "No user found for this email")
+        }
+      } else {
+        Log.d("ChatId", "Failed to fetch user")
+      }
+    }
+  }
+
   fun fetchGroomerReviews(email: String): Task<GroomerReviews> {
     val source = TaskCompletionSource<GroomerReviews>()
 
@@ -359,6 +407,22 @@ class FirebaseConnection : Database() {
     }
 
     return source.task
+  }
+
+  fun fetchReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
+    db.collection("reservations").whereEqualTo("userEmail", email).get().addOnCompleteListener {
+        task ->
+      if (task.isSuccessful) {
+        val reservations = task.result?.toObjects(Reservation::class.java)
+        if (reservations != null) {
+          onComplete(reservations)
+        } else {
+          onComplete(emptyList())
+        }
+      } else {
+        onComplete(emptyList())
+      }
+    }
   }
 
   fun registerUser(
@@ -384,9 +448,10 @@ class FirebaseConnection : Database() {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-        task ->
+    val auth = FirebaseAuth.getInstance()
+    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
       if (task.isSuccessful) {
+        auth.currentUser?.uid?.let { getUserData(it) }
         onSuccess()
       } else {
         onFailure(task.exception ?: Exception("Login failed"))
