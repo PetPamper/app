@@ -266,9 +266,10 @@ fun GroomerRegister(
                       viewModel.profilePicture,
                       viewModel.price),
                   onSuccess = {
-                    connectUser(ChatClient.instance(), User(viewModel.email, viewModel.name, viewModel.profilePicture),
-                        onSuccess = {
-                      navController.navigate("LoginScreen") },
+                    connectUser(
+                        ChatClient.instance(),
+                        User(viewModel.email, viewModel.name, viewModel.profilePicture),
+                        onSuccess = { navController.navigate("LoginScreen") },
                         onError = { error -> Log.e("SignUp", "Chat connection failed") })
 
                     firebaseConnection.addGroomerReview(

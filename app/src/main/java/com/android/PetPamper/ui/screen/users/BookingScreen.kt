@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import com.android.PetPamper.model.Groomer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -43,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.Reservation
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -175,17 +175,16 @@ fun DayPicker(
       Box(
           contentAlignment = Alignment.Center,
           modifier =
-          Modifier
-              .aspectRatio(1f)
-              .clip(RoundedCornerShape(50))
-              .background(backgroundColor)
-              .then(
-                  if (!isPast && isInDayList)
-                      Modifier.clickable { // Only clickable if not past and in the date list
-                          selectedDate.value = dayDate
-                          onDateSelected(dayDate)
-                      }
-                  else Modifier)) {
+              Modifier.aspectRatio(1f)
+                  .clip(RoundedCornerShape(50))
+                  .background(backgroundColor)
+                  .then(
+                      if (!isPast && isInDayList)
+                          Modifier.clickable { // Only clickable if not past and in the date list
+                            selectedDate.value = dayDate
+                            onDateSelected(dayDate)
+                          }
+                      else Modifier)) {
             Text(
                 day.toString(),
                 style = MaterialTheme.typography.bodyLarge,
@@ -242,13 +241,12 @@ fun HourBox(hour: Int, isSelected: Boolean, onClick: () -> Unit) {
   Box(
       contentAlignment = Alignment.Center,
       modifier =
-      Modifier
-          .fillMaxWidth()
-          .padding(4.dp)
-          .clip(RoundedCornerShape(10.dp))
-          .background(if (isSelected) Color(0xFF4CAF50) else Color(0xFF2196F3))
-          .clickable(onClick = onClick)
-          .padding(vertical = 8.dp, horizontal = 16.dp)) {
+          Modifier.fillMaxWidth()
+              .padding(4.dp)
+              .clip(RoundedCornerShape(10.dp))
+              .background(if (isSelected) Color(0xFF4CAF50) else Color(0xFF2196F3))
+              .clickable(onClick = onClick)
+              .padding(vertical = 8.dp, horizontal = 16.dp)) {
         Text(
             text = String.format("%02d:00", hour),
             style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
@@ -266,10 +264,8 @@ fun ConfirmReservation(
 ) {
   val context = LocalContext.current
   val firebaseConnection = FirebaseConnection()
-    val groomer  = remember { mutableStateOf( Groomer()) }
-    firebaseConnection.fetchGroomerData(groomerEmail){
-        groomer.value = it
-    }
+  val groomer = remember { mutableStateOf(Groomer()) }
+  firebaseConnection.fetchGroomerData(groomerEmail) { groomer.value = it }
 
   // Button to confirm the reservation
   Button(
