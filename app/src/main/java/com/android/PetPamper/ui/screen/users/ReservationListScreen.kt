@@ -35,8 +35,7 @@ import com.android.PetPamper.model.Reservation
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ReservationsScreen(onBackPressed: () -> Unit, reservations : List<Reservation>) {
-
+fun ReservationsScreen(onBackPressed: () -> Unit, reservations: List<Reservation>) {
 
   Scaffold(
       topBar = {
@@ -58,16 +57,12 @@ fun ReservationsScreen(onBackPressed: () -> Unit, reservations : List<Reservatio
 
 @Composable
 fun GroomerCard(reservation: Reservation) {
-    val firebaseConnection = FirebaseConnection()
-    val groomerName = remember {
-        mutableStateOf("")
-    }
-    firebaseConnection.fetchGroomerData(reservation.groomerEmail){
-        println("Groomer Name: $it")
-        groomerName.value = it.name
-    }
-
-
+  val firebaseConnection = FirebaseConnection()
+  val groomerName = remember { mutableStateOf("") }
+  firebaseConnection.fetchGroomerData(reservation.groomerEmail) {
+    println("Groomer Name: $it")
+    groomerName.value = it.name
+  }
 
   Card(
       // elevation = 4.dp,
@@ -76,21 +71,16 @@ fun GroomerCard(reservation: Reservation) {
           Image(
               painter = painterResource(id = R.drawable.placeholder),
               contentDescription = null,
-              modifier = Modifier
-                  .size(64.dp)
-                  .clip(CircleShape))
-          Column(modifier = Modifier
-              .weight(1f)
-              .padding(start = 16.dp)) {
+              modifier = Modifier.size(64.dp).clip(CircleShape))
+          Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
             Text(text = groomerName.value, style = MaterialTheme.typography.titleSmall)
-            Text(
-                text = "Date: ${reservation.date}",
-                style = MaterialTheme.typography.labelMedium)
+            Text(text = "Date: ${reservation.date}", style = MaterialTheme.typography.labelMedium)
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(text = "${reservation.hour}/hour", style = MaterialTheme.typography.labelMedium)
-            Text(text = "${reservation.groomerEmail}/hour", style = MaterialTheme.typography.labelMedium)
-
+            Text(
+                text = "${reservation.groomerEmail}/hour",
+                style = MaterialTheme.typography.labelMedium)
           }
         }
       }

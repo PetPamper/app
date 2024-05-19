@@ -86,22 +86,26 @@ fun SignUpScreenGoogle(
             "Street",
             viewModel,
             onNextAddress = { street, city, state, postalcode ->
-                viewModel.address.apply {
-                    this.city = city
-                    this.state = state
-                    this.street = street
-                    this.postalCode = postalcode
-                    this.location = viewModel.locationMap
-                }
+              viewModel.address.apply {
+                this.city = city
+                this.state = state
+                this.street = street
+                this.postalCode = postalcode
+                this.location = viewModel.locationMap
+              }
 
-                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+              val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-                val firebaseConnection = FirebaseConnection()
-                firebaseConnection.addUser(
-                    User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address, uid),
-                    onSuccess = { currentStep++ },
-                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) }
-                )
+              val firebaseConnection = FirebaseConnection()
+              firebaseConnection.addUser(
+                  User(
+                      viewModel.name,
+                      viewModel.email,
+                      viewModel.phoneNumber,
+                      viewModel.address,
+                      uid),
+                  onSuccess = { currentStep++ },
+                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
             })
     4 -> navController.navigate("LoginScreen")
   }

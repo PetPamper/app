@@ -48,11 +48,11 @@ fun GroomerHome(email: String) {
   // Map to store selected hours for multiple dates
   val selectedHoursMap = remember { mutableStateMapOf<String, MutableList<Int>>() }
 
-    connectUser(ChatClient.instance(), User(groomerViewModel.value.email, groomerViewModel.value.name, "https://bit.ly/3kgrh3e"), onSuccess = {
-        println("User connected successfully")
-    }, onError = {
-        println("Error connecting user: $it")
-    })
+  connectUser(
+      ChatClient.instance(),
+      User(groomerViewModel.value.email, groomerViewModel.value.name, "https://bit.ly/3kgrh3e"),
+      onSuccess = { println("User connected successfully") },
+      onError = { println("Error connecting user: $it") })
 
   Column(modifier = Modifier.padding(16.dp)) {
     MonthYearPicker(selectedDate) { date -> selectedDate.value = date }

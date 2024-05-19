@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.users
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -59,16 +58,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
+    val firebaseConnection = FirebaseConnection()
+    var resa = remember { mutableStateOf(listOf<Reservation>()) }
+    firebaseConnection.fetchReservations(email!!) { resa.value = it }
 
-      val firebaseConnection = FirebaseConnection()
-      var resa  = remember { mutableStateOf(listOf<Reservation>()) }
-      firebaseConnection.fetchReservations(email!!){
-          resa.value = it
-      }
-
-      if (resa.value.isNotEmpty()) {
-          CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
-      }
+    if (resa.value.isNotEmpty()) {
+      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
+    }
 
     // Text(text = "Home screen")
 
@@ -77,7 +73,12 @@ fun HomeScreen(navController: NavController, email: String?) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CarouselCard(navController: NavController, email: String?, petListViewModel: PetListViewModel, reservation: List<Reservation>) {
+fun CarouselCard(
+    navController: NavController,
+    email: String?,
+    petListViewModel: PetListViewModel,
+    reservation: List<Reservation>
+) {
 
   val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
@@ -93,15 +94,10 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
             Icon(Icons.Default.KeyboardArrowLeft, null)
           }
 
-
-
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier
-              .height(300.dp)
-              .width(350.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
             val pet = petListViewModel.petsList[page]
             Card(
                 shape = RoundedCornerShape(10.dp),
@@ -133,9 +129,8 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                   }
                   Box(
                       modifier =
-                      Modifier
-                          .fillMaxWidth()
-                          .aspectRatio(16f / 9f), // or your desired aspect ratio
+                          Modifier.fillMaxWidth()
+                              .aspectRatio(16f / 9f), // or your desired aspect ratio
                       contentAlignment = Alignment.Center) {
                         AsyncImage(
                             model =
@@ -151,9 +146,7 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                             )
                       }
 
-                  Spacer(modifier = Modifier
-                      .height(8.dp)
-                      .width(10.dp))
+                  Spacer(modifier = Modifier.height(8.dp).width(10.dp))
                 }
           }
       IconButton(
@@ -176,9 +169,6 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
 
     // second one
 
-
-
-
     val pageState2 = rememberPagerState(initialPage = 0, pageCount = { reservation.size })
     val scope2 = rememberCoroutineScope()
     val currentReservations = reservation[pageState2.currentPage]
@@ -200,67 +190,51 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
             Icon(Icons.Default.KeyboardArrowLeft, null)
           }
 
-
-
-            HorizontalPager(
-                state = pageState2,
-                contentPadding = PaddingValues(horizontal = 10.dp),
-                modifier = Modifier
-                    .height(180.dp)
-                    .weight(1f)
-            ) { page ->
-                Card(
-                    shape = RoundedCornerShape(10.dp),
-                    modifier =
+      HorizontalPager(
+          state = pageState2,
+          contentPadding = PaddingValues(horizontal = 10.dp),
+          modifier = Modifier.height(180.dp).weight(1f)) { page ->
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                modifier =
                     Modifier.graphicsLayer {
-                        val pageOffset = pageState2.getOffsetFractionForPage(page).absoluteValue
-                        lerp(start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
-                            .also { scale ->
-                                scaleX = scale
-                                scaleY = scale
-                            }
-                        alpha =
-                            lerp(
-                                start = 0.50f,
-                                stop = 1f,
-                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                            )
+                      val pageOffset = pageState2.getOffsetFractionForPage(page).absoluteValue
+                      lerp(start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
+                          .also { scale ->
+                            scaleX = scale
+                            scaleY = scale
+                          }
+                      alpha =
+                          lerp(
+                              start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
-                    Box(
-                        modifier =
-                        Modifier
-                            .padding(16.dp)
-                            // .background(Color.White, RoundedCornerShape(10.dp))
-                            .height(150.dp)
-                            .fillMaxWidth()
-                    ) {
+                  Box(
+                      modifier =
+                          Modifier.padding(16.dp)
+                              // .background(Color.White, RoundedCornerShape(10.dp))
+                              .height(150.dp)
+                              .fillMaxWidth()) {
                         Row(modifier = Modifier.padding(8.dp)) {
-                            // Profile picture
-                            Image(
-                                painter = painterResource(id = R.drawable.profile),
-                                contentDescription = "Profile Picture",
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape)
-                            )
+                          // Profile picture
+                          Image(
+                              painter = painterResource(id = R.drawable.profile),
+                              contentDescription = "Profile Picture",
+                              modifier = Modifier.size(60.dp).clip(CircleShape))
 
-                            // Spacer
-                            Spacer(
-                                modifier = Modifier
-                                    .height(8.dp)
-                                    .width(10.dp)
-                            )
+                          // Spacer
+                          Spacer(modifier = Modifier.height(8.dp).width(10.dp))
 
-                            // Details: Name, age, distance
-                            Column {
-                                Text(
-                                    text = currentReservations.groomerName,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(text = "Price: ${currentReservations.price}")
-                                Text(text = "Experience Years: ${currentReservations.experienceYears} years")
-                                Text(text = "Services: ${currentReservations.services}")
-                            }
+                          // Details: Name, age, distance
+                          Column {
+                            Text(
+                                text = currentReservations.groomerName,
+                                fontWeight = FontWeight.Bold)
+                            Text(text = "Price: ${currentReservations.price}")
+                            Text(
+                                text =
+                                    "Experience Years: ${currentReservations.experienceYears} years")
+                            Text(text = "Services: ${currentReservations.services}")
+                          }
                         }
 
                         // Spacer
@@ -269,28 +243,25 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                         // Additional details: Service type, date joined, total price
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
-                            Text(text = "Date : ${currentReservations.date}")
-                            Text(text = "Hour: ${currentReservations.hour}")
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
+                            modifier = Modifier.align(Alignment.BottomCenter)) {
+                              Text(text = "Date : ${currentReservations.date}")
+                              Text(text = "Hour: ${currentReservations.hour}")
+                              Spacer(modifier = Modifier.height(10.dp))
+                            }
 
                         // Start chatting button
                         Button(
-                            onClick = { /* Handle start chatting action */ },
+                            onClick = { /* Handle start chatting action */},
                             modifier = Modifier.align(Alignment.BottomEnd),
                             colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF2490DF),
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text("Chat")
-                        }
-                    }
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF2490DF),
+                                    contentColor = Color.White)) {
+                              Text("Chat")
+                            }
+                      }
                 }
-            }
+          }
 
       IconButton(
           enabled = pageState2.currentPage < pageState2.pageCount - 1,

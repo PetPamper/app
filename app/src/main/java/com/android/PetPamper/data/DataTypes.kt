@@ -6,12 +6,8 @@ data class UserData(
     val number: String? = "",
     val imageUrl: String? = ""
 ) {
-    fun toMap() = mapOf(
-        "userId" to userId,
-        "name" to name,
-        "number" to number,
-        "imageUrl" to imageUrl
-    )
+  fun toMap() =
+      mapOf("userId" to userId, "name" to name, "number" to number, "imageUrl" to imageUrl)
 }
 
 data class ChatData(
@@ -38,8 +34,3 @@ data class Status(
     val imageUrl: String? = "",
     val timestamp: Long? = null
 )
-
-
-
-
-

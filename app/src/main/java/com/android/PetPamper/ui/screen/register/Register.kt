@@ -77,8 +77,8 @@ import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.android.PetPamper.ui.screen.users.CustomTextButton
 import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 class SignUpViewModel {
 
@@ -198,9 +198,14 @@ fun Register(
             viewModel.email,
             viewModel.password,
             onSuccess = {
-                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+              val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
               firebaseConnection.addUser(
-                  User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address,uid),
+                  User(
+                      viewModel.name,
+                      viewModel.email,
+                      viewModel.phoneNumber,
+                      viewModel.address,
+                      uid),
                   onSuccess = { currentStep++ },
                   onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
             },
@@ -212,9 +217,14 @@ fun Register(
             .get()
             .addOnSuccessListener { document ->
               if (!document.exists()) {
-                  val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                 firebaseConnection.addUser(
-                    User(viewModel.name, viewModel.email, viewModel.phoneNumber, viewModel.address,uid),
+                    User(
+                        viewModel.name,
+                        viewModel.email,
+                        viewModel.phoneNumber,
+                        viewModel.address,
+                        uid),
                     onSuccess = { currentStep++ },
                     onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
               } else {

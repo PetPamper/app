@@ -30,59 +30,55 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 
 fun navigateTo(navController: NavController, route: String) {
-    navController.navigate(route) {
-        popUpTo(route)
-        launchSingleTop = true
-    }
+  navController.navigate(route) {
+    popUpTo(route)
+    launchSingleTop = true
+  }
 }
 
 @Composable
 fun CommonProgressSpinner() {
-    Row(modifier = Modifier
-        .alpha(0.5f)
-        .background(Color.LightGray)
-        .clickable(enabled = false) {}
-        .fillMaxSize(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+  Row(
+      modifier =
+          Modifier.alpha(0.5f)
+              .background(Color.LightGray)
+              .clickable(enabled = false) {}
+              .fillMaxSize(),
+      horizontalArrangement = Arrangement.Center,
+      verticalAlignment = Alignment.CenterVertically) {
         CircularProgressIndicator()
-    }
+      }
 }
 
 @Composable
 fun NotificationMessage(vm: CAViewModel) {
-    val notifState = vm.popupNotification.value
-    val notifMessage = notifState?.getContentOrNull()
-    if (!notifMessage.isNullOrEmpty())
-        Toast.makeText(LocalContext.current, notifMessage, Toast.LENGTH_SHORT).show()
+  val notifState = vm.popupNotification.value
+  val notifMessage = notifState?.getContentOrNull()
+  if (!notifMessage.isNullOrEmpty())
+      Toast.makeText(LocalContext.current, notifMessage, Toast.LENGTH_SHORT).show()
 }
 
 @Composable
 fun CheckSignedIn(vm: CAViewModel, navController: NavController) {
-    val alreadySignedIn = remember { mutableStateOf(false) }
-    val signedIn = vm.signedIn.value
-    if (signedIn && !alreadySignedIn.value) {
-        alreadySignedIn.value = true
-        //navController.navigate(DestinationScreen.Profile.route) {
-            //popUpTo(0)
-        //}
-    }
+  val alreadySignedIn = remember { mutableStateOf(false) }
+  val signedIn = vm.signedIn.value
+  if (signedIn && !alreadySignedIn.value) {
+    alreadySignedIn.value = true
+    // navController.navigate(DestinationScreen.Profile.route) {
+    // popUpTo(0)
+    // }
+  }
 }
 
 @Composable
 fun CommonDivider() {
-    Divider(
-        color = Color.LightGray,
-        thickness = 1.dp,
-        modifier = Modifier
-            .alpha(0.3f)
-            .padding(top = 8.dp, bottom = 8.dp)
-    )
+  Divider(
+      color = Color.LightGray,
+      thickness = 1.dp,
+      modifier = Modifier.alpha(0.3f).padding(top = 8.dp, bottom = 8.dp))
 }
 
 @Composable
@@ -91,53 +87,33 @@ fun CommonImage(
     modifier: Modifier = Modifier.wrapContentSize(),
     contentScale: ContentScale = ContentScale.Crop
 ) {
-    val painter = rememberImagePainter(data = data)
-    Image(
-        painter = painter,
-        contentDescription = null,
-        modifier = modifier,
-        contentScale = contentScale
-    )
-    //if (painter.state is ImagePainter.State.Loading)
-     //   CommonProgressSpinner()
+  val painter = rememberImagePainter(data = data)
+  Image(
+      painter = painter,
+      contentDescription = null,
+      modifier = modifier,
+      contentScale = contentScale)
+  // if (painter.state is ImagePainter.State.Loading)
+  //   CommonProgressSpinner()
 }
 
 @Composable
 fun CommonRow(imageUrl: String?, name: String?, onItemClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(75.dp)
-            .clickable { onItemClick.invoke() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+  Row(
+      modifier = Modifier.fillMaxWidth().height(75.dp).clickable { onItemClick.invoke() },
+      verticalAlignment = Alignment.CenterVertically) {
         CommonImage(
             data = imageUrl,
-            modifier = Modifier
-                .padding(8.dp)
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color.Red)
-        )
+            modifier = Modifier.padding(8.dp).size(50.dp).clip(CircleShape).background(Color.Red))
         Text(
             text = name ?: "---",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp)
-        )
-    }
+            modifier = Modifier.padding(start = 4.dp))
+      }
 }
 
 @Composable
 fun TitleText(txt: String) {
-    Text(
-        text = txt,
-        fontWeight = FontWeight.Bold,
-        fontSize = 35.sp,
-        modifier = Modifier.padding(8.dp)
-    )
+  Text(
+      text = txt, fontWeight = FontWeight.Bold, fontSize = 35.sp, modifier = Modifier.padding(8.dp))
 }
-
-
-
-
-

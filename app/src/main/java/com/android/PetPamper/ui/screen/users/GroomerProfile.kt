@@ -16,22 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
-import com.android.PetPamper.connectUser
 import com.android.PetPamper.createChannel
 import com.android.PetPamper.model.Groomer
 import com.example.PetPamper.ChannelActivity
@@ -40,13 +36,15 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.compose.ui.messages.MessagesScreen
-import io.getstream.chat.android.compose.ui.theme.ChatTheme
-import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.models.User
 
 @Composable
-fun GroomerProfile(groomer: Groomer, navController: NavController, userId: String, client: ChatClient) {
+fun GroomerProfile(
+    groomer: Groomer,
+    navController: NavController,
+    userId: String,
+    client: ChatClient
+) {
   Scaffold(
       bottomBar = {
         BottomBookingBar(groomer.price, navController, groomer)
@@ -54,11 +52,10 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
       ) { innerPadding ->
         Column(
             modifier =
-            Modifier
-                .padding(innerPadding)
-                .fillMaxWidth()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())) {
+                Modifier.padding(innerPadding)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())) {
               Card(
                   shape = RoundedCornerShape(10.dp),
                   elevation = 4.dp,
@@ -66,16 +63,12 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
                     Image(
                         painter = rememberImagePainter(groomer.profilePic),
                         contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
                         contentScale = ContentScale.Crop)
                   }
 
               Row(
-                  modifier = Modifier
-                      .fillMaxWidth()
-                      .padding(16.dp),
+                  modifier = Modifier.fillMaxWidth().padding(16.dp),
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     InfoCard(
                         title = "Groomable Pets",
@@ -120,7 +113,7 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
               GroomerLocationMap(
                   LatLng(groomer.address.location.latitude, groomer.address.location.longitude))
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
               ChatWithGroomerButton(
                   context = LocalContext.current,
@@ -128,8 +121,7 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
                   groomerName = groomer.name,
                   groomerId = groomer.email,
                   userId = userId,
-                  client = client
-              )
+                  client = client)
 
               Spacer(modifier = Modifier.height(80.dp))
             }
@@ -140,17 +132,14 @@ fun GroomerProfile(groomer: Groomer, navController: NavController, userId: Strin
 fun BottomBookingBar(price: Int, navController: NavController, groomer: Groomer) {
   Card(
       modifier =
-      Modifier
-          .fillMaxWidth()
-          .height(80.dp)
-          .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+          Modifier.fillMaxWidth()
+              .height(80.dp)
+              .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
       // Define a fixed height for the bottom section
       elevation = 4.dp,
       backgroundColor = Color(0xFFEAEAEA)) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 25.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 25.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
               Text(text = "Price: \n$${price}/hour", style = MaterialTheme.typography.h6)
@@ -160,61 +149,63 @@ fun BottomBookingBar(price: Int, navController: NavController, groomer: Groomer)
                     println("Book Now Clicked!")
                   },
                   colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
-                  modifier = Modifier
-                      .height(40.dp)
-                      .width(110.dp)) {
+                  modifier = Modifier.height(40.dp).width(110.dp)) {
                     Text("Book Now", color = Color.White)
                   }
             }
       }
 }
 
-
 @Composable
-fun ChatWithGroomerButton(client: ChatClient, context: Context, profilePic: String, groomerName: String, groomerId: String, userId: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
-            onClick = {
-                val groomer = User(
-                    id = groomerId,
-                    name = groomerName,
-                    image = profilePic,
+fun ChatWithGroomerButton(
+    client: ChatClient,
+    context: Context,
+    profilePic: String,
+    groomerName: String,
+    groomerId: String,
+    userId: String
+) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+    Button(
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2490DF)),
+        onClick = {
+          val groomer =
+              User(
+                  id = groomerId,
+                  name = groomerName,
+                  image = profilePic,
+              )
 
-                )
-
-                // First, connect the groomer
-                        // Then, create or load the channel
-                createChannel(client, userId, groomerId, onSuccess = { channelId ->
-                    val intent = ChannelActivity.getIntent(context, channelId)
-                    context.startActivity(intent)
-                    Log.d("ChatWithGroomerButton", "Channel created: $channelId, current user : ${client.getCurrentUser()}")
-                }, onError = { error ->
-                    Toast.makeText(
-                        context,
-                        "Error creating channel: $error",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
-
-
-            },
-        ) {
-            Row {
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Chat with this groomer", color = Color.White)
-            }
-        }
+          // First, connect the groomer
+          // Then, create or load the channel
+          createChannel(
+              client,
+              userId,
+              groomerId,
+              onSuccess = { channelId ->
+                val intent = ChannelActivity.getIntent(context, channelId)
+                context.startActivity(intent)
+                Log.d(
+                    "ChatWithGroomerButton",
+                    "Channel created: $channelId, current user : ${client.getCurrentUser()}")
+              },
+              onError = { error ->
+                Toast.makeText(context, "Error creating channel: $error", Toast.LENGTH_SHORT).show()
+              })
+        },
+    ) {
+      Row {
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = "Chat with this groomer", color = Color.White)
+      }
     }
-
+  }
 }
 
 @Composable
 fun InfoCard(title: String, description: String, iconResource: Int) {
   Card(
-      modifier = Modifier
-          .padding(2.dp)
-          .width(110.dp), // Fixed width for the card
+      modifier = Modifier.padding(2.dp).width(110.dp), // Fixed width for the card
       backgroundColor = Color(0xFFF7F7F7),
       elevation = 4.dp // Slight shadow for better UI depth
       ) {
@@ -227,9 +218,7 @@ fun InfoCard(title: String, description: String, iconResource: Int) {
                 Icon(
                     painter = painterResource(id = iconResource),
                     contentDescription = title, // Accessibility description
-                    modifier = Modifier
-                        .size(30.dp)
-                        .padding(end = 0.dp),
+                    modifier = Modifier.size(30.dp).padding(end = 0.dp),
                     tint = Color.Unspecified // Uses the icon's natural color
                     )
                 Text(
@@ -244,9 +233,8 @@ fun InfoCard(title: String, description: String, iconResource: Int) {
                   fontSize = 14.sp,
                   color = Color.Black,
                   modifier =
-                  Modifier
-                      .padding(bottom = 8.dp) // Padding at the bottom of the text
-                      .fillMaxWidth(), // Ensures the text fills the width of the card
+                      Modifier.padding(bottom = 8.dp) // Padding at the bottom of the text
+                          .fillMaxWidth(), // Ensures the text fills the width of the card
                   textAlign = TextAlign.Center // Centers the text within its container
                   )
             }
@@ -261,10 +249,7 @@ fun GroomerLocationMap(
   var mapView = remember { mutableStateOf<MapView?>(null) }
 
   AndroidView(
-      modifier = Modifier
-          .width(400.dp)
-          .height(200.dp)
-          .clip(RoundedCornerShape(20.dp)),
+      modifier = Modifier.width(400.dp).height(200.dp).clip(RoundedCornerShape(20.dp)),
       factory = { context ->
         MapView(context).apply {
           mapView.value = this
@@ -308,9 +293,7 @@ fun ServiceItem(serviceName: String) {
       onClick = { /* Do something when clicked */},
       shape = MaterialTheme.shapes.medium, // Rounded corners
       colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF7F7F7)),
-      modifier = Modifier
-          .padding(4.dp)
-          .clip(RoundedCornerShape(50.dp))) {
+      modifier = Modifier.padding(4.dp).clip(RoundedCornerShape(50.dp))) {
         Text(
             text = serviceName,
             textAlign = TextAlign.Center,
@@ -337,21 +320,15 @@ fun GroomerProfileCard(
     modifier: Modifier = Modifier
 ) {
   Card(
-      modifier = modifier
-          .fillMaxWidth()
-          .height(70.dp),
+      modifier = modifier.fillMaxWidth().height(70.dp),
   ) {
     Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
+        modifier = Modifier.padding(8.dp).fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically) {
           Image(
               painter = rememberImagePainter(profilePic),
               contentDescription = "Profile Image",
-              modifier = Modifier
-                  .size(55.dp)
-                  .clip(MaterialTheme.shapes.small))
+              modifier = Modifier.size(55.dp).clip(MaterialTheme.shapes.small))
           Spacer(modifier = Modifier.width(8.dp))
           Column(modifier = Modifier.weight(1f)) {
             Text(
