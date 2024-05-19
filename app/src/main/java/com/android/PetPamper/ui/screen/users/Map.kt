@@ -24,6 +24,7 @@ import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -36,6 +37,7 @@ fun MapView(email: String) {
   val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
   var showDialog by remember { mutableStateOf(false) }
   var selectedGroomer by remember { mutableStateOf<Groomer?>(null) }
+  var showUserLocationDialog by remember { mutableStateOf(false) }
 
   LaunchedEffect(email) {
     firebaseConnection.getUserUidByEmail(email).addOnSuccessListener { documents ->
@@ -55,8 +57,14 @@ fun MapView(email: String) {
     }
   }
 
-  val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(46.516, 6.63282), 10f)
+  val cameraPositionState = rememberCameraPositionState()
+  LaunchedEffect(address.value.location) {
+    if (address.value.location.latitude != 0.0 && address.value.location.longitude != 0.0) {
+      cameraPositionState.position =
+          CameraPosition.fromLatLngZoom(
+              LatLng(address.value.location.latitude, address.value.location.longitude),
+              14f) // Zoom level adjusted for closer view
+    }
   }
 
   GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
@@ -75,6 +83,18 @@ fun MapView(email: String) {
             true // Return true to indicate that we have handled the click
           })
     }
+    Marker(
+        state =
+            MarkerState(
+                position =
+                    LatLng(address.value.location.latitude, address.value.location.longitude)),
+        title = "Your location",
+        snippet = "You are here",
+        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
+        onClick = {
+          showUserLocationDialog = true
+          true
+        })
   }
 
   if (showDialog) {
@@ -87,6 +107,28 @@ fun MapView(email: String) {
               colors =
                   ButtonColors(Color.LightGray, Color.LightGray, Color.LightGray, Color.LightGray),
               onClick = { showDialog = false }) {
+                Text("Close")
+              }
+        })
+  }
+
+  if (showUserLocationDialog) {
+    AlertDialog(
+        onDismissRequest = { showUserLocationDialog = false },
+        title = {
+          Text(
+              text = "Your Location",
+              color = Color(0xFF000080), // Navy blue color
+              fontSize = 26.sp,
+              fontWeight = FontWeight.Bold)
+        },
+        text = { Text("You are here", fontWeight = FontWeight.Bold) },
+        confirmButton = {
+          Button(
+              colors =
+                  ButtonDefaults.buttonColors(
+                      backgroundColor = Color.LightGray, contentColor = Color.Black),
+              onClick = { showUserLocationDialog = false }) {
                 Text("Close")
               }
         })
