@@ -372,6 +372,24 @@ class FirebaseConnection : Database() {
     return source.task
   }
 
+
+  fun fetchChatId(email: String, onComplete: (String, String) -> Unit){
+    db.collection("users").whereEqualTo("email", email).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val user = task.result?.toObjects(User::class.java)
+        if (user != null && user.isNotEmpty()) {
+          val name = user[0].name
+          val Id = user[0].email
+          onComplete(name, Id)
+        } else {
+         Log.d("ChatId", "No user found for this email")
+        }
+      } else {
+        Log.d("ChatId", "Failed to fetch user")
+      }
+    }
+
+  }
   fun fetchGroomerReviews(email: String): Task<GroomerReviews> {
     val source = TaskCompletionSource<GroomerReviews>()
 
@@ -391,6 +409,22 @@ class FirebaseConnection : Database() {
 
     return source.task
   }
+
+
+    fun fetchReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
+        db.collection("reservations").whereEqualTo("userEmail", email).get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val reservations = task.result?.toObjects(Reservation::class.java)
+                if (reservations != null) {
+                    onComplete(reservations)
+                } else {
+                    onComplete(emptyList())
+                }
+            } else {
+                onComplete(emptyList())
+            }
+        }
+    }
 
   fun registerUser(
       email: String,
