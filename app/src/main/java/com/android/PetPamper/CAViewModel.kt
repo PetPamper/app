@@ -7,6 +7,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.android.PetPamper.data.COLLECTION_CHAT
 import com.android.PetPamper.data.COLLECTION_MESSAGES
+import com.android.PetPamper.data.COLLECTION_STATUS
 import com.android.PetPamper.data.COLLECTION_USER
 import com.android.PetPamper.data.ChatData
 import com.android.PetPamper.data.ChatUser
@@ -80,7 +81,9 @@ class CAViewModel @Inject constructor(
                     userData.value = user
                     inProgress.value = false
                     populateChats()
+
                     populateUsers()
+
                 } else {
                     handleException(null, "User not found")
                     inProgress.value = false
@@ -106,6 +109,7 @@ class CAViewModel @Inject constructor(
             }
     }
 
+
     private fun populateUsers() {
         inProgressChats.value = true
         db.collection(COLLECTION_USER)
@@ -117,6 +121,7 @@ class CAViewModel @Inject constructor(
                 inProgressChats.value = false
             }
     }
+
 
 
     private fun handleException(exception: Exception? = null, customMessage: String = "") {

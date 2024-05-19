@@ -59,6 +59,7 @@ fun ChatListScreen(navController: NavController, vm: CAViewModel, email: String)
         val userData = vm.userData.value
 
         val showDialog = remember { mutableStateOf(false) }
+
         val onFabClick: () -> Unit = { navigateTo(
             navController, "AllUsersScreen"
         ) }
