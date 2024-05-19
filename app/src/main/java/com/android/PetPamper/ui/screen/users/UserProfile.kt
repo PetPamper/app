@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -34,19 +36,37 @@ import com.android.PetPamper.model.User
 
 @Composable
 fun UserProfileScreen(modifier: Modifier = Modifier, userVM: UserViewModel) {
+
     var user by remember { mutableStateOf(userVM.getUser()) }
 
     var showEditProfile by remember { mutableStateOf(false) }
-  if (showEditProfile){
-    EditProfileDialog(onDismiss = { showEditProfile = false },
+
+    var needRecompose by remember { mutableStateOf(false) }
+
+    if (showEditProfile){
+    EditProfileDialog(
+        onDismiss = {
+            showEditProfile = false
+            needRecompose = true},
         onSave = {
             userVM.updateUser(name = it.name, email = it.email, phone = it.phoneNumber)
-            showEditProfile = false },
+            showEditProfile = false
+            needRecompose = true},
         user)
-  }
-  Log.d("UserProfile1", "phone: ${user.phoneNumber}")
+    }
 
-  Column(modifier = Modifier.padding(12.dp)) { // Adding padding around the entire screen content
+    LaunchedEffect(userVM.uid, needRecompose) {
+        Log.d("LaunchedEffectTAG","UserProfileScreen recomposed")
+        user = userVM.getUser()
+        needRecompose = false
+    }
+
+    Log.d("UserProfile1", "phone: ${user.phoneNumber}")
+
+
+
+
+  Column(modifier = Modifier.padding(12.dp).testTag("UsrProfileColumn")) { // Adding padding around the entire screen content
     // user name
     Text(
         text = user.name,
@@ -354,10 +374,8 @@ fun UserProfileScreen(modifier: Modifier = Modifier, userVM: UserViewModel) {
             .width(395.dp)
             .height(43.dp)
             .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))) {
-          Button(
-              onClick = {
-                  user = userVM.getUser(true)
-                  showEditProfile = true},
+          Button(// Edit Profile Button
+              onClick = {showEditProfile = true},
               modifier =
                   Modifier.matchParentSize(), // Ensures the Button matches the size of the Box
               colors =
@@ -500,6 +518,7 @@ fun UserProfileScreen(modifier: Modifier = Modifier, userVM: UserViewModel) {
       }
     }
   }
+
 }
 
 @Composable

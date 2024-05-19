@@ -59,6 +59,7 @@ fun EditProfileDialog(
                     label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(
+                    readOnly = true, // {TODO: fix database UUID }
                     value = _email.value,
                     onValueChange = {},
                     label = { Text("Email") },
