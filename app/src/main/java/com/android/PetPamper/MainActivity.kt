@@ -76,6 +76,11 @@ import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import com.android.PetPamper.ui.chat.ChatListScreen
 import com.android.PetPamper.ui.chat.SingleChatScreen
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.android.PetPamper.ui.chat.AllUsersScreen
+import dagger.hilt.android.AndroidEntryPoint
+
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var client: ChatClient
@@ -325,6 +330,10 @@ fun AppNavigation(email: String?, client: ChatClient) {
 //                    SingleChatScreen(navController = navController, vm = vm, chatId = it)
 //                }
 //            }
+
+            composable("AllUsersScreen") {
+                AllUsersScreen(navController = navController, vm = vm, email!!)
+            }
 
               composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)

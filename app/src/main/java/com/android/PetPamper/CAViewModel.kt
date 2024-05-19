@@ -43,6 +43,7 @@ class CAViewModel @Inject constructor(
     val userData = mutableStateOf<User?>(null)
 
     val chats = mutableStateOf<List<ChatData>>(listOf())
+    val users = mutableStateOf<List<User>>(listOf())
     val inProgressChats = mutableStateOf(false)
 
     val chatMessages = mutableStateOf<List<Message>>(listOf())
@@ -80,6 +81,9 @@ class CAViewModel @Inject constructor(
                     userData.value = user
                     inProgress.value = false
                     populateChats()
+
+                    populateUsers()
+
                 } else {
                     handleException(null, "User not found")
                     inProgress.value = false
@@ -104,6 +108,20 @@ class CAViewModel @Inject constructor(
                 inProgressChats.value = false
             }
     }
+
+
+    private fun populateUsers() {
+        inProgressChats.value = true
+        db.collection(COLLECTION_USER)
+            .addSnapshotListener { value, error ->
+                if (error != null)
+                    handleException(error)
+                if (value != null)
+                    users.value = value.documents.mapNotNull { it.toObject<User>() }
+                inProgressChats.value = false
+            }
+    }
+
 
 
     private fun handleException(exception: Exception? = null, customMessage: String = "") {
