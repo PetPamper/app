@@ -73,6 +73,9 @@ import io.getstream.chat.android.state.extensions.watchChannelAsState
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 
+import com.android.PetPamper.ui.chat.ChatListScreen
+import com.android.PetPamper.ui.chat.SingleChatScreen
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var client: ChatClient
@@ -162,6 +165,7 @@ fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: 
     val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
+
 
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
@@ -312,7 +316,15 @@ fun AppNavigation(email: String?, client: ChatClient) {
                     onBackPressed = { navController.navigateUp() })
               }
 
-              composable("ChatScreen") { ChatScreenPreview() }
+              //composable("ChatScreen") { ChatScreenPreview() }
+            // New added chat
+
+//            composable("SingleChatScreen/{chatId}") {
+//                val chatId = it.arguments?.getString("chatId")
+//                chatId?.let {
+//                    SingleChatScreen(navController = navController, vm = vm, chatId = it)
+//                }
+//            }
 
               composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
@@ -359,6 +371,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
                     }
                 }
             }
+
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!, navController) }
