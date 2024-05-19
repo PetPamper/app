@@ -9,6 +9,10 @@ plugins {
     // ensure correct Kotlin plugin
     id("jacoco")
     id("com.google.gms.google-services")
+
+    // chats
+    id ("kotlin-kapt")
+    id ("dagger.hilt.android.plugin")
 }
 
 
@@ -65,12 +69,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        //sourceCompatibility = JavaVersion.VERSION_1_8
+        //targetCompatibility = JavaVersion.VERSION_1_8
+
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        //jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     packaging {
@@ -225,6 +233,18 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
     // To use constraintlayout in compose
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
+
+    // chat
+    implementation ("com.google.firebase:firebase-storage-ktx")
+
+    implementation ("com.google.dagger:hilt-android:2.48")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation ("com.google.firebase:firebase-firestore:24.6.0")
+    kapt ("com.google.dagger:hilt-android-compiler:2.48")
+
+    // implementation ("io.coil-kt:coil-compose:1.3.2")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 }
 
 configurations {
