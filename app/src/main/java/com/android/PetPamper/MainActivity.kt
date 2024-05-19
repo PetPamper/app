@@ -26,13 +26,13 @@ import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
 import com.android.PetPamper.ui.screen.forgotPass.*
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
-import com.android.PetPamper.ui.screen.register.*
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
 import com.android.PetPamper.ui.screen.register.SignUpScreenGoogle
 import com.android.PetPamper.ui.screen.register.SignUpViewModel
 import com.android.PetPamper.ui.screen.register.SignUpViewModelGoogle
+
 import com.android.PetPamper.ui.screen.users.*
 import com.android.PetPamper.ui.screen.users.AddPetScreen
 import com.android.PetPamper.ui.screen.users.AddPetScreenViewModel
@@ -50,21 +50,121 @@ import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
 import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import kotlin.math.round
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat.startActivity
+import com.example.PetPamper.ChannelActivity
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryChannelRequest
+import io.getstream.chat.android.client.logger.ChatLogLevel
+import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
+import io.getstream.chat.android.compose.ui.messages.MessagesScreen
+import io.getstream.chat.android.compose.ui.theme.ChatTheme
+import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+import io.getstream.chat.android.core.internal.exhaustive
+import io.getstream.chat.android.models.Channel
+import io.getstream.chat.android.models.InitializationState
+import io.getstream.chat.android.models.Message
+import io.getstream.chat.android.models.User
+import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
+import io.getstream.chat.android.state.extensions.watchChannelAsState
+import io.getstream.chat.android.state.plugin.config.StatePluginConfig
+import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
+
 import com.android.PetPamper.ui.chat.ChatListScreen
 import com.android.PetPamper.ui.chat.SingleChatScreen
+
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.android.PetPamper.ui.chat.AllUsersScreen
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent { AppNavigation() }
-  }
 
-  @Composable
-  fun AppNavigation() {
+
+class MainActivity : ComponentActivity() {
+    private lateinit var client: ChatClient
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val offlinePluginFactory = StreamOfflinePluginFactory(appContext = applicationContext)
+        val statePluginFactory = StreamStatePluginFactory(config = StatePluginConfig(), appContext = this)
+
+        client = ChatClient.Builder("cqxfgwz78trh", this)
+            .withPlugins(offlinePluginFactory, statePluginFactory)
+            .logLevel(ChatLogLevel.ALL) // Set to NOTHING in production
+            .build()
+
+
+
+        setContent {
+            AppNavigation(client)
+        }
+    }
+
+
+}
+
+fun createChannel(client: ChatClient, userId: String, groomerId: String, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+    Log.d("salam", "Creating channel")
+    val channelId = "dm_channel_id"
+    val channelClient = client.channel(
+        channelType = "messaging",
+        channelId = channelId
+    )
+
+    val members = listOf(userId, groomerId)
+    Log.d("Members", "Members: $members")
+    val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
+
+
+    channelClient.create(members, extraData).enqueue { result ->
+        if (result.isSuccess) {
+            val channel: Channel = result.getOrThrow()
+
+            channel.members.forEach {
+                Log.d("salam", "Member: ${it.user.id}")
+            }
+            Log.d("salam", "current user: ${client.getCurrentUser()}")
+            Log.d("salam", "Channel created: ${channel.cid}")
+
+            val message = Message(text = "Hello, this is a message.")
+
+
+            onSuccess(channel.cid)
+        } else {
+            Log.e("salam", "Error creating channel: ")
+            onError(result.errorOrNull()?.message ?: "Unknown error")
+        }
+    }
+}
+
+fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
+
+    val token = client.devToken(user.id) // Ensure the token is correct
+
+    if (client.getCurrentUser() != null) {
+        Log.d("ChatApp", "User already connected")
+        onSuccess()
+    } else {
+        client.connectUser(user, token).enqueue { result ->
+            if (result.isSuccess) {
+                Log.d("ChatApp", "User connected: ${user.id}")
+                onSuccess()
+            } else {
+                Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
+                onError(result.errorOrNull()?.message ?: "Unknown error")
+            }
+        }
+    }
+}
+
+
+
+
+    @Composable
+  fun AppNavigation(client: ChatClient) {
     val navController = rememberNavController()
     val signUp = SignUpViewModel()
     val groomerSignUp = GroomerSignUpViewModel()
@@ -92,23 +192,24 @@ class MainActivity : ComponentActivity() {
 
       composable("HomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
-        AppNavigation(email)
+        AppNavigation(email, client)
       }
       composable("GroomerHomeScreen/{email}") { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email")
         if (email != null) {
+
           GroomerHome(email)
         }
       }
     }
   }
-}
+
+
+
 
 @Composable
-fun AppNavigation(email: String?) {
+fun AppNavigation(email: String?, client: ChatClient) {
   val navController = rememberNavController()
-    val vm = hiltViewModel<CAViewModel>()
-    NotificationMessage(vm = vm)
   val items =
       listOf(
           BarScreen.Home,
@@ -118,10 +219,40 @@ fun AppNavigation(email: String?) {
           BarScreen.Profile,
       )
 
+
+
+    val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
+
+    val firebaseConnection = FirebaseConnection()
+
+    LaunchedEffect(email) {
+        if (email != null) {
+            firebaseConnection.fetchChatId(email, onComplete = { userName, userId ->
+                user1Id.value = userId
+                val user1 = User(
+                    id = userId,
+                    name = userName,
+                    image = "https://e7.pngegg.com/pngimages/81/556/png-clipart-graphy-graphy-royalty-free-microphone-child.png",
+                )
+
+                connectUser(client, user1, onSuccess = {
+                     Log.d("ChatApp", "User connected")
+                }, onError = {
+                     Log.e("ChatApp", "Error connecting user: $it")
+                })
+
+            })
+        }
+    }
+
+
+
   Scaffold(
       bottomBar = {
         BottomNavigation(
-            backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+            backgroundColor = Color.White, modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()) {
               val currentRoute =
                   navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -133,7 +264,9 @@ fun AppNavigation(email: String?) {
                       Icon(
                           painterResource(id = screen.icon),
                           contentDescription = null,
-                          modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                          modifier = Modifier
+                              .size(40.dp)
+                              .padding(bottom = 4.dp, top = 7.dp),
                           tint = iconColor)
                     },
                     label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
@@ -160,13 +293,19 @@ fun AppNavigation(email: String?) {
                 firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
                   val uid = documents.documents[0]?.id.toString()
                   val userViewModel = UserViewModel(uid)
-                  userViewModel.getNameFromFirebase { name -> nameUser.value = name }
+                  userViewModel.getNameFromFirebase { name ->
+                      nameUser.value = name }
                 }
                 HomeScreen(navController, email)
               }
 
               composable("ReservationsScreen") {
-                ReservationsScreen(onBackPressed = { navController.navigateUp() })
+                  val reservations = remember { mutableStateOf(listOf<Reservation>()) }
+                  firebaseConnection.fetchReservations(email!!) { res ->
+                      reservations.value = res
+                  }
+
+                ReservationsScreen(reservations = reservations.value, onBackPressed = { navController.navigateUp() })
               }
 
               composable("PetListScreen") {
@@ -185,12 +324,12 @@ fun AppNavigation(email: String?) {
               //composable("ChatScreen") { ChatScreenPreview() }
             // New added chat
 
-            composable("SingleChatScreen/{chatId}") {
-                val chatId = it.arguments?.getString("chatId")
-                chatId?.let {
-                    SingleChatScreen(navController = navController, vm = vm, chatId = it)
-                }
-            }
+//            composable("SingleChatScreen/{chatId}") {
+//                val chatId = it.arguments?.getString("chatId")
+//                chatId?.let {
+//                    SingleChatScreen(navController = navController, vm = vm, chatId = it)
+//                }
+//            }
 
             composable("AllUsersScreen") {
                 AllUsersScreen(navController = navController, vm = vm, email!!)
@@ -215,10 +354,33 @@ fun AppNavigation(email: String?) {
                     ReservationConfirmation(navController, backStackEntry)
                   }
 
-              composable(BarScreen.Chat.route) {
-                //ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
-                ChatListScreen(navController = navController, vm = vm, email!!)
-              }
+            composable(BarScreen.Chat.route) {
+                val clientInitialisationState by client.clientState.initializationState.collectAsState()
+
+                ChatTheme {
+                    when (clientInitialisationState) {
+                        InitializationState.COMPLETE -> {
+                            val context = LocalContext.current
+                            ChannelsScreen(
+                                title = stringResource(id = R.string.app_name),
+                                isShowingSearch = true,
+                                onItemClick = { channel ->
+                                    context.startActivity(ChannelActivity.getIntent(context, channel.cid))
+                                },
+                                onBackPressed = { navController.popBackStack() }
+                            )
+                        }
+                        InitializationState.INITIALIZING -> {
+                            Text(text = "Initializing...")
+                        }
+                        InitializationState.NOT_INITIALIZED -> {
+                            Text(text = "Not initialized...")
+                        }
+
+                    }
+                }
+            }
+
 
               composable(BarScreen.Map.route) { MapView(email!!) }
               composable(BarScreen.Profile.route) { UserProfileScreen(email!!, navController) }
@@ -309,8 +471,10 @@ fun AppNavigation(email: String?) {
                     GroomerName.value = groomer
                   }
                 }
-                GroomerProfile(GroomerName.value, navController)
+                GroomerProfile(GroomerName.value, navController, user1Id.value, client)
               }
             }
       }
 }
+
+
