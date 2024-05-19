@@ -50,7 +50,12 @@ import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
 import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import kotlin.math.round
+import com.android.PetPamper.ui.chat.ChatListScreen
+import com.android.PetPamper.ui.chat.SingleChatScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -64,6 +69,7 @@ class MainActivity : ComponentActivity() {
     val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
     val firebaseConnection = FirebaseConnection()
+
 
     NavHost(navController = navController, startDestination = "LoginScreen") {
       composable("LoginScreen") { SignIn(navController) }
@@ -100,6 +106,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(email: String?) {
   val navController = rememberNavController()
+    val vm = hiltViewModel<CAViewModel>()
+    NotificationMessage(vm = vm)
   val items =
       listOf(
           BarScreen.Home,
@@ -173,7 +181,15 @@ fun AppNavigation(email: String?) {
                     onBackPressed = { navController.navigateUp() })
               }
 
-              composable("ChatScreen") { ChatScreenPreview() }
+              //composable("ChatScreen") { ChatScreenPreview() }
+            // New added chat
+
+            composable("SingleChatScreen/{chatId}") {
+                val chatId = it.arguments?.getString("chatId")
+                chatId?.let {
+                    SingleChatScreen(navController = navController, vm = vm, chatId = it)
+                }
+            }
 
               composable("UsersScreen") {
                 UsersScreen(onBackPressed = { navController.navigateUp() }, navController)
@@ -195,7 +211,8 @@ fun AppNavigation(email: String?) {
                   }
 
               composable(BarScreen.Chat.route) {
-                ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
+                //ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
+                ChatListScreen(navController = navController, vm = vm, email!!)
               }
 
               composable(BarScreen.Map.route) { MapView(email!!) }
