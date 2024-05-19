@@ -123,14 +123,6 @@ fun createChannel(client: ChatClient, userId: String, groomerId: String, onSucce
 
             val message = Message(text = "Hello, this is a message.")
 
-            // Send the message
-            channelClient.sendMessage(message).enqueue { sendMessageResult ->
-                if (sendMessageResult.isSuccess) {
-                    Log.d("salam", "Message sent successfully")
-                } else {
-                    Log.e("salam", "Error sending message: ${sendMessageResult.errorOrNull()?.message}")
-                }
-            }
 
             onSuccess(channel.cid)
         } else {
