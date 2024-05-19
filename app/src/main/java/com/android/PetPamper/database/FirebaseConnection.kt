@@ -3,6 +3,7 @@ package com.android.PetPamper.database
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.android.PetPamper.data.COLLECTION_USER
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
@@ -306,7 +307,7 @@ class FirebaseConnection : Database() {
   }
 
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
-    return db.collection("users").whereEqualTo("email", email).get()
+    return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
 
   fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {

@@ -108,19 +108,20 @@ fun SingleChatScreen(navController: NavController, vm: CAViewModel, chatId: Stri
         )
     }
 }
-
 @Composable
 fun Messages(
     modifier: Modifier,
     chatMessages: List<Message>,
     currentUserId: String
 ) {
+    val sortedMessages = chatMessages.sortedByDescending { it.timestamp }
+
     LazyColumn(
         modifier = modifier,
         reverseLayout = true,
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(chatMessages) { msg ->
+        items(sortedMessages) { msg ->
             val isCurrentUser = msg.sentBy == currentUserId
             val backgroundColor = if (isCurrentUser) Color(0xFF3F51B5) else Color(0xFFF5F5F5)
             val textColor = if (isCurrentUser) Color.White else Color.Black

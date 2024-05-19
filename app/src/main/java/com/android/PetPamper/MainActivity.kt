@@ -212,7 +212,7 @@ fun AppNavigation(email: String?) {
 
               composable(BarScreen.Chat.route) {
                 //ConversationsScreen(onBackPressed = { navController.navigateUp() }, navController)
-                ChatListScreen(navController = navController, vm = vm)
+                ChatListScreen(navController = navController, vm = vm, email!!)
               }
 
               composable(BarScreen.Map.route) { MapView(email!!) }

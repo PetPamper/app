@@ -16,6 +16,7 @@ import com.android.PetPamper.data.Message
 import com.android.PetPamper.data.Status
 import com.android.PetPamper.data.UserData
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,7 +40,7 @@ class CAViewModel @Inject constructor(
     val inProgress = mutableStateOf(false)
     val popupNotification = mutableStateOf<Event<String>?>(null)
     val signedIn = mutableStateOf(false)
-    val userData = mutableStateOf<UserData?>(null)
+    val userData = mutableStateOf<User?>(null)
 
     val chats = mutableStateOf<List<ChatData>>(listOf())
     val inProgressChats = mutableStateOf(false)
@@ -52,30 +53,40 @@ class CAViewModel @Inject constructor(
     val inProgressStatus = mutableStateOf(false)
 
     init {
-//        onLogout()
         val currentUser = auth.currentUser
         signedIn.value = currentUser != null
-        currentUser?.uid?.let { uid ->
-            print("UUID $uid")
-            getUserData(uid)
+        currentUser?.email?.let { email ->
+            print("Email: $email")
+            getUserData(email)
         }
     }
 
 
-    private fun getUserData(uid: String) {
+
+    private fun getUserData(email: String) {
         inProgress.value = true
-        db.collection(COLLECTION_USER).document(uid)
+        db.collection(COLLECTION_USER)
+            .whereEqualTo("email", email)
             .addSnapshotListener { value, error ->
-                if (error != null)
+                if (error != null) {
                     handleException(error, "Cannot retrieve user data")
-                if (value != null) {
-                    val user = value.toObject<UserData>()
+                    inProgress.value = false
+                    return@addSnapshotListener
+                }
+
+                if (value != null && !value.isEmpty) {
+                    val userDocument = value.documents[0]
+                    val user = userDocument.toObject<User>()
                     userData.value = user
                     inProgress.value = false
                     populateChats()
+                } else {
+                    handleException(null, "User not found")
+                    inProgress.value = false
                 }
             }
     }
+
 
     private fun populateChats() {
         inProgressChats.value = true
@@ -125,19 +136,20 @@ class CAViewModel @Inject constructor(
 
 
 
-    fun onAddChat(number: String) {
+    fun onAddChat(number: String, email: String) {
         if (number.isEmpty() or !number.isDigitsOnly())
             handleException(customMessage = "Number must contain only digits")
         else {
+            // User storedUser = FirebaseConnection().getUserUidByEmail(email)
             db.collection(COLLECTION_CHAT)
                 .where(
                     Filter.or(
                         Filter.and(
                             Filter.equalTo("user1.phoneNumber", number),
-                            Filter.equalTo("user2.phoneNumber", userData.value?.number)
+                            Filter.equalTo("user2.phoneNumber", userData.value?.phoneNumber)
                         ),
                         Filter.and(
-                            Filter.equalTo("user1.phoneNumber", userData.value?.number),
+                            Filter.equalTo("user1.phoneNumber", userData.value?.phoneNumber),
                             Filter.equalTo("user2.phoneNumber", number)
                         )
                     )
@@ -151,21 +163,19 @@ class CAViewModel @Inject constructor(
                                 if (it.isEmpty)
                                     handleException(customMessage = "Cannot retrieve user with number $number")
                                 else {
-                                    val chatPartner = it.toObjects<UserData>()[0]
+                                    val chatPartner = it.toObjects<User>()[0]
                                     val id = db.collection(COLLECTION_CHAT).document().id
                                     val chat = ChatData(
                                         id,
                                         ChatUser(
                                             userData.value?.userId,
                                             userData.value?.name,
-                                            userData.value?.imageUrl,
-                                            userData.value?.number
+                                            userData.value?.phoneNumber
                                         ),
                                         ChatUser(
                                             chatPartner.userId,
                                             chatPartner.name,
-                                            chatPartner.imageUrl,
-                                            chatPartner.number
+                                            chatPartner.phoneNumber
                                         )
                                     )
                                     db.collection(COLLECTION_CHAT).document(id).set(chat)

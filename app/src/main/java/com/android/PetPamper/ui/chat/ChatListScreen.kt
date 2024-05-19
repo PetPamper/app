@@ -50,7 +50,7 @@ import com.android.PetPamper.navigateTo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatListScreen(navController: NavController, vm: CAViewModel) {
+fun ChatListScreen(navController: NavController, vm: CAViewModel, email: String) {
     val inProgress = vm.inProgressChats.value
     if (inProgress)
         CommonProgressSpinner()
@@ -62,7 +62,7 @@ fun ChatListScreen(navController: NavController, vm: CAViewModel) {
         val onFabClick: () -> Unit = { showDialog.value = true }
         val onDismiss: () -> Unit = { showDialog.value = false }
         val onAddChat: (String) -> Unit = {
-            vm.onAddChat(it)
+            vm.onAddChat(it, email)
             showDialog.value = false
         }
 
