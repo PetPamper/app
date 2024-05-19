@@ -29,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +48,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.android.PetPamper.R
+import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
+import com.android.PetPamper.model.Reservation
 import java.time.LocalDate
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
@@ -54,14 +58,28 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
+    val firebaseConnection = FirebaseConnection()
+    var resa = remember { mutableStateOf(listOf<Reservation>()) }
+    firebaseConnection.fetchReservations(email!!) { resa.value = it }
+
+    if (resa.value.isNotEmpty()) {
+      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
+    }
+
     // Text(text = "Home screen")
-    CarouselCard(navController, email, PetListViewModel(email!!, PetDataHandler()))
+
   }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CarouselCard(navController: NavController, email: String?, petListViewModel: PetListViewModel) {
+fun CarouselCard(
+    navController: NavController,
+    email: String?,
+    petListViewModel: PetListViewModel,
+    reservation: List<Reservation>
+) {
+
   val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
@@ -151,8 +169,9 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
 
     // second one
 
-    val pageState2 = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
+    val pageState2 = rememberPagerState(initialPage = 0, pageCount = { reservation.size })
     val scope2 = rememberCoroutineScope()
+    val currentReservations = reservation[pageState2.currentPage]
 
     Row(modifier = Modifier.padding(15.dp)) {
       Text(
@@ -207,9 +226,14 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
 
                           // Details: Name, age, distance
                           Column {
-                            Text(text = "John Doe", fontWeight = FontWeight.Bold)
-                            Text(text = "Age: 30")
-                            Text(text = "Distance: 5 km")
+                            Text(
+                                text = currentReservations.groomerName,
+                                fontWeight = FontWeight.Bold)
+                            Text(text = "Price: ${currentReservations.price}")
+                            Text(
+                                text =
+                                    "Experience Years: ${currentReservations.experienceYears} years")
+                            Text(text = "Services: ${currentReservations.services}")
                           }
                         }
 
@@ -220,9 +244,8 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.align(Alignment.BottomCenter)) {
-                              Text(text = "Service Type: Service XYZ")
-                              Text(text = "Date: Jan 1, 2024")
-                              Text(text = "Total: $100")
+                              Text(text = "Date : ${currentReservations.date}")
+                              Text(text = "Hour: ${currentReservations.hour}")
                               Spacer(modifier = Modifier.height(10.dp))
                             }
 
@@ -239,6 +262,7 @@ fun CarouselCard(navController: NavController, email: String?, petListViewModel:
                       }
                 }
           }
+
       IconButton(
           enabled = pageState2.currentPage < pageState2.pageCount - 1,
           onClick = {

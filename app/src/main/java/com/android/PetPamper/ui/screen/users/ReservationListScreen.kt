@@ -22,27 +22,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.android.PetPamper.R
+import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.Reservation
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ReservationsScreen(onBackPressed: () -> Unit) {
-  val groomers =
-      listOf<com.android.PetPamper.ui.screen.users.Groomer>(
-          com.android.PetPamper.ui.screen.users.Groomer(
-              "Hamid", listOf("Skafandri"), 12.0, 12.0, 1),
-          com.android.PetPamper.ui.screen.users.Groomer(
-              "Sa3id", listOf("Skafandri"), 12.0, 12.0, 1),
-          com.android.PetPamper.ui.screen.users.Groomer(
-              "3bdellah", listOf("Skafandri"), 12.0, 12.0, 1),
-          com.android.PetPamper.ui.screen.users.Groomer(
-              "Dawya", listOf("Skafandri"), 12.0, 12.0, 1),
-      )
+fun ReservationsScreen(onBackPressed: () -> Unit, reservations: List<Reservation>) {
 
   Scaffold(
       topBar = {
@@ -57,13 +50,20 @@ fun ReservationsScreen(onBackPressed: () -> Unit) {
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              items(groomers) { groomer -> GroomerCard(groomer) }
+              items(reservations) { reservation -> GroomerCard(reservation) }
             }
       }
 }
 
 @Composable
-fun GroomerCard(groomer: Groomer) {
+fun GroomerCard(reservation: Reservation) {
+  val firebaseConnection = FirebaseConnection()
+  val groomerName = remember { mutableStateOf("") }
+  firebaseConnection.fetchGroomerData(reservation.groomerEmail) {
+    println("Groomer Name: $it")
+    groomerName.value = it.name
+  }
+
   Card(
       // elevation = 4.dp,
       modifier = Modifier.fillMaxWidth()) {
@@ -73,15 +73,14 @@ fun GroomerCard(groomer: Groomer) {
               contentDescription = null,
               modifier = Modifier.size(64.dp).clip(CircleShape))
           Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-            Text(text = groomer.name, style = MaterialTheme.typography.titleSmall)
-            Text(
-                text = "Groomable Pet Types: ${groomer.petTypes.joinToString()}",
-                style = MaterialTheme.typography.labelMedium)
+            Text(text = groomerName.value, style = MaterialTheme.typography.titleSmall)
+            Text(text = "Date: ${reservation.date}", style = MaterialTheme.typography.labelMedium)
           }
           Column(horizontalAlignment = Alignment.End) {
-            Text(text = "${groomer.price}/hour", style = MaterialTheme.typography.labelMedium)
-            Text(text = "${groomer.distance} KM", style = MaterialTheme.typography.labelSmall)
-            Text(text = "${groomer.reviews} Reviews", style = MaterialTheme.typography.labelMedium)
+            Text(text = "${reservation.hour}/hour", style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = "${reservation.groomerEmail}/hour",
+                style = MaterialTheme.typography.labelMedium)
           }
         }
       }

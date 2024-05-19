@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.android.PetPamper.R
+import com.android.PetPamper.connectUser
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
@@ -77,6 +78,8 @@ import com.android.PetPamper.ui.screen.users.CustomTextButton
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.models.User
 
 class GroomerSignUpViewModel {
 
@@ -263,6 +266,12 @@ fun GroomerRegister(
                       viewModel.profilePicture,
                       viewModel.price),
                   onSuccess = {
+                    connectUser(
+                        ChatClient.instance(),
+                        User(viewModel.email, viewModel.name, viewModel.profilePicture),
+                        onSuccess = { navController.navigate("LoginScreen") },
+                        onError = { error -> Log.e("SignUp", "Chat connection failed") })
+
                     firebaseConnection.addGroomerReview(
                         GroomerReviews(viewModel.email, 5.0, 0),
                         onSuccess = { navController.navigate("LoginScreen") },

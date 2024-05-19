@@ -3,6 +3,7 @@ package com.android.PetPamper.database
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.android.PetPamper.data.COLLECTION_USER
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
@@ -306,7 +307,7 @@ class FirebaseConnection : Database() {
   }
 
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
-    return db.collection("users").whereEqualTo("email", email).get()
+    return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
 
   fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
@@ -371,6 +372,23 @@ class FirebaseConnection : Database() {
     return source.task
   }
 
+  fun fetchChatId(email: String, onComplete: (String, String) -> Unit) {
+    db.collection("users").whereEqualTo("email", email).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val user = task.result?.toObjects(User::class.java)
+        if (user != null && user.isNotEmpty()) {
+          val name = user[0].name
+          val Id = user[0].email
+          onComplete(name, Id)
+        } else {
+          Log.d("ChatId", "No user found for this email")
+        }
+      } else {
+        Log.d("ChatId", "Failed to fetch user")
+      }
+    }
+  }
+
   fun fetchGroomerReviews(email: String): Task<GroomerReviews> {
     val source = TaskCompletionSource<GroomerReviews>()
 
@@ -389,6 +407,22 @@ class FirebaseConnection : Database() {
     }
 
     return source.task
+  }
+
+  fun fetchReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
+    db.collection("reservations").whereEqualTo("userEmail", email).get().addOnCompleteListener {
+        task ->
+      if (task.isSuccessful) {
+        val reservations = task.result?.toObjects(Reservation::class.java)
+        if (reservations != null) {
+          onComplete(reservations)
+        } else {
+          onComplete(emptyList())
+        }
+      } else {
+        onComplete(emptyList())
+      }
+    }
   }
 
   fun registerUser(
@@ -414,9 +448,10 @@ class FirebaseConnection : Database() {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
-        task ->
+    val auth = FirebaseAuth.getInstance()
+    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
       if (task.isSuccessful) {
+        auth.currentUser?.uid?.let { getUserData(it) }
         onSuccess()
       } else {
         onFailure(task.exception ?: Exception("Login failed"))
