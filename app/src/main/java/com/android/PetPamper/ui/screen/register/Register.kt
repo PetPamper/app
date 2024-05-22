@@ -205,6 +205,8 @@ fun Register(
                       viewModel.email,
                       viewModel.phoneNumber,
                       viewModel.address,
+                      0,
+                      "",
                       uid),
                   onSuccess = { currentStep++ },
                   onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
@@ -224,6 +226,8 @@ fun Register(
                         viewModel.email,
                         viewModel.phoneNumber,
                         viewModel.address,
+                        0,
+                        "",
                         uid),
                     onSuccess = { currentStep++ },
                     onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
