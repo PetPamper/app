@@ -199,7 +199,7 @@ fun ConfirmButton(
   Button(
       onClick = { groomerViewModel.saveHoursToFirebase(selectedHoursMap) { onConfirm() } },
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) {
+      colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))) {
         Text("Save Available Hours", style = MaterialTheme.typography.bodyLarge)
       }
 }
