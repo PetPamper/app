@@ -110,8 +110,6 @@ fun createChannel(
       Log.d("salam", "current user: ${client.getCurrentUser()}")
       Log.d("salam", "Channel created: ${channel.cid}")
 
-      val message = Message(text = "Hello, this is a message.")
-
       onSuccess(channel.cid)
     } else {
       Log.e("salam", "Error creating channel: ")
@@ -146,7 +144,6 @@ fun AppNavigation(client: ChatClient) {
   val signUp = SignUpViewModel()
   val groomerSignUp = GroomerSignUpViewModel()
   val emailViewModel = EmailViewModel()
-  val firebaseConnection = FirebaseConnection()
 
   NavHost(navController = navController, startDestination = "LoginScreen") {
     composable("LoginScreen") { SignIn(navController) }
@@ -343,30 +340,20 @@ fun AppNavigation(email: String?, client: ChatClient) {
               composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
               composable(BarScreen.Groomers.route) {
-                val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
-                val firebaseConnection = FirebaseConnection()
                 val sampleGroomers = remember { mutableStateOf(listOf<GroomerReview>()) }
                 val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
                 val groomersWithReviews = remember {
                   mutableStateOf(mapOf<Groomer, GroomerReviews>())
                 }
+                var needRecompose by remember { mutableStateOf(false) }
 
-                LaunchedEffect(email) {
-                  firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-                    val uid = documents.documents[0]?.id.toString()
-                    val userViewModel = UserViewModel(uid)
-                    userViewModel.getAddressFromFirebase { address1 ->
-                      if (address.value != address1) {
-                        address.value = address1
-                      }
-                    }
-                  }
-                }
 
-                LaunchedEffect(address.value) {
-                  firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener {
+                LaunchedEffect(userVM.getUser().address, needRecompose) {
+                  needRecompose = false
+                  firebaseConnection.fetchNearbyGroomers(userVM.getUser().address).addOnSuccessListener {
                       groomers ->
                     groomersNearby.value = groomers
+                    groomersWithReviews.value = mapOf<Groomer, GroomerReviews>()
                     groomers.forEach { groomer ->
                       firebaseConnection.fetchGroomerReviews(groomer.email).addOnSuccessListener {
                           reviews ->
@@ -376,15 +363,13 @@ fun AppNavigation(email: String?, client: ChatClient) {
                   }
                 }
 
-                Log.d("GroomersOutLaunched", "${groomersNearby.value}")
-
-                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, address.value) {
+                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
                   sampleGroomers.value =
                       groomersNearby.value.map { groomer ->
                         val distanceWithGroomer =
                             distance(
-                                address.value.location.latitude,
-                                address.value.location.longitude,
+                                userVM.getUser().address.location.latitude,
+                                userVM.getUser().address.location.longitude,
                                 groomer.address.location.latitude,
                                 groomer.address.location.longitude)
                         GroomerReview(
@@ -401,34 +386,30 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
                 Column {
                   GroomerTopBar(
-                      address.value,
+                      userVM.getUser().address,
                       onUpdateAddress = { updatedAddress ->
-                        address.value = updatedAddress
-                        if (email != null) {
-                          firebaseConnection.changeAddress(email, updatedAddress)
-                        }
+                        needRecompose = true
+                        userVM.updateUser(address = updatedAddress)
                       })
                   if (sampleGroomers.value.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                       Text(text = "No groomers found")
                     }
                   } else {
-                    Log.d("Groomers", "${sampleGroomers.value}")
                     GroomerList(groomers = sampleGroomers.value, navController)
                   }
                 }
               }
 
               composable("groomer_details/{email}") { backStackEntry ->
-                val email = backStackEntry.arguments?.getString("email")
-                var firebaseConnection = FirebaseConnection()
-                var GroomerName = remember { mutableStateOf<Groomer>(Groomer()) }
-                if (email != null) {
-                  firebaseConnection.fetchGroomerData(email) { groomer ->
-                    GroomerName.value = groomer
+                val groomerEmail = backStackEntry.arguments?.getString("email")
+                var groomerName = remember { mutableStateOf<Groomer>(Groomer()) }
+                if (groomerEmail != null) {
+                  firebaseConnection.fetchGroomerData(groomerEmail) { groomer ->
+                    groomerName.value = groomer
                   }
                 }
-                GroomerProfile(GroomerName.value, navController, user1Id.value, client)
+                GroomerProfile(groomerName.value, navController, user1Id.value, client)
               }
             }
       }
