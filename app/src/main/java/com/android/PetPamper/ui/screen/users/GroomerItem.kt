@@ -99,14 +99,6 @@ fun GroomerItem(groomer: GroomerReview, navController: NavController) {
                                 }
                               })
                     }
-                // Rating stars, make sure to keep outside the Column to position at the end of the
-                // row
-                //                Text(
-                //                    text = "${groomer.rating} ★",
-                //                    color = Color(0xFFFDD835),
-                //                    modifier = Modifier.align(Alignment.CenterVertically) //
-                // Center vertically within the row
-                //                )
                 RatingBox(
                     rating = groomer.rating.toDouble(),
                     starPainter = painterResource(id = R.drawable.star))

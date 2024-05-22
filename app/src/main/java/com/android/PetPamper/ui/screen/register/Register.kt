@@ -1,6 +1,6 @@
 package com.android.PetPamper.ui.screen.register
 
-import LocationViewModel
+import com.android.PetPamper.viewmodel.AddressViewModel
 import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
@@ -417,9 +417,9 @@ fun RegisterLayout(
   var state by remember { mutableStateOf("") }
   var postalCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
-  var locationViewModel = LocationViewModel()
+  var addressVM = AddressViewModel()
   var expandedState by remember { mutableStateOf(false) }
-  val locationOptions = remember { mutableStateListOf<LocationMap>() }
+  val addressSuggestions = remember { mutableStateListOf<Address>() }
   val focusRequester = remember { FocusRequester() }
   val firebaseConnection = FirebaseConnection()
 
@@ -523,7 +523,7 @@ fun RegisterLayout(
                             unfocusedLabelColor = Color.Gray))
               } else {
                 ExposedDropdownMenuBox(
-                    expanded = expandedState && locationOptions.isNotEmpty(),
+                    expanded = expandedState && addressSuggestions.isNotEmpty(),
                     onExpandedChange = {
                       expandedState = it
                       if (expandedState) {
@@ -536,13 +536,13 @@ fun RegisterLayout(
                           value = textField,
                           onValueChange = { newValue ->
                             textField = newValue
-                            locationViewModel.fetchLocation(newValue) { locations ->
-                              if (locations != null) {
-                                locationOptions.clear()
-                                locationOptions.addAll(locations)
+                            addressVM.fetchAddresses(newValue) { addresses ->
+                              if (addresses != null) {
+                                addressSuggestions.clear()
+                                addressSuggestions.addAll(addresses)
                                 Log.d(
                                     "LocationInput",
-                                    "Updated location options: ${locationOptions.joinToString { it.name }}")
+                                    "Updated location options: ${addressSuggestions.joinToString { it.location.name }}")
                               }
                             }
                           },
@@ -559,12 +559,12 @@ fun RegisterLayout(
                       )
                       DropdownMenu(
                           expanded = expandedState, onDismissRequest = { expandedState = false }) {
-                            locationOptions.forEach { location ->
+                            addressSuggestions.forEach { address ->
                               DropdownMenuItem(
-                                  text = { Text(location.name) },
+                                  text = { Text(address.location.name) },
                                   onClick = {
-                                    textField = location.name
-                                    viewModel.locationMap = location
+                                    textField = address.location.name
+                                    viewModel.locationMap = address.location
                                     expandedState = false
                                   })
                             }
