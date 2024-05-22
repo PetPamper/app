@@ -20,7 +20,7 @@ class GroomerViewModel(var email: String) : ViewModel() {
   private var firebaseConnection: FirebaseConnection = FirebaseConnection()
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
-    firebaseConnection.getUserData(uid).get().addOnCompleteListener { task ->
+    firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val document = task.result
         if (document != null) {
@@ -91,7 +91,7 @@ class GroomerViewModel(var email: String) : ViewModel() {
     }
 
     fun getAddressFromFirebase(onComplete: (Address) -> Unit) {
-      firebaseConnection.getUserData(uid).get().addOnCompleteListener { task ->
+      firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
         if (task.isSuccessful) {
           val document = task.result
           if (document != null) {

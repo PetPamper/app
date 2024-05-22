@@ -191,6 +191,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
           BarScreen.Map,
           BarScreen.Profile,
       )
+  val userVM = UserViewModel(email!!)
 
   val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
@@ -256,13 +257,6 @@ fun AppNavigation(email: String?, client: ChatClient) {
             startDestination = BarScreen.Home.route,
             modifier = Modifier.padding(innerPadding)) {
               composable(BarScreen.Home.route) {
-                val nameUser = remember { mutableStateOf("") }
-                val firebaseConnection = FirebaseConnection()
-                firebaseConnection.getUserUidByEmail(email!!).addOnSuccessListener { documents ->
-                  val uid = documents.documents[0]?.id.toString()
-                  val userViewModel = UserViewModel(uid)
-                  userViewModel.getNameFromFirebase { name -> nameUser.value = name }
-                }
                 HomeScreen(navController, email)
               }
 
@@ -345,8 +339,8 @@ fun AppNavigation(email: String?, client: ChatClient) {
               }
 
 
-              composable(BarScreen.Map.route) { MapView(email!!) }
-              composable(BarScreen.Profile.route) { UserProfileScreen(email!!, navController) }
+              composable(BarScreen.Map.route) { MapView(userVM) }
+              composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
               composable(BarScreen.Groomers.route) {
                 val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
