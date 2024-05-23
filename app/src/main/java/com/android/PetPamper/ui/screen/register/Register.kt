@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.register
 
-import com.android.PetPamper.viewmodel.AddressViewModel
 import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
@@ -76,6 +75,7 @@ import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.android.PetPamper.ui.screen.users.CustomTextButton
+import com.android.PetPamper.viewmodel.AddressViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore

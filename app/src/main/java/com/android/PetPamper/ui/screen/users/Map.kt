@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.android.PetPamper.database.FirebaseConnection
-import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
@@ -30,16 +29,14 @@ import com.google.maps.android.compose.*
 
 @Composable
 fun MapView(userVM: UserViewModel) {
-    var user by remember { mutableStateOf(userVM.getUser()) }
+  var user by remember { mutableStateOf(userVM.getUser()) }
   val context = LocalContext.current
   val firebaseConnection = FirebaseConnection()
   var groomersNearby by remember { mutableStateOf(listOf<Groomer>()) }
   var showDialog by remember { mutableStateOf(false) }
   var selectedGroomer by remember { mutableStateOf<Groomer?>(null) }
 
-  LaunchedEffect(userVM.uid) {
-    user = userVM.getUser()
-  }
+  LaunchedEffect(userVM.uid) { user = userVM.getUser() }
 
   LaunchedEffect(user.address) {
     firebaseConnection.fetchNearbyGroomers(user.address).addOnSuccessListener { groomers ->

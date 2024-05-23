@@ -245,6 +245,9 @@ dependencies {
     // implementation ("io.coil-kt:coil-compose:1.3.2")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    //notifications
+    implementation ("androidx.core:core-ktx:1.6.0")
 }
 
 configurations {
