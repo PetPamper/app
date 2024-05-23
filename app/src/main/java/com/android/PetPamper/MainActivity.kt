@@ -25,7 +25,6 @@ import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
 import com.android.PetPamper.model.*
-import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
@@ -60,7 +59,6 @@ import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.InitializationState
-import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
@@ -253,9 +251,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
             navController = navController,
             startDestination = BarScreen.Home.route,
             modifier = Modifier.padding(innerPadding)) {
-              composable(BarScreen.Home.route) {
-                HomeScreen(navController, email)
-              }
+              composable(BarScreen.Home.route) { HomeScreen(navController, email) }
 
               composable("ReservationsScreen") {
                 val reservations = remember { mutableStateOf(listOf<Reservation>()) }
@@ -335,7 +331,6 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
               }
 
-
               composable(BarScreen.Map.route) { MapView(userVM) }
               composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
@@ -347,42 +342,44 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
                 var needRecompose by remember { mutableStateOf(false) }
 
-
                 LaunchedEffect(userVM.getUser().address, needRecompose) {
                   needRecompose = false
-                  firebaseConnection.fetchNearbyGroomers(userVM.getUser().address).addOnSuccessListener {
-                      groomers ->
-                    groomersNearby.value = groomers
-                    groomersWithReviews.value = mapOf<Groomer, GroomerReviews>()
-                    groomers.forEach { groomer ->
-                      firebaseConnection.fetchGroomerReviews(groomer.email).addOnSuccessListener {
-                          reviews ->
-                        groomersWithReviews.value += (groomer to reviews)
+                  firebaseConnection
+                      .fetchNearbyGroomers(userVM.getUser().address)
+                      .addOnSuccessListener { groomers ->
+                        groomersNearby.value = groomers
+                        groomersWithReviews.value = mapOf<Groomer, GroomerReviews>()
+                        groomers.forEach { groomer ->
+                          firebaseConnection
+                              .fetchGroomerReviews(groomer.email)
+                              .addOnSuccessListener { reviews ->
+                                groomersWithReviews.value += (groomer to reviews)
+                              }
+                        }
                       }
-                    }
-                  }
                 }
 
-                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
-                  sampleGroomers.value =
-                      groomersNearby.value.map { groomer ->
-                        val distanceWithGroomer =
-                            distance(
-                                userVM.getUser().address.location.latitude,
-                                userVM.getUser().address.location.longitude,
-                                groomer.address.location.latitude,
-                                groomer.address.location.longitude)
-                        GroomerReview(
-                            groomer.email,
-                            groomer.name,
-                            groomer.petTypes.joinToString(", "),
-                            groomer.price.toString() + " CHF",
-                            (round(distanceWithGroomer * 10) / 10).toString() + " km",
-                            groomersWithReviews.value[groomer]?.reviewCount ?: 0,
-                            groomersWithReviews.value[groomer]?.rating ?: 0.0,
-                            groomer.profilePic)
-                      }
-                }
+                LaunchedEffect(
+                    groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
+                      sampleGroomers.value =
+                          groomersNearby.value.map { groomer ->
+                            val distanceWithGroomer =
+                                distance(
+                                    userVM.getUser().address.location.latitude,
+                                    userVM.getUser().address.location.longitude,
+                                    groomer.address.location.latitude,
+                                    groomer.address.location.longitude)
+                            GroomerReview(
+                                groomer.email,
+                                groomer.name,
+                                groomer.petTypes.joinToString(", "),
+                                groomer.price.toString() + " CHF",
+                                (round(distanceWithGroomer * 10) / 10).toString() + " km",
+                                groomersWithReviews.value[groomer]?.reviewCount ?: 0,
+                                groomersWithReviews.value[groomer]?.rating ?: 0.0,
+                                groomer.profilePic)
+                          }
+                    }
 
                 Column {
                   GroomerTopBar(
