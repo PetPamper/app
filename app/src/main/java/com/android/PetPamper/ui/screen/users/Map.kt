@@ -29,29 +29,21 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 
 @Composable
-fun MapView(email: String) {
+fun MapView(userVM: UserViewModel) {
+    var user by remember { mutableStateOf(userVM.getUser()) }
   val context = LocalContext.current
   val firebaseConnection = FirebaseConnection()
-  val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
-  val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
+  var groomersNearby by remember { mutableStateOf(listOf<Groomer>()) }
   var showDialog by remember { mutableStateOf(false) }
   var selectedGroomer by remember { mutableStateOf<Groomer?>(null) }
 
-  LaunchedEffect(email) {
-    firebaseConnection.getUserUidByEmail(email).addOnSuccessListener { documents ->
-      val uid = documents.documents[0]?.id.toString()
-      val userViewModel = UserViewModel(uid)
-      userViewModel.getAddressFromFirebase { address1 ->
-        if (address.value != address1) {
-          address.value = address1
-        }
-      }
-    }
+  LaunchedEffect(userVM.uid) {
+    user = userVM.getUser()
   }
 
-  LaunchedEffect(address.value) {
-    firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener { groomers ->
-      groomersNearby.value = groomers
+  LaunchedEffect(user.address) {
+    firebaseConnection.fetchNearbyGroomers(user.address).addOnSuccessListener { groomers ->
+      groomersNearby = groomers
     }
   }
 
@@ -60,7 +52,7 @@ fun MapView(email: String) {
   }
 
   GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
-    groomersNearby.value.forEach { groomer ->
+    groomersNearby.forEach { groomer ->
       Marker(
           state =
               MarkerState(
@@ -81,7 +73,7 @@ fun MapView(email: String) {
     AlertDialog(
         onDismissRequest = { showDialog = false },
         title = { Text(text = "Groomer Details") },
-        text = { selectedGroomer?.let { InfoWindow(it, address.value.location) } },
+        text = { selectedGroomer?.let { InfoWindow(it, user.address.location) } },
         confirmButton = {
           Button(
               colors =

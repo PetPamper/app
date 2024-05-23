@@ -1,6 +1,6 @@
 package com.android.PetPamper.ui.screen.register
 
-import LocationViewModel
+import com.android.PetPamper.viewmodel.AddressViewModel
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -103,6 +103,8 @@ fun SignUpScreenGoogle(
                       viewModel.email,
                       viewModel.phoneNumber,
                       viewModel.address,
+                      0,
+                      "",
                       uid),
                   onSuccess = { currentStep++ },
                   onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
@@ -133,9 +135,9 @@ fun SignUpScreenLayoutGoogle(
   var postalCode by remember { mutableStateOf("") }
   var errorText by remember { mutableStateOf("") }
   var expandedState by remember { mutableStateOf(false) }
-  val locationOptions = remember { mutableStateListOf<LocationMap>() }
+  val addressSuggestions = remember { mutableStateListOf<Address>() }
   val focusRequester = remember { FocusRequester() }
-  var locationViewModel = LocationViewModel()
+  var addressVM = AddressViewModel()
 
   val imeVisible = LocalWindowInsets.current.ime.isVisible
   val keyboardOpenState = remember { mutableStateOf(false) }
@@ -223,7 +225,7 @@ fun SignUpScreenLayoutGoogle(
                               unfocusedLabelColor = Color.Gray))
                 } else {
                   ExposedDropdownMenuBox(
-                      expanded = expandedState && locationOptions.isNotEmpty(),
+                      expanded = expandedState && addressSuggestions.isNotEmpty(),
                       onExpandedChange = {
                         expandedState = it
                         if (expandedState) {
@@ -236,13 +238,13 @@ fun SignUpScreenLayoutGoogle(
                             value = textField,
                             onValueChange = { newValue ->
                               textField = newValue
-                              locationViewModel.fetchLocation(newValue) { locations ->
-                                if (locations != null) {
-                                  locationOptions.clear()
-                                  locationOptions.addAll(locations)
+                              addressVM.fetchAddresses(newValue) { addresses ->
+                                if (addresses != null) {
+                                  addressSuggestions.clear()
+                                  addressSuggestions.addAll(addresses)
                                   Log.d(
                                       "LocationInput",
-                                      "Updated location options: ${locationOptions.joinToString { it.name }}")
+                                      "Updated location options: ${addressSuggestions.joinToString { it.location.name }}")
                                 }
                               }
                             },
@@ -260,14 +262,14 @@ fun SignUpScreenLayoutGoogle(
                         androidx.compose.material.DropdownMenu(
                             expanded = expandedState,
                             onDismissRequest = { expandedState = false }) {
-                              locationOptions.forEach { location ->
+                              addressSuggestions.forEach { address ->
                                 androidx.compose.material.DropdownMenuItem(
                                     onClick = {
-                                      textField = location.name
-                                      viewModel.locationMap = location
+                                      textField = address.location.name
+                                      viewModel.locationMap = address.location
                                       expandedState = false
                                     }) {
-                                      Text(location.name)
+                                      Text(address.location.name)
                                     }
                               }
                             }

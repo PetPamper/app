@@ -6,6 +6,6 @@ data class User(
     var phoneNumber: String = "",
     var address: Address = Address(),
     var pawPoints: Int = 0,
-    var profilePictureUrl: String  = "",
-    val userId: String = ""
+    var profilePictureUrl: String = "",
+    var userId: String = ""
 ) {}

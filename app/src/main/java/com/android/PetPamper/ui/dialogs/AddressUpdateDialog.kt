@@ -4,29 +4,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.R
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.PetPamper.model.Address
-import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.viewmodel.LocationViewModel
+import com.android.PetPamper.viewmodel.AddressViewModel
 
 @Composable
 fun AddressUpdateDialog(
     initialAddress: Address,
     onDismiss: () -> Unit,
     onSave: (Address) -> Unit,
-    viewModel: LocationViewModel = viewModel()
+    addressVM: AddressViewModel = AddressViewModel()
 ) {
   var street by remember { mutableStateOf(initialAddress.street) }
   var city by remember { mutableStateOf(initialAddress.city) }
   var state by remember { mutableStateOf(initialAddress.state) }
   var postalCode by remember { mutableStateOf(initialAddress.postalCode) }
-  var locationName by remember { mutableStateOf(initialAddress.location.name) }
 
   val coroutineScope = rememberCoroutineScope()
-  var suggestions = remember { mutableStateListOf<LocationMap>() }
-  var locationView = LocationViewModel()
-  var location by remember { mutableStateOf(Address()) }
+  var suggestions = remember { mutableStateListOf<Address>() }
+  var location by remember { mutableStateOf(initialAddress.location) }
 
   AlertDialog(
       onDismissRequest = onDismiss,
@@ -37,7 +34,7 @@ fun AddressUpdateDialog(
               value = street,
               onValueChange = {
                 street = it
-                locationView.fetchLocation(street) { result ->
+                addressVM.fetchAddresses(street) { result ->
                   if (result != null) {
                     suggestions.clear()
                     suggestions.addAll(result)
@@ -66,11 +63,10 @@ fun AddressUpdateDialog(
             suggestions.forEach { suggestion ->
               TextButton(
                   onClick = {
-                    street = suggestion.name
-                    locationName = suggestion.name
-                    location = Address(suggestion.name, city, state, postalCode, suggestion)
+                    street = suggestion.street
+                    location = suggestion.location
                   }) {
-                    Text(suggestion.name)
+                    Text(suggestion.location.name)
                   }
             }
           }
@@ -79,7 +75,7 @@ fun AddressUpdateDialog(
       confirmButton = {
         Button(
             onClick = {
-              val updatedAddress = location
+              val updatedAddress = Address(street, city, state, postalCode, location)
               onSave(updatedAddress)
             }) {
               Text("Save")

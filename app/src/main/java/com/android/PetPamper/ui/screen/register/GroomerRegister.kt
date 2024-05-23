@@ -1,6 +1,6 @@
 package com.android.PetPamper.ui.screen.register
 
-import LocationViewModel
+import com.android.PetPamper.viewmodel.AddressViewModel
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -669,7 +669,7 @@ fun GroomerRegisterMultipleLayout(
   val numFields = fieldNames.size
   val textFields = remember { mutableStateListOf<String>() }
   val shownErrorTexts = remember { mutableStateListOf<String>() }
-  val locationViewModel = LocationViewModel()
+  val addressVM = AddressViewModel()
   var expandedState by remember { mutableStateOf(false) }
   val locationOptions = remember { mutableStateListOf<LocationMap>() }
   val focusRequester = remember { FocusRequester() }
