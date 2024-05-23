@@ -54,6 +54,8 @@ import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
 import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import com.example.PetPamper.ChannelActivity
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
@@ -145,7 +147,17 @@ fun AppNavigation(client: ChatClient) {
   val groomerSignUp = GroomerSignUpViewModel()
   val emailViewModel = EmailViewModel()
 
-  NavHost(navController = navController, startDestination = "LoginScreen") {
+    val currentUser = Firebase.auth.currentUser
+    val startDestination = if (currentUser?.email == null) {
+        Log.d("MainActivity", "current user not connected")
+        "LoginScreen"
+    } else {
+        val email = currentUser.email
+        //Log.d("MainActivity", "current email is $email")
+        "HomeScreen/$email"
+    }
+
+  NavHost(navController = navController, startDestination = startDestination) {
     composable("LoginScreen") { SignIn(navController) }
 
     composable("RegisterScreen1") { Register(signUp, navController) }
@@ -164,7 +176,7 @@ fun AppNavigation(client: ChatClient) {
     composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
     composable("HomeScreen/{email}") { backStackEntry ->
-      val email = backStackEntry.arguments?.getString("email")
+      val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
       AppNavigation(email, client)
     }
     composable("GroomerHomeScreen/{email}") { backStackEntry ->

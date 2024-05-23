@@ -1,24 +1,30 @@
 package com.android.PetPamper.database
 
 import android.util.Log
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.android.PetPamper.model.Pet
 import com.android.PetPamper.model.PetFactory
 import com.android.PetPamper.model.PetType
 import com.google.firebase.firestore.Filter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.util.UUID
 
 /** Class representing pet data entry in Firestore */
+@Entity
 data class PetData(
-    var id: String = "",
-    val petType: String = PetType.OTHER.petType,
-    val name: String = "Unnamed",
-    val birthYear: Int = 0,
-    val birthMonth: Int = 1,
-    val birthDay: Int = 1,
-    val description: String = "",
-    val pictures: List<String> = listOf(""),
-    val ownerId: String = ""
+    @PrimaryKey var id: String = "",
+    var petType: String = PetType.OTHER.petType,
+    var name: String = "Unnamed",
+    var birthYear: Int = 0,
+    var birthMonth: Int = 1,
+    var birthDay: Int = 1,
+    var description: String = "",
+    @Ignore var pictures: List<String> = listOf(""),
+    var ownerId: String = ""
 ) {
   constructor(
       pet: Pet
@@ -148,6 +154,19 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
    * @return UID as a string
    */
   fun generateNewId(): String {
-    return UUID.randomUUID().toString()
+      var newId = UUID.randomUUID().toString()
+      var success = false
+      var idFound = true
+      while (idFound || !success) {
+          newId = UUID.randomUUID().toString()
+          runBlocking {
+              launch {
+                  val temp = db.documentExists(petsDBPath, newId)
+                  success = temp.first
+                  idFound = temp.second
+              }
+          }
+      }
+    return newId
   }
 }

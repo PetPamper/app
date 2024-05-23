@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
-class FirebaseConnection : Database() {
+class FirebaseConnection : Database {
 
   private val db: FirebaseFirestore = Firebase.firestore
 
