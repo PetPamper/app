@@ -8,8 +8,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,45 +30,43 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.android.PetPamper.R
+import com.android.PetPamper.model.Address
+import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
-
-data class UserProfile(
-    val name: String,
-    val phoneNumber: String,
-    val email: String,
-    val address: String,
-    val pawPoints: Int,
-    val profilePictureUrl: String
-)
+import com.android.PetPamper.model.User
 
 @Composable
-fun UserProfileScreen(email: String, navController: NavController) {
-  var userviewModel = UserViewModel(email)
-  val _phoneNumber = remember { mutableStateOf<String>("") }
-  val _addressStreet = remember { mutableStateOf<String>("") }
-  val _name = remember { mutableStateOf<String>("") }
+fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
+  var user by remember { mutableStateOf(userVM.getUser()) }
 
-  userviewModel.getPhoneNumberFromFirebase { name -> _phoneNumber.value = name }
+    var showEditProfile by remember { mutableStateOf(false) }
 
-  userviewModel.getAddressFromFirebase { address -> _addressStreet.value = address.street }
+    var needRecompose by remember { mutableStateOf(false) }
 
-  userviewModel.getNameFromFirebase { name -> _name.value = name }
+    if (showEditProfile){
+        EditProfileDialog(
+            onDismiss = {
+                showEditProfile = false
+                needRecompose = true},
+            onSave = {
+                userVM.updateUser(name = it.name, email = it.email, phone = it.phoneNumber)
+                showEditProfile = false
+                needRecompose = true},
+            user)
+    }
 
-  var userProfile =
-      UserProfile(
-          name = userviewModel.name,
-          phoneNumber = _phoneNumber.value,
-          email = userviewModel.email,
-          address = _addressStreet.value,
-          pawPoints = 75,
-          profilePictureUrl = "https://yourimageurl.com/image.jpg")
+    LaunchedEffect(userVM.uid, needRecompose) {
+        Log.d("LaunchedEffectTAG","UserProfileScreen recomposed")
+        user = userVM.getUser()
+        needRecompose = false
+    }
 
-  Log.d("UserProfile1", "phone: ${userviewModel.phoneNumber}")
+    Log.d("UserProfile1", "phone: ${user.phoneNumber}")
 
   Column(modifier = Modifier.padding(12.dp)) { // Adding padding around the entire screen content
     // user name
     Text(
-        text = _name.value,
+        text = user.name,
         style =
             TextStyle(
                 fontSize = 38.sp,
@@ -163,7 +164,7 @@ fun UserProfileScreen(email: String, navController: NavController) {
                 }
             Text(
                 text =
-                    "${userProfile.phoneNumber}\n${userProfile.email.take(20)}\n${userProfile.address.take(20)}",
+                    "${user.phoneNumber}\n${user.email.take(20)}\n${user.address.street.take(20)}",
                 style =
                     TextStyle(
                         fontSize = 13.sp,
@@ -341,7 +342,7 @@ fun UserProfileScreen(email: String, navController: NavController) {
                 .height(43.dp)
                 .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))) {
           Button(
-              onClick = { /* Handle your click here */},
+              onClick = { showEditProfile = true},
               modifier =
                   Modifier.matchParentSize(), // Ensures the Button matches the size of the Box
               colors =
@@ -486,15 +487,13 @@ fun UserProfileDetail(label: String, detail: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewUserProfile() {
-  val sampleUserProfile =
-      UserProfile(
-          name = "Stanley Cohen",
-          phoneNumber = "+33 6 77 66 55 44",
-          email = "stanley.coh@gmail.com",
-          address = "Rue Louis Favre 4, 1024 Ecublens",
-          pawPoints = 75,
-          profilePictureUrl = "https://yourimageurl.com/image.jpg")
-  MaterialTheme {
-    UserProfileScreen("alitennis131800@gmail.com", NavController(context = LocalContext.current))
-  }
+    class previewUVM: UserViewModel("alitennis131800@gmail.com"){
+        override fun getUser(force: Boolean): User {
+            return User("Ali Tennis",super.uid,"0041234567890", Address("Rte des Essai 40, Apt. 4","Essex","Suisse","1234",
+                LocationMap()
+            )
+            )
+        }
+    }
+    MaterialTheme { UserProfileScreen(userVM = previewUVM(), navController = NavController(context = LocalContext.current)) }
 }
