@@ -28,6 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.android.PetPamper.R
+import com.android.PetPamper.connectUser
 import com.android.PetPamper.createChannel
 import com.android.PetPamper.model.Groomer
 import com.example.PetPamper.ChannelActivity
@@ -176,6 +177,8 @@ fun ChatWithGroomerButton(
                   image = profilePic,
               )
 
+            connectUser(client, groomer, onSuccess = { println("User connected successfully") },
+              onError = { println("Error connecting user: $it") })
           // First, connect the groomer
           // Then, create or load the channel
           createChannel(
