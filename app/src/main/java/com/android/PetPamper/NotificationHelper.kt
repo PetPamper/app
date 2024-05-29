@@ -10,7 +10,7 @@ import com.android.PetPamper.R
 class NotificationHelper(private val context: Context) {
 
     companion object {
-        const val CHANNEL_ID = "your_channel_id"  // Consistent Channel ID
+        const val CHANNEL_ID = "pet_pamper_notifications_channel"
     }
 
     init {
@@ -18,16 +18,14 @@ class NotificationHelper(private val context: Context) {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name = "My channel name"
-            val descriptionText = "My channel description"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Pet Pamper Notifications"
+            val descriptionText = "Notifications for Pet Pamper app"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
