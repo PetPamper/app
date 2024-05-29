@@ -66,6 +66,9 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import kotlin.math.round
+import okhttp3.*
+import org.json.JSONObject
+import java.io.IOException
 
 class MainActivity : ComponentActivity() {
   private lateinit var client: ChatClient
@@ -86,7 +89,6 @@ class MainActivity : ComponentActivity() {
     setContent { AppNavigation(client) }
   }
 }
-
 fun createChannel(
     client: ChatClient,
     userId: String,
@@ -94,49 +96,62 @@ fun createChannel(
     onSuccess: (String) -> Unit,
     onError: (String) -> Unit
 ) {
-  Log.d("salam", "Creating channel")
-  val channelId = "dm_channel_id"
-  val channelClient = client.channel(channelType = "messaging", channelId = channelId)
+    Log.d("salam", "Creating channel")
+    val channelId = "dm_channel_id"
+    val channelClient = client.channel(channelType = "messaging", channelId = channelId)
 
-  val members = listOf(userId, groomerId)
-  Log.d("Members", "Members: $members")
-  val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
+    val members = listOf(userId, groomerId)
+    Log.d("Members", "Members: $members")
+    val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
 
-  channelClient.create(members, extraData).enqueue { result ->
-    if (result.isSuccess) {
-      val channel: Channel = result.getOrThrow()
+    channelClient.create(members, extraData).enqueue { result ->
+        if (result.isSuccess) {
+            val channel: Channel = result.getOrThrow()
 
-      channel.members.forEach { Log.d("salam", "Member: ${it.user.id}") }
-      Log.d("salam", "current user: ${client.getCurrentUser()}")
-      Log.d("salam", "Channel created: ${channel.cid}")
+            channel.members.forEach { Log.d("salam", "Member: ${it.user.id}") }
+            Log.d("salam", "current user: ${client.getCurrentUser()}")
+            Log.d("salam", "Channel created: ${channel.cid}")
 
-      onSuccess(channel.cid)
-    } else {
-      Log.e("salam", "Error creating channel: ")
-      onError(result.errorOrNull()?.message ?: "Unknown error")
+            // Send a default message
+            val message = Message(
+                text = "Hello! How can I assist you today?", // The ID of the user sending the message
+            )
+
+            channelClient.sendMessage(message).enqueue { sendMessageResult ->
+                if (sendMessageResult.isSuccess) {
+                    Log.d("salam", "Default message sent successfully")
+                } else {
+                    Log.e("salam", "Error sending default message: ${sendMessageResult.errorOrNull()?.message}")
+                }
+            }
+
+            onSuccess(channel.cid)
+        } else {
+            Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
+            onError(result.errorOrNull()?.message ?: "Unknown error")
+        }
     }
-  }
 }
+
 
 fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
-
-  val token = client.devToken(user.id) // Ensure the token is correct
-
-  if (client.getCurrentUser() != null) {
-    Log.d("ChatApp", "User already connected")
-    onSuccess()
-  } else {
-    client.connectUser(user, token).enqueue { result ->
-      if (result.isSuccess) {
-        Log.d("ChatApp", "User connected: ${user.id}")
+        val token = client.devToken(user.id)
+    if (client.getCurrentUser() != null) {
+        Log.d("ChatApp", "User already connected")
         onSuccess()
-      } else {
-        Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
-        onError(result.errorOrNull()?.message ?: "Unknown error")
-      }
+    } else {
+        client.connectUser(user, token).enqueue { result ->
+            if (result.isSuccess) {
+                Log.d("ChatApp", "User connected: ${user.id}")
+                onSuccess()
+            } else {
+                Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
+                onError(result.errorOrNull()?.message ?: "Unknown error")
+            }
+        }
     }
-  }
-}
+    }
+
 
 @Composable
 fun AppNavigation(client: ChatClient) {
@@ -189,6 +204,8 @@ fun AppNavigation(email: String?, client: ChatClient) {
           BarScreen.Profile,
       )
   val userVM = UserViewModel(email!!)
+
+
 
   val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
@@ -336,7 +353,10 @@ fun AppNavigation(email: String?, client: ChatClient) {
               }
 
 
-              composable(BarScreen.Map.route) { MapView(userVM) }
+              composable(BarScreen.Map.route) {
+
+                  MapView(userVM) }
+
               composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
               composable(BarScreen.Groomers.route) {
