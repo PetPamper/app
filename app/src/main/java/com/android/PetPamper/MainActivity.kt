@@ -205,6 +205,8 @@ fun AppNavigation(email: String?, client: ChatClient) {
       )
   val userVM = UserViewModel(email!!)
 
+
+
   val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
   val firebaseConnection = FirebaseConnection()
@@ -351,7 +353,10 @@ fun AppNavigation(email: String?, client: ChatClient) {
               }
 
 
-              composable(BarScreen.Map.route) { MapView(userVM) }
+              composable(BarScreen.Map.route) {
+
+                  MapView(userVM) }
+
               composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
               composable(BarScreen.Groomers.route) {

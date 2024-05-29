@@ -138,8 +138,7 @@ fun CarouselCard(
                                     .data(sliderList[page].pictures.getOrNull(0))
                                     .crossfade(true)
                                     .scale(Scale.FILL)
-                                    .build(),
-                            contentDescription = null,
+                                    .build(), contentDescription = null,
                             placeholder = painterResource(id = R.drawable.placeholder),
                             error = painterResource(id = R.drawable.error_image_generic),
                             modifier = Modifier.fillMaxSize() // Make the image fill the Box
