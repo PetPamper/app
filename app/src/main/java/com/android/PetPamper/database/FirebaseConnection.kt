@@ -221,6 +221,10 @@ class FirebaseConnection : Database() {
     return db.collection("users").document(uid).get()
   }
 
+    fun getGroomerData(email: String): Task<DocumentSnapshot> {
+        return db.collection("groomers").document(email).get()
+    }
+
   fun fetchGroomerData(email: String, onComplete: (Groomer) -> Unit) {
     db.collection("groomers").get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
@@ -310,7 +314,12 @@ class FirebaseConnection : Database() {
     return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
 
-  fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
+    fun getGroomerUidByEmail(email: String): Task<QuerySnapshot> {
+        return db.collection("groomers").whereEqualTo("email", email).get()
+    }
+
+
+    fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
     // Convert each Calendar instance to a Timestamp for Firebase storage
     val hoursData =
         newHours.map { calendar ->

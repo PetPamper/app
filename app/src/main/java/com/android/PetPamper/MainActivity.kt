@@ -31,6 +31,7 @@ import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
 import com.android.PetPamper.ui.screen.forgotPass.*
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
+import com.android.PetPamper.ui.screen.groomers.GroomerHomeScreen
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
@@ -186,7 +187,7 @@ fun AppNavigation(client: ChatClient) {
       val email = backStackEntry.arguments?.getString("email")
       if (email != null) {
 
-        GroomerHome(email)
+          GroomerHomeScreen(email)
       }
     }
   }
@@ -276,7 +277,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
               composable("ReservationsScreen") {
                 val reservations = remember { mutableStateOf(listOf<Reservation>()) }
-                firebaseConnection.fetchReservations(email!!) { res -> reservations.value = res }
+                firebaseConnection.fetchReservations(email) { res -> reservations.value = res }
 
                 ReservationsScreen(
                     reservations = reservations.value,
@@ -285,14 +286,14 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
               composable("PetListScreen") {
                 PetListScreen(
-                    viewModel = PetListViewModel(email!!, PetDataHandler()),
+                    viewModel = PetListViewModel(email, PetDataHandler()),
                     onBackPressed = { navController.navigateUp() },
                     navController = navController)
               }
 
               composable("AddPetScreen") {
                 AddPetScreen(
-                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler()),
+                    viewModel = AddPetScreenViewModel(email, PetDataHandler()),
                     onBackPressed = { navController.navigateUp() })
               }
 

@@ -1,5 +1,6 @@
 package com.android.PetPamper.model
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +10,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 
-class GroomerViewModel(var email: String) : ViewModel() {
+open class GroomerViewModel(var email: String) : ViewModel() {
   var uid: String = email
   var name: String = ""
   var phoneNumber: String = ""
@@ -20,7 +21,7 @@ class GroomerViewModel(var email: String) : ViewModel() {
   private var firebaseConnection: FirebaseConnection = FirebaseConnection()
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
-    firebaseConnection.getUserData(uid).addOnCompleteListener { task ->
+    firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val document = task.result
         if (document != null) {
@@ -31,7 +32,45 @@ class GroomerViewModel(var email: String) : ViewModel() {
     }
   }
 
-  fun updateAvailableHours(
+    fun getPhoneNumberFromFirebase(onComplete: (String) -> Unit) {
+        firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val document = task.result
+            if (document != null) {
+            phoneNumber = document.getString("phoneNumber") ?: ""
+                Log.d("PhoneNumber", "Phone number: $phoneNumber")
+            onComplete(phoneNumber)
+            }
+        }
+        }
+    }
+
+    fun getAddressesFromFirebase(onComplete: (Address) -> Unit) {
+        firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val document = task.result
+                if (document != null) {
+                    // Fetch each part of the address from the document
+                    val street = document.getString("address.street") ?: ""
+                    val city = document.getString("address.city") ?: ""
+                    val state = document.getString("address.state") ?: ""
+                    val postalCode = document.getString("address.postalCode") ?: ""
+                    // Construct an Address object
+                    val address = Address(street, city, state, postalCode, LocationMap())
+                    Log.d("Address", "Address: $address")
+                    onComplete(address)
+                }
+            } else {
+                // Handle the task failure if needed
+                onComplete(Address("", "", "", "", LocationMap())) // Provide a default address or handle the error as required
+            }
+        }
+    }
+
+
+
+
+    fun updateAvailableHours(
       email: String,
       date: String,
       newHours: List<Calendar>,
