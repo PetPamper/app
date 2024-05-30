@@ -80,7 +80,7 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
     Box(
         modifier =
             Modifier.fillMaxWidth()
-                .height(194.dp)
+                .height(160.dp)
                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                 .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(8.dp))
                 .padding(12.dp)) {
@@ -92,14 +92,14 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
               Image(
                   painter = painterResource(id = R.drawable.user_image),
                   contentDescription = "User profile image",
-                  modifier = Modifier.size(width = 160.dp, height = 150.dp),
+                  modifier = Modifier.size(width = 100.dp, height = 100.dp),
                   contentScale = ContentScale.FillBounds)
               Button(
                   onClick = { /* Handle your click here */},
                   modifier =
                       Modifier.width(90.dp) // Adjusted for visual balance
                           .height(40.dp)
-                          .padding(start = 75.dp),
+                          .padding(start = 30.dp),
                   // Adjusted for visual balance
                   colors = ButtonDefaults.buttonColors(Color.Transparent),
                   contentPadding =

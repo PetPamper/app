@@ -434,6 +434,22 @@ class FirebaseConnection : Database() {
     }
   }
 
+    fun fetchGroomerReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
+        db.collection("reservations").whereEqualTo("groomerEmail", email).get().addOnCompleteListener {
+            task ->
+        if (task.isSuccessful) {
+            val reservations = task.result?.toObjects(Reservation::class.java)
+            if (reservations != null) {
+            onComplete(reservations)
+            } else {
+            onComplete(emptyList())
+            }
+        } else {
+            onComplete(emptyList())
+        }
+        }
+    }
+
   fun registerUser(
       email: String,
       password: String,

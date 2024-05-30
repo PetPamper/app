@@ -217,6 +217,7 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.accompanist.insets)
     implementation ("com.google.android.gms:play-services-auth:19.0.0")
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.23.1")
 
 
     implementation ("androidx.compose.material:material:1.6.5")

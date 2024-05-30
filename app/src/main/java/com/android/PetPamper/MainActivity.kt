@@ -284,6 +284,16 @@ fun AppNavigation(email: String?, client: ChatClient) {
                     onBackPressed = { navController.navigateUp() })
               }
 
+            composable("ReservationsScreenGroomers/{email}") {  backStackEntry ->
+                val email2 = backStackEntry.arguments?.getString("email")
+                val reservations = remember { mutableStateOf(listOf<Reservation>()) }
+                firebaseConnection.fetchGroomerReservations(email2!!) { res -> reservations.value = res }
+
+                ReservationsScreen(
+                    reservations = reservations.value,
+                    onBackPressed = { navController.navigateUp() })
+            }
+
               composable("PetListScreen") {
                 PetListScreen(
                     viewModel = PetListViewModel(email, PetDataHandler()),

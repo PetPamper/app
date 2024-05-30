@@ -130,7 +130,7 @@ fun GroomerProfileScreen(navController: NavController, groomerVM: GroomerViewMod
                         Image(
                             painter = painterResource(id = R.drawable.user_image),
                             contentDescription = "User profile image",
-                            modifier = Modifier.size(width = 160.dp, height = 150.dp),
+                            modifier = Modifier.size(width = 100.dp, height = 100.dp),
                             contentScale = ContentScale.FillBounds
                         )
                         Button(
@@ -139,7 +139,7 @@ fun GroomerProfileScreen(navController: NavController, groomerVM: GroomerViewMod
                             Modifier
                                 .width(90.dp) // Adjusted for visual balance
                                 .height(40.dp)
-                                .padding(start = 75.dp),
+                                .padding(start = 25.dp),
                             // Adjusted for visual balance
                             colors = ButtonDefaults.buttonColors(Color.Transparent),
                             contentPadding =

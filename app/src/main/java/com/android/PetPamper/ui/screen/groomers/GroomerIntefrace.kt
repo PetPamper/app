@@ -31,8 +31,7 @@ fun GroomerHomeScreen(email: String) {
         NavItem("Home", Icons.Default.Home, { HomeScreen(email) }),
         NavItem("Chat", Icons.Default.Chat, { ChatScreen(email) }),
         NavItem("Reservations", Icons.Default.CalendarToday, { ReservationsScreen(email) }),
-        NavItem("Profile", Icons.Default.Person, { ProfileScreen(email) }),
-
+        NavItem("Profile", Icons.Default.Person, { ProfileScreen(email) })
     )
 
     var selectedItem by remember { mutableStateOf(0) }
@@ -54,13 +53,12 @@ fun GroomerHomeScreen(email: String) {
                         },
                         label = { Text(item.label) },
                         selected = selectedItem == index,
-                        selectedContentColor = Color.Gray,
+                        selectedContentColor = Color(0xFF2196F3),
                         unselectedContentColor = Color.Gray,
                         onClick = { selectedItem = index }
                     )
                 }
             }
-
         }
     ) {
         navItems[selectedItem].screen()
@@ -69,10 +67,12 @@ fun GroomerHomeScreen(email: String) {
 
 data class NavItem(val label: String, val icon: ImageVector, val screen: @Composable () -> Unit)
 
+
+
 @Composable
 fun HomeScreen(email: String) {
     // Your HomeScreen Composable content
-    Text("Home Screen")
+    groomerReservations(navController = rememberNavController(), email = email)
 }
 
 @Composable
