@@ -20,14 +20,37 @@ import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.firestoreSettings
+import com.google.firebase.firestore.memoryCacheSettings
+import com.google.firebase.firestore.persistentCacheSettings
 import java.util.Calendar
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
-class FirebaseConnection : Database() {
+class FirebaseConnection private constructor(): Database() {
+
+    // Singleton pattern
+    companion object {
+        @Volatile
+        private var INSTANCE: FirebaseConnection? = null
+
+        fun getInstance() =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: FirebaseConnection().also { INSTANCE = it }
+            }
+    }
 
   private val db: FirebaseFirestore = Firebase.firestore
+
+    private val settings = firestoreSettings {
+        setLocalCacheSettings(memoryCacheSettings {  })
+        setLocalCacheSettings(persistentCacheSettings {  })
+    }
+
+    init {
+        db.firestoreSettings = settings
+    }
 
   /**
    * General function to retrieve data from Firestore

@@ -53,7 +53,7 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
   /** Function that handles input changes for each field */
   fun handleInput(fieldIndex: Int, input: String) {
     when (fieldIndex) {
-      0,
+      0, 1,
       3 -> fieldShownVals[fieldIndex] = input
       2 -> fieldShownVals[fieldIndex] = if (input.length >= 8) input.substring(0, 8) else input
       4 -> {

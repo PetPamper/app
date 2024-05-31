@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
-    val firebaseConnection = FirebaseConnection()
+    val firebaseConnection = FirebaseConnection.getInstance()
     var resa = remember { mutableStateOf(listOf<Reservation>()) }
     firebaseConnection.fetchReservations(email!!) { resa.value = it }
 

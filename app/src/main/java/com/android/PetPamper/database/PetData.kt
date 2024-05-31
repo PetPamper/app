@@ -37,7 +37,7 @@ data class PetData(
 const val petsDBPath = "pets"
 val petsFields = listOf("id", "petType", "name", "birthDate", "description", "pictures", "ownerId")
 
-class PetDataHandler(private val db: Database = FirebaseConnection()) {
+class PetDataHandler(private val db: Database = FirebaseConnection.getInstance()) {
 
   /**
    * Converts map representing pet to Pet object

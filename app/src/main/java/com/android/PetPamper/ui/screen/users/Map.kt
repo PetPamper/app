@@ -33,7 +33,7 @@ import com.google.maps.android.compose.*
 @Composable
 fun MapView(userViewModel : UserViewModel) {
     val context = LocalContext.current
-    val firebaseConnection = FirebaseConnection()
+    val firebaseConnection = FirebaseConnection.getInstance()
     val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
     val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
     var showDialog by remember { mutableStateOf(false) }

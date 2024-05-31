@@ -9,7 +9,7 @@ open class UserViewModel(var email: String) : ViewModel() {
     var uid = "ERROR_UUID"
     private var user = User(email = email)
     private var isLoaded = false
-    private val firebaseConnection: FirebaseConnection = FirebaseConnection()
+    private val firebaseConnection: FirebaseConnection = FirebaseConnection.getInstance()
 
     open fun getUser(force: Boolean = false): User {
         if(!isLoaded || force) {
