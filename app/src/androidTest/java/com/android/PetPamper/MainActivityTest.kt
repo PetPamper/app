@@ -41,7 +41,7 @@ class MainActivityTest : TestCase() {
         // Check if the error message is displayed
         errorMessage {
           assertIsDisplayed()
-          assertTextEquals("Login failed, email or password is incorrect")
+          assertTextEquals("Please enter your email and password!")
         }
       }
     }
