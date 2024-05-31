@@ -71,6 +71,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
+import com.android.PetPamper.StringSanitizer
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
@@ -129,7 +130,7 @@ fun Register(
             "Hello ${viewModel.name}, enter your email",
             "Email",
             onNext = { newEmail ->
-              viewModel.email = newEmail
+              viewModel.email = StringSanitizer.sanitizeEmail(newEmail)
               currentStep++
             })
     3 ->
@@ -141,7 +142,7 @@ fun Register(
             "What’s your phone number?",
             "Phone",
             onNext = { newPhoneNumber ->
-              viewModel.phoneNumber = newPhoneNumber
+              viewModel.phoneNumber = StringSanitizer.sanitizePhone(newPhoneNumber)
               currentStep++
             })
     4 ->
@@ -315,7 +316,7 @@ fun Register(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { email = StringSanitizer.sanitizeEmail(it) },
                 label = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth())

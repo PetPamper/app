@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.android.PetPamper.R
+import com.android.PetPamper.StringSanitizer
 import com.android.PetPamper.connectUser
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
@@ -136,7 +137,7 @@ fun GroomerRegister(
             isValidEmail = ::isValidEmail1,
             errorText = "Please enter a valid email.",
             onNext = { newEmail ->
-              viewModel.email = newEmail
+              viewModel.email = StringSanitizer.sanitizeEmail(newEmail)
               currentStep++
             })
     3 ->
@@ -148,7 +149,7 @@ fun GroomerRegister(
             isValidInput = ::isValidPhone,
             errorText = "Please enter a valid phone number.",
             onNext = { newPhoneNumber ->
-              viewModel.phoneNumber = newPhoneNumber
+              viewModel.phoneNumber = StringSanitizer.sanitizePhone(newPhoneNumber)
               currentStep++
             })
     4 ->
@@ -194,7 +195,7 @@ fun GroomerRegister(
             "How many years of experience do you have as a groomer?",
             "Experience Years",
             onNext = { experienceYears ->
-              viewModel.experienceYears = experienceYears
+              viewModel.experienceYears = StringSanitizer.sanitizeFloat(experienceYears)
               currentStep++
             })
     8 ->
@@ -204,7 +205,7 @@ fun GroomerRegister(
             "What is your average service price for an hour",
             "Price",
             onNext = { price ->
-              viewModel.price = price.toInt()
+              viewModel.price = StringSanitizer.sanitizeInt(price).toInt()
               currentStep++
             })
     9 ->
@@ -346,7 +347,7 @@ fun GroomerRegister(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { email = StringSanitizer.sanitizeEmail(it) },
                 label = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth())
