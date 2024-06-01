@@ -66,8 +66,6 @@ fun HomeScreen(navController: NavController, email: String?) {
       CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
     }
 
-    // Text(text = "Home screen")
-
   }
 }
 
@@ -125,7 +123,7 @@ fun CarouselCard(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
-                    Text(text = petListViewModel.petsList[page].description, color = Color.DarkGray)
+                    Text(text = if (petListViewModel.petsList[page].description.length > 150){petListViewModel.petsList[page].description.take(150)+"..."} else petListViewModel.petsList[page].description, color = Color.DarkGray)
                   }
                   Box(
                       modifier =
@@ -138,8 +136,7 @@ fun CarouselCard(
                                     .data(sliderList[page].pictures.getOrNull(0))
                                     .crossfade(true)
                                     .scale(Scale.FILL)
-                                    .build(),
-                            contentDescription = null,
+                                    .build(), contentDescription = null,
                             placeholder = painterResource(id = R.drawable.placeholder),
                             error = painterResource(id = R.drawable.error_image_generic),
                             modifier = Modifier.fillMaxSize() // Make the image fill the Box
