@@ -11,21 +11,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class PetListViewModel(email: String, private val petDataHandler: PetDataHandler) : ViewModel() {
-  private var _petsList: MutableList<Pet> = mutableStateListOf()
+  private val _petsList: MutableList<Pet> = mutableStateListOf()
   val petsList: List<Pet>
     get() = _petsList
 
   init {
-//    runBlocking {
-//      launch {
-//        _petsList =
-//            petDataHandler.retrievePetsFromOwner(email)
-//                ?: run {
-//                  Log.e("PetListScreenViewModel", "Could not retrieve pets")
-//                  listOf()
-//                }
-//      }
-//    }
       petDataHandler.retrievePetsFromOwner(email, _petsList)
   }
 }

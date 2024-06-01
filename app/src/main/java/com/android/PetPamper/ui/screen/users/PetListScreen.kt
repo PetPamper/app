@@ -77,7 +77,9 @@ fun PetCard(pet: Pet) {
       Image(
           painter =
               rememberAsyncImagePainter(
-                  model = pet.pictures.getOrNull(0)), // painterResource(id = pet.pictureRes),
+                  model = pet.pictures.getOrNull(0)?.also {
+                  Log.d("PetListScreen", pet.pictures[0])
+              }), // painterResource(id = pet.pictureRes),
           contentDescription = null,
           modifier = Modifier
               .size(64.dp)

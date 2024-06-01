@@ -57,6 +57,8 @@ class FirebaseConnection private constructor(): Database() {
    *
    * @param collectionPath path to the collection (generally its name) containing the data
    * @param document identifier of the document to retrieve data from
+   * @param onSuccess function to call when operation is successful to process the data
+   * @param onFailure function to call when operation is not successful
    */
   override fun fetchData(
       collectionPath: String,
@@ -103,6 +105,9 @@ class FirebaseConnection private constructor(): Database() {
    *
    * @param collectionPath path to the collection
    * @param document identifier of the document that we want to verify the existence of
+   * @param onExists function to call when the document exists
+   * @param onNotExists function to call when the document doesn't exist
+   * @param onFailure function to call when operation is not successful
    */
   override fun documentExists(
       collectionPath: String,
@@ -128,6 +133,8 @@ class FirebaseConnection private constructor(): Database() {
    * @param collectionPath path to the collection (generally its name) to store data to
    * @param document identifier of the document to be stored
    * @param data object containing the data to store
+   * @param onSuccess function to call when operation is successful
+   * @param onFailure function to call when operation is not successful
    */
   override fun storeData(
       collectionPath: String,
@@ -147,6 +154,8 @@ class FirebaseConnection private constructor(): Database() {
      * @param collectionPath path to the collection (generally its name) to update data in
      * @param document identifier of the document to be updated
      * @param dataAsMap map containing the data to update
+     * @param onSuccess function to call when operation is successful
+     * @param onFailure function to call when operation is not successful
      */
     override fun updateData(
         collectionPath: String,
