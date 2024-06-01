@@ -140,12 +140,7 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
             pictures = if (fieldShownVals[4] != "") listOf(fieldShownVals[4]) else listOf(),
             ownerId = email)
 
-    if (!addPet(pet)) {
-      errorTexts[errorTexts.size - 1] = "Could not register pet"
-      errorShown[errorShown.size - 1] = true
-      Log.d("AddPetScreenViewModel", "couldn't store pet")
-      return false
-    }
+    addPet(pet)
 
     return true
   }
@@ -156,13 +151,14 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
    * @param pet pet to add to the database
    * @return true if successfully added pet to database, otherwise false
    */
-  private fun addPet(pet: Pet): Boolean {
-    var success = false
-    runBlocking { launch { success = petDataHandler.storePetToDatabase(pet) } }
-
-    Log.d("AddPetScreenViewModel", "addPet success status: $success")
-    return success
-  }
+    private fun addPet(pet: Pet) {
+        val errorHandler: (Exception) -> Unit = { _ ->
+            errorTexts[errorTexts.size - 1] = "Could not register pet"
+            errorShown[errorShown.size - 1] = true
+            Log.d("AddPetScreenViewModel", "couldn't store pet")
+        }
+        petDataHandler.storePetToDatabase(pet, errorHandler)
+    }
 }
 
 /** Visual transformation allowing dates to be displayed in the format dd/mm/yyyya */

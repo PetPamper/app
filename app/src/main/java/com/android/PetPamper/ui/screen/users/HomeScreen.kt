@@ -63,7 +63,7 @@ fun HomeScreen(navController: NavController, email: String?) {
     firebaseConnection.fetchReservations(email!!) { resa.value = it }
 
     if (resa.value.isNotEmpty()) {
-      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
+      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler(firebaseConnection)), resa.value)
     }
 
   }

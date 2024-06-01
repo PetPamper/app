@@ -297,14 +297,14 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
               composable("PetListScreen") {
                 PetListScreen(
-                    viewModel = PetListViewModel(email!!, PetDataHandler()),
+                    viewModel = PetListViewModel(email!!, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() },
                     navController = navController)
               }
 
               composable("AddPetScreen") {
                 AddPetScreen(
-                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler()),
+                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() })
               }
 
