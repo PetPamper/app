@@ -437,6 +437,10 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
                 GroomerProfile(groomerName.value, navController, user1Id.value, client)
               }
+
+              //            composable("LoginScreen") {
+              //                Firebase.auth.signOut()
+              //                AppNavigation(client = client) }
             }
       }
 }
