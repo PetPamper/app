@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
@@ -18,8 +19,6 @@ import com.android.PetPamper.model.PetType
 import com.google.firebase.storage.FirebaseStorage
 import java.time.DateTimeException
 import java.time.LocalDate
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 enum class FieldType() {
   OUTLINED_TEXT_FIELD,
@@ -48,12 +47,16 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
   val errorTexts = mutableStateListOf("", "", "", "", "", "")
   val errorShown = mutableStateListOf(false, false, false, false, false, false)
 
+  val addPetError = "Could not register pet"
+  var goToPreviousScreen by mutableStateOf(false)
+
   // val addPetEnabled = mutableStateOf(true)
 
   /** Function that handles input changes for each field */
   fun handleInput(fieldIndex: Int, input: String) {
     when (fieldIndex) {
-      0, 1,
+      0,
+      1,
       3 -> fieldShownVals[fieldIndex] = input
       2 -> fieldShownVals[fieldIndex] = if (input.length >= 8) input.substring(0, 8) else input
       4 -> {
@@ -92,12 +95,8 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
     }
   }
 
-  /**
-   * Function to add pet to the database from input values
-   *
-   * @return true if successfully added pet to database, otherwise false
-   */
-  fun onAddPet(): Boolean {
+  /** Function to add pet to the database from input values */
+  fun onAddPet(errorHandler: (Exception) -> Unit = {}) {
     clearErrorTexts()
 
     val petFactory = PetFactory()
@@ -112,7 +111,7 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
                   errorTexts[2] = "Entered date is incorrect"
                   errorShown[2] = true
                   Log.d("AddPetScreenViewModel", "date is too short")
-                  return false
+                  return
                 } else
                     try {
                       LocalDate.of(
@@ -125,13 +124,13 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
                           errorTexts[2] = "Entered date is incorrect"
                           errorShown[2] = true
                           Log.d("AddPetScreenViewModel", "date wasn't numbers")
-                          return false
+                          return
                         }
                         is DateTimeException -> {
                           errorTexts[2] = "Entered date is incorrect"
                           errorShown[2] = true
                           Log.d("AddPetScreenViewModel", "date wasn't correct format")
-                          return false
+                          return
                         }
                         else -> throw e
                       }
@@ -140,25 +139,25 @@ class AddPetScreenViewModel(val email: String, val petDataHandler: PetDataHandle
             pictures = if (fieldShownVals[4] != "") listOf(fieldShownVals[4]) else listOf(),
             ownerId = email)
 
-    addPet(pet)
-
-    return true
+    addPet(pet, errorHandler)
   }
 
   /**
    * Function to add a pet to the database
    *
    * @param pet pet to add to the database
-   * @return true if successfully added pet to database, otherwise false
+   * @param errorHandler function to call in case of error
    */
-    private fun addPet(pet: Pet) {
-        val errorHandler: (Exception) -> Unit = { _ ->
-            errorTexts[errorTexts.size - 1] = "Could not register pet"
-            errorShown[errorShown.size - 1] = true
-            Log.d("AddPetScreenViewModel", "couldn't store pet")
-        }
-        petDataHandler.storePetToDatabase(pet, errorHandler)
+  private fun addPet(pet: Pet, errorHandler: (Exception) -> Unit = {}) {
+    val finalErrorHandler: (Exception) -> Unit = { exception ->
+      errorTexts[errorTexts.size - 1] = "Could not register pet"
+      errorShown[errorShown.size - 1] = true
+      errorHandler(exception)
+      Log.d("AddPetScreenViewModel", "couldn't store pet")
     }
+    petDataHandler.storePetToDatabase(pet, errorHandler = finalErrorHandler)
+    goToPreviousScreen = true
+  }
 }
 
 /** Visual transformation allowing dates to be displayed in the format dd/mm/yyyya */

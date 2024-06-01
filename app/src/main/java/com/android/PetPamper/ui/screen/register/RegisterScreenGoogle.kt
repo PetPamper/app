@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.register
 
-import com.android.PetPamper.viewmodel.AddressViewModel
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +29,7 @@ import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
+import com.android.PetPamper.viewmodel.AddressViewModel
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.firebase.auth.FirebaseAuth

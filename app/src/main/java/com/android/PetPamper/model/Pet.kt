@@ -18,9 +18,9 @@ sealed class Pet(
 ) {
   var id
     get() = _id
-      set(value) {
-          _id = value
-      }
+    set(value) {
+      _id = value
+    }
 
   var petType
     get() = _petType

@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.register
 
-import com.android.PetPamper.viewmodel.AddressViewModel
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -75,6 +74,7 @@ import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.ui.screen.users.CustomTextButton
+import com.android.PetPamper.viewmodel.AddressViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage

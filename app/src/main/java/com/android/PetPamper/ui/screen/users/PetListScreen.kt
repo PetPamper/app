@@ -1,7 +1,6 @@
 package com.android.PetPamper.ui.screen.users
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -70,23 +69,15 @@ fun PetListScreen(
 
 @Composable
 fun PetCard(pet: Pet) {
-  Card(modifier = Modifier
-      .fillMaxWidth()
-      .padding(16.dp), elevation = 4.dp) {
+  Card(modifier = Modifier.fillMaxWidth().padding(16.dp), elevation = 4.dp) {
     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
       Image(
           painter =
               rememberAsyncImagePainter(
-                  model = pet.pictures.getOrNull(0)?.also {
-                  Log.d("PetListScreen", pet.pictures[0])
-              }), // painterResource(id = pet.pictureRes),
+                  model = pet.pictures.getOrNull(0)), // painterResource(id = pet.pictureRes),
           contentDescription = null,
-          modifier = Modifier
-              .size(64.dp)
-              .clip(CircleShape))
-      Column(modifier = Modifier
-          .weight(1f)
-          .padding(start = 16.dp)) {
+          modifier = Modifier.size(64.dp).clip(CircleShape))
+      Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
         Text(text = pet.name, style = MaterialTheme.typography.subtitle1)
         Text(text = pet.description, style = MaterialTheme.typography.body2)
         Text(text = "Date of Birth: ${pet.birthDate}", style = MaterialTheme.typography.caption)

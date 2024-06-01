@@ -24,33 +24,27 @@ import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.firestore.persistentCacheSettings
 import java.util.Calendar
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 
-class FirebaseConnection private constructor(): Database() {
+class FirebaseConnection private constructor() : Database() {
 
-    // Singleton pattern
-    companion object {
-        @Volatile
-        private var INSTANCE: FirebaseConnection? = null
+  // Singleton pattern
+  companion object {
+    @Volatile private var INSTANCE: FirebaseConnection? = null
 
-        fun getInstance() =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: FirebaseConnection().also { INSTANCE = it }
-            }
-    }
+    fun getInstance() =
+        INSTANCE ?: synchronized(this) { INSTANCE ?: FirebaseConnection().also { INSTANCE = it } }
+  }
 
   private val db: FirebaseFirestore = Firebase.firestore
 
-    private val settings = firestoreSettings {
-        setLocalCacheSettings(memoryCacheSettings {  })
-        setLocalCacheSettings(persistentCacheSettings {  })
-    }
+  private val settings = firestoreSettings {
+    setLocalCacheSettings(memoryCacheSettings {})
+    setLocalCacheSettings(persistentCacheSettings {})
+  }
 
-    init {
-        db.firestoreSettings = settings
-    }
+  init {
+    db.firestoreSettings = settings
+  }
 
   /**
    * General function to retrieve data from Firestore
@@ -66,13 +60,15 @@ class FirebaseConnection private constructor(): Database() {
       onSuccess: (Map<String, Any>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection(collectionPath).document(document).get()
+    db.collection(collectionPath)
+        .document(document)
+        .get()
         .addOnSuccessListener { doc ->
-            if (doc != null) {
-                doc.data?.let { onSuccess(it) }
-            } else {
-                onFailure(Exception("NoSuchDocument"))
-            }
+          if (doc != null) {
+            doc.data?.let { onSuccess(it) }
+          } else {
+            onFailure(Exception("NoSuchDocument"))
+          }
         }
         .addOnFailureListener(onFailure)
   }
@@ -83,20 +79,21 @@ class FirebaseConnection private constructor(): Database() {
       onSuccess: (List<Map<String, Any>>) -> Unit,
       onFailure: (Exception) -> Unit
   )
-//  : Pair<Boolean, List<Map<String, Any>?>>
+    //  : Pair<Boolean, List<Map<String, Any>?>>
   {
     val query = db.collection(collectionPath).where(filter)
 
-    query.get()
+    query
+        .get()
         .addOnSuccessListener { query ->
-            val docs = query.documents
-            val data = docs.map { doc -> doc.data!! }
-            onSuccess(data)
+          val docs = query.documents
+          val data = docs.map { doc -> doc.data!! }
+          onSuccess(data)
         }
         .addOnFailureListener(onFailure)
 
-//    val docTasks = querySnapshot!!.documents
-//    val data = docTasks.map { doc -> doc.data }
+    //    val docTasks = querySnapshot!!.documents
+    //    val data = docTasks.map { doc -> doc.data }
 
   }
 
@@ -116,15 +113,16 @@ class FirebaseConnection private constructor(): Database() {
       onNotExists: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-      val docRef = db.collection(collectionPath).document(document).get()
-      docRef.addOnSuccessListener { doc ->
+    val docRef = db.collection(collectionPath).document(document).get()
+    docRef
+        .addOnSuccessListener { doc ->
           if (doc != null) {
-              onExists()
+            onExists()
           } else {
-              onNotExists()
+            onNotExists()
           }
-      }
-          .addOnFailureListener(onFailure)
+        }
+        .addOnFailureListener(onFailure)
   }
 
   /**
@@ -143,33 +141,37 @@ class FirebaseConnection private constructor(): Database() {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-      db.collection(collectionPath).document(document).set(data)
-      .addOnSuccessListener { onSuccess() }
-      .addOnFailureListener { exception -> onFailure(exception) }
-    }
+    db.collection(collectionPath)
+        .document(document)
+        .set(data)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
 
-    /**
-     * General function to update data on Firestore
-     *
-     * @param collectionPath path to the collection (generally its name) to update data in
-     * @param document identifier of the document to be updated
-     * @param dataAsMap map containing the data to update
-     * @param onSuccess function to call when operation is successful
-     * @param onFailure function to call when operation is not successful
-     */
-    override fun updateData(
-        collectionPath: String,
-        document: String,
-        dataAsMap: Map<String, Any>,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        db.collection(collectionPath).document(document).update(dataAsMap)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { exception -> onFailure(exception) }
-    }
+  /**
+   * General function to update data on Firestore
+   *
+   * @param collectionPath path to the collection (generally its name) to update data in
+   * @param document identifier of the document to be updated
+   * @param dataAsMap map containing the data to update
+   * @param onSuccess function to call when operation is successful
+   * @param onFailure function to call when operation is not successful
+   */
+  override fun updateData(
+      collectionPath: String,
+      document: String,
+      dataAsMap: Map<String, Any>,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .document(document)
+        .update(dataAsMap)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { exception -> onFailure(exception) }
+  }
 
-    fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+  fun addUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("users")
         .document(user.email)
         .set(user)

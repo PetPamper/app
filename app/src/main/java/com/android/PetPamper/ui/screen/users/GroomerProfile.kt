@@ -177,7 +177,10 @@ fun ChatWithGroomerButton(
                   image = profilePic,
               )
 
-            connectUser(client, groomer, onSuccess = { println("User connected successfully") },
+          connectUser(
+              client,
+              groomer,
+              onSuccess = { println("User connected successfully") },
               onError = { println("Error connecting user: $it") })
           // First, connect the groomer
           // Then, create or load the channel

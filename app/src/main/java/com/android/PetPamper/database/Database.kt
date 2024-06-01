@@ -1,7 +1,6 @@
 package com.android.PetPamper.database
 
 import android.util.Log
-import com.google.firebase.firestore.DocumentSnapshot
 
 abstract class Database {
   abstract fun documentExists(

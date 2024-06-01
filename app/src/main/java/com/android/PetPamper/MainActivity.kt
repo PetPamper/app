@@ -25,7 +25,6 @@ import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
 import com.android.PetPamper.model.*
-import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
@@ -69,8 +68,6 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import kotlin.math.round
 import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
 
 class MainActivity : ComponentActivity() {
   private lateinit var client: ChatClient
@@ -91,6 +88,7 @@ class MainActivity : ComponentActivity() {
     setContent { AppNavigation(client) }
   }
 }
+
 fun createChannel(
     client: ChatClient,
     userId: String,
@@ -98,62 +96,62 @@ fun createChannel(
     onSuccess: (String) -> Unit,
     onError: (String) -> Unit
 ) {
-    Log.d("salam", "Creating channel")
-    val channelId = "dm_channel_id"
-    val channelClient = client.channel(channelType = "messaging", channelId = channelId)
+  Log.d("salam", "Creating channel")
+  val channelId = "dm_channel_id"
+  val channelClient = client.channel(channelType = "messaging", channelId = channelId)
 
-    val members = listOf(userId, groomerId)
-    Log.d("Members", "Members: $members")
-    val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
+  val members = listOf(userId, groomerId)
+  Log.d("Members", "Members: $members")
+  val extraData = mapOf("name" to "Direct Message between $userId and $groomerId")
 
-    channelClient.create(members, extraData).enqueue { result ->
-        if (result.isSuccess) {
-            val channel: Channel = result.getOrThrow()
+  channelClient.create(members, extraData).enqueue { result ->
+    if (result.isSuccess) {
+      val channel: Channel = result.getOrThrow()
 
-            channel.members.forEach { Log.d("salam", "Member: ${it.user.id}") }
-            Log.d("salam", "current user: ${client.getCurrentUser()}")
-            Log.d("salam", "Channel created: ${channel.cid}")
+      channel.members.forEach { Log.d("salam", "Member: ${it.user.id}") }
+      Log.d("salam", "current user: ${client.getCurrentUser()}")
+      Log.d("salam", "Channel created: ${channel.cid}")
 
-            // Send a default message
-            val message = Message(
-                text = "Hello! How can I assist you today?", // The ID of the user sending the message
-            )
+      // Send a default message
+      val message =
+          Message(
+              text = "Hello! How can I assist you today?", // The ID of the user sending the message
+          )
 
-            channelClient.sendMessage(message).enqueue { sendMessageResult ->
-                if (sendMessageResult.isSuccess) {
-                    Log.d("salam", "Default message sent successfully")
-                } else {
-                    Log.e("salam", "Error sending default message: ${sendMessageResult.errorOrNull()?.message}")
-                }
-            }
-
-            onSuccess(channel.cid)
+      channelClient.sendMessage(message).enqueue { sendMessageResult ->
+        if (sendMessageResult.isSuccess) {
+          Log.d("salam", "Default message sent successfully")
         } else {
-            Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
-            onError(result.errorOrNull()?.message ?: "Unknown error")
+          Log.e(
+              "salam", "Error sending default message: ${sendMessageResult.errorOrNull()?.message}")
         }
+      }
+
+      onSuccess(channel.cid)
+    } else {
+      Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
+      onError(result.errorOrNull()?.message ?: "Unknown error")
     }
+  }
 }
 
-
 fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val token = client.devToken(user.id)
-    if (client.getCurrentUser() != null) {
-        Log.d("ChatApp", "User already connected")
+  val token = client.devToken(user.id)
+  if (client.getCurrentUser() != null) {
+    Log.d("ChatApp", "User already connected")
+    onSuccess()
+  } else {
+    client.connectUser(user, token).enqueue { result ->
+      if (result.isSuccess) {
+        Log.d("ChatApp", "User connected: ${user.id}")
         onSuccess()
-    } else {
-        client.connectUser(user, token).enqueue { result ->
-            if (result.isSuccess) {
-                Log.d("ChatApp", "User connected: ${user.id}")
-                onSuccess()
-            } else {
-                Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
-                onError(result.errorOrNull()?.message ?: "Unknown error")
-            }
-        }
+      } else {
+        Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
+        onError(result.errorOrNull()?.message ?: "Unknown error")
+      }
     }
-    }
-
+  }
+}
 
 @Composable
 fun AppNavigation(client: ChatClient) {
@@ -162,15 +160,16 @@ fun AppNavigation(client: ChatClient) {
   val groomerSignUp = GroomerSignUpViewModel()
   val emailViewModel = EmailViewModel()
 
-    val currentUser = Firebase.auth.currentUser
-    val startDestination = if (currentUser?.email == null) {
+  val currentUser = Firebase.auth.currentUser
+  val startDestination =
+      if (currentUser?.email == null) {
         Log.d("MainActivity", "current user not connected")
         "LoginScreen"
-    } else {
+      } else {
         val email = currentUser.email
-        //Log.d("MainActivity", "current email is $email")
+        // Log.d("MainActivity", "current email is $email")
         "HomeScreen/$email"
-    }
+      }
 
   NavHost(navController = navController, startDestination = startDestination) {
     composable("LoginScreen") { SignIn(navController) }
@@ -191,7 +190,7 @@ fun AppNavigation(client: ChatClient) {
     composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
     composable("HomeScreen/{email}") { backStackEntry ->
-        val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
+      val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
       AppNavigation(email, client)
     }
     composable("GroomerHomeScreen/{email}") { backStackEntry ->
@@ -216,8 +215,6 @@ fun AppNavigation(email: String?, client: ChatClient) {
           BarScreen.Profile,
       )
   val userVM = UserViewModel(email!!)
-
-
 
   val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
@@ -282,9 +279,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
             navController = navController,
             startDestination = BarScreen.Home.route,
             modifier = Modifier.padding(innerPadding)) {
-              composable(BarScreen.Home.route) {
-                HomeScreen(navController, email)
-              }
+              composable(BarScreen.Home.route) { HomeScreen(navController, email) }
 
               composable("ReservationsScreen") {
                 val reservations = remember { mutableStateOf(listOf<Reservation>()) }
@@ -364,10 +359,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
               }
 
-
-              composable(BarScreen.Map.route) {
-
-                  MapView(userVM) }
+              composable(BarScreen.Map.route) { MapView(userVM) }
 
               composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
@@ -379,42 +371,44 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
                 var needRecompose by remember { mutableStateOf(false) }
 
-
                 LaunchedEffect(userVM.getUser().address, needRecompose) {
                   needRecompose = false
-                  firebaseConnection.fetchNearbyGroomers(userVM.getUser().address).addOnSuccessListener {
-                      groomers ->
-                    groomersNearby.value = groomers
-                    groomersWithReviews.value = mapOf<Groomer, GroomerReviews>()
-                    groomers.forEach { groomer ->
-                      firebaseConnection.fetchGroomerReviews(groomer.email).addOnSuccessListener {
-                          reviews ->
-                        groomersWithReviews.value += (groomer to reviews)
+                  firebaseConnection
+                      .fetchNearbyGroomers(userVM.getUser().address)
+                      .addOnSuccessListener { groomers ->
+                        groomersNearby.value = groomers
+                        groomersWithReviews.value = mapOf<Groomer, GroomerReviews>()
+                        groomers.forEach { groomer ->
+                          firebaseConnection
+                              .fetchGroomerReviews(groomer.email)
+                              .addOnSuccessListener { reviews ->
+                                groomersWithReviews.value += (groomer to reviews)
+                              }
+                        }
                       }
-                    }
-                  }
                 }
 
-                LaunchedEffect(groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
-                  sampleGroomers.value =
-                      groomersNearby.value.map { groomer ->
-                        val distanceWithGroomer =
-                            distance(
-                                userVM.getUser().address.location.latitude,
-                                userVM.getUser().address.location.longitude,
-                                groomer.address.location.latitude,
-                                groomer.address.location.longitude)
-                        GroomerReview(
-                            groomer.email,
-                            groomer.name,
-                            groomer.petTypes.joinToString(", "),
-                            groomer.price.toString() + " CHF",
-                            (round(distanceWithGroomer * 10) / 10).toString() + " km",
-                            groomersWithReviews.value[groomer]?.reviewCount ?: 0,
-                            groomersWithReviews.value[groomer]?.rating ?: 0.0,
-                            groomer.profilePic)
-                      }
-                }
+                LaunchedEffect(
+                    groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
+                      sampleGroomers.value =
+                          groomersNearby.value.map { groomer ->
+                            val distanceWithGroomer =
+                                distance(
+                                    userVM.getUser().address.location.latitude,
+                                    userVM.getUser().address.location.longitude,
+                                    groomer.address.location.latitude,
+                                    groomer.address.location.longitude)
+                            GroomerReview(
+                                groomer.email,
+                                groomer.name,
+                                groomer.petTypes.joinToString(", "),
+                                groomer.price.toString() + " CHF",
+                                (round(distanceWithGroomer * 10) / 10).toString() + " km",
+                                groomersWithReviews.value[groomer]?.reviewCount ?: 0,
+                                groomersWithReviews.value[groomer]?.rating ?: 0.0,
+                                groomer.profilePic)
+                          }
+                    }
 
                 Column {
                   GroomerTopBar(
