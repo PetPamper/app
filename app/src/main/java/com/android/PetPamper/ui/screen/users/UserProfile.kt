@@ -471,7 +471,7 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
         ) {
           ClickableText(
               onClick = {
-                //                          navController.navigate("LoginScreen")
+                  navController.navigate("LoginScreen")
               },
               text = AnnotatedString("Log out"),
               modifier = Modifier.weight(1f),

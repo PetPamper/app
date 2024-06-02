@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
@@ -191,7 +192,7 @@ fun AppNavigation(client: ChatClient) {
 
     composable("HomeScreen/{email}") { backStackEntry ->
       val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
-      AppNavigation(email, client)
+      AppNavigation(email, client, navController)
     }
     composable("GroomerHomeScreen/{email}") { backStackEntry ->
       val email = backStackEntry.arguments?.getString("email")
@@ -204,7 +205,7 @@ fun AppNavigation(client: ChatClient) {
 }
 
 @Composable
-fun AppNavigation(email: String?, client: ChatClient) {
+fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavController) {
   val navController = rememberNavController()
   val items =
       listOf(
@@ -437,10 +438,9 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
                 GroomerProfile(groomerName.value, navController, user1Id.value, client)
               }
-
-              //            composable("LoginScreen") {
-              //                Firebase.auth.signOut()
-              //                AppNavigation(client = client) }
+            composable("LoginScreen") {
+                Firebase.auth.signOut()
+                prevNavController.navigate("LoginScreen") }
             }
       }
 }
