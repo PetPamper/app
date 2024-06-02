@@ -202,7 +202,7 @@ fun GroomerProfileScreen(navController: NavController, userVM: UserViewModel) {
                     )
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.verify_id),
+                    painter = painterResource(id = R.drawable.verify_id2),
                     contentDescription = "Verify Identity Icon",
                     contentScale = ContentScale.FillBounds
                 )
@@ -327,7 +327,7 @@ fun GroomerProfileScreen(navController: NavController, userVM: UserViewModel) {
                     modifier = Modifier.weight(1f)
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.verify_id),
+                    painter = painterResource(id = R.drawable.verify_id2),
                     contentDescription = "image description",
                     modifier = Modifier.size(20.dp),
                     contentScale = ContentScale.FillBounds
