@@ -119,7 +119,7 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
                               verticalAlignment = Alignment.CenterVertically,
                               horizontalArrangement = Arrangement.Start) {
                                 Image(
-                                    painter = painterResource(id = R.drawable.editphoto),
+                                    painter = painterResource(id = R.drawable.editphoto2),
                                     contentDescription = "Edit Photo",
                                     modifier = Modifier.size(15.dp),
                                     alignment = Alignment.CenterStart,

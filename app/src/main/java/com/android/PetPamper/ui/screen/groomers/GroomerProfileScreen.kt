@@ -115,7 +115,7 @@ fun GroomerProfileScreen(navController: NavController, userVM: UserViewModel) {
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Image(
-                                    painter = painterResource(id = R.drawable.editphoto),
+                                    painter = painterResource(id = R.drawable.editphoto2),
                                     contentDescription = "Edit Photo",
                                     modifier = Modifier.size(15.dp),
                                     alignment = Alignment.CenterStart,
