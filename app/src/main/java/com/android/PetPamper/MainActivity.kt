@@ -118,14 +118,6 @@ fun createChannel(
                 text = "Hello! How can I assist you today?", // The ID of the user sending the message
             )
 
-            channelClient.sendMessage(message).enqueue { sendMessageResult ->
-                if (sendMessageResult.isSuccess) {
-                    Log.d("salam", "Default message sent successfully")
-                } else {
-                    Log.e("salam", "Error sending default message: ${sendMessageResult.errorOrNull()?.message}")
-                }
-            }
-
             onSuccess(channel.cid)
         } else {
             Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
