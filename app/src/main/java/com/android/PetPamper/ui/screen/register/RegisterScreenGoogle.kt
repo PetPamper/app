@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.android.PetPamper.StringSanitizer
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
@@ -75,7 +76,7 @@ fun SignUpScreenGoogle(
             "Phone Number",
             viewModel,
             onNext = { newPhoneNumber ->
-              viewModel.phoneNumber = newPhoneNumber
+              viewModel.phoneNumber = StringSanitizer.sanitizePhone(newPhoneNumber)
               currentStep++
             })
     3 ->

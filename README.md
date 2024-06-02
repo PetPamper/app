@@ -23,3 +23,16 @@ https://www.figma.com/file/qlYy5i2OyPBfw2wrRyCuLU/PetPamper?type=design&node-id=
 Below is our architecture diagram for this app, illustrating how we integrate various SDKs and APIs like Firebase, Nominatim, and Google Maps to enhance our app’s functionality.
 
 <img width="697" alt="Screenshot 2024-06-02 at 17 43 11" src="https://github.com/PetPamper/PetPamper/assets/91835061/d6728653-80d4-40a2-9c5a-40010dabb611">
+
+## Scrum Documents and Autonomy
+We’re all about getting better and learning from our experiences. Check out the links below for our individual and team retrospectives, where we share what went well, what didn’t, and what we learned from each sprint.
+
+[Team Retrospectives](https://docs.google.com/spreadsheets/d/1j4zsrZ_oZSsp809og6vjGvOsBsgm8WAhs2sdzQxGP_M/edit#gid=1449571209)
+
+[Individual Retrospectives](https://docs.google.com/spreadsheets/d/1i7t96dJlajiblT1MJI9hyEIqlJToemBuwo3OQLAxDsc/edit#gid=1073029597)
+
+[Stand Ups](https://docs.google.com/spreadsheets/d/1i7t96dJlajiblT1MJI9hyEIqlJToemBuwo3OQLAxDsc/edit#gid=1073029597)
+
+
+
+
