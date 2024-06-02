@@ -556,9 +556,13 @@ class FirebaseConnection private constructor() : Database() {
     return res
   }
 
-    fun sendNotificationToGroomer(context: Context, groomerEmail: String, title: String, content: String) {
-        val notificationHelper = NotificationHelper(context)  // Pass the provided context
-        notificationHelper.showNotification(title, content)
-    }
-
+  fun sendNotificationToGroomer(
+      context: Context,
+      groomerEmail: String,
+      title: String,
+      content: String
+  ) {
+    val notificationHelper = NotificationHelper(context) // Pass the provided context
+    notificationHelper.showNotification(title, content)
+  }
 }
