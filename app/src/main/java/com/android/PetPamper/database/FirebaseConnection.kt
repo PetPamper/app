@@ -116,7 +116,7 @@ class FirebaseConnection private constructor() : Database() {
     val docRef = db.collection(collectionPath).document(document).get()
     docRef
         .addOnSuccessListener { doc ->
-          if (doc != null) {
+          if (doc != null && doc.exists()) {
             onExists()
           } else {
             onNotExists()
@@ -126,7 +126,7 @@ class FirebaseConnection private constructor() : Database() {
   }
 
   /**
-   * General function to store data to Firestore
+   * General function to store data to Firestore (overrides file if it already exists)
    *
    * @param collectionPath path to the collection (generally its name) to store data to
    * @param document identifier of the document to be stored
@@ -146,6 +146,36 @@ class FirebaseConnection private constructor() : Database() {
         .set(data)
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { exception -> onFailure(exception) }
+  }
+
+  /**
+   * General function to store data to Firestore (doesn't override existing files)
+   *
+   * @param collectionPath path to the collection (generally its name) to store data to
+   * @param document identifier of the document to be stored
+   * @param data object containing the data to store
+   * @param onSuccess function to call when operation is successful
+   * @param onFailure function to call when operation is not successful
+   */
+  override fun storeDataNoOverride(
+      collectionPath: String,
+      document: String,
+      data: Any,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    documentExists(
+        collectionPath,
+        document,
+        onExists = { onFailure(Exception("Tried to store a document that already exists")) },
+        onNotExists = {
+          db.collection(collectionPath)
+              .document(document)
+              .set(data)
+              .addOnSuccessListener { onSuccess() }
+              .addOnFailureListener { exception -> onFailure(exception) }
+        },
+        onFailure = onFailure)
   }
 
   /**

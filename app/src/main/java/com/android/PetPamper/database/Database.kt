@@ -26,6 +26,14 @@ abstract class Database {
       onFailure: (Exception) -> Unit = { _ -> Log.e("Database", "Could not store data") }
   )
 
+  abstract fun storeDataNoOverride(
+      collectionPath: String,
+      document: String,
+      data: Any,
+      onSuccess: () -> Unit = { Log.d("Database", "Data successfully stored") },
+      onFailure: (Exception) -> Unit = { _ -> Log.e("Database", "Could not store data") }
+  )
+
   abstract fun updateData(
       collectionPath: String,
       document: String,

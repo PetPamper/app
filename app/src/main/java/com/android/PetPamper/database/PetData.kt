@@ -63,10 +63,12 @@ class PetDataHandler(private val db: Database) {
 
   private fun petToMap(pet: Pet): Map<String, Any> {
     return mapOf(
+        "id" to pet.id,
+        "petType" to pet.petType.petType,
         "name" to pet.name,
-        "birthYear" to pet.birthDate.year,
-        "birthMonth" to pet.birthDate.monthValue,
-        "birthDay" to pet.birthDate.dayOfMonth,
+        "birthYear" to pet.birthDate.year.toLong(),
+        "birthMonth" to pet.birthDate.monthValue.toLong(),
+        "birthDay" to pet.birthDate.dayOfMonth.toLong(),
         "description" to pet.description,
         "pictures" to pet.pictures,
         "ownerId" to pet.ownerId)
@@ -164,7 +166,7 @@ class PetDataHandler(private val db: Database) {
       onSuccess: () -> Unit = {},
       errorHandler: (Exception) -> Unit = {}
   ) {
-    db.storeData(
+    db.storeDataNoOverride(
         petsDBPath,
         pet.id,
         pet,
