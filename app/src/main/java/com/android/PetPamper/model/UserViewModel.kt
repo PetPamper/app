@@ -134,7 +134,7 @@ open class UserViewModel(var email: String) : ViewModel() {
           val city = document.getString("address.city") ?: ""
           val state = document.getString("address.state") ?: ""
           val postalCode = document.getString("address.postalCode") ?: ""
-          val location = document.get("address.location") as HashMap<*, *>
+          val location = document.get("address.location") as? HashMap<*, *> ?: emptyMap<Any, Any>()
 
           // Construct an Address object
           val address =
@@ -144,9 +144,9 @@ open class UserViewModel(var email: String) : ViewModel() {
                   state,
                   postalCode,
                   LocationMap(
-                      location["latitude"] as Double,
-                      location["longitude"] as Double,
-                      location["name"] as String))
+                      location["latitude"] as? Double ?: 0.0,
+                      location["longitude"] as? Double ?: 0.0,
+                      location["name"] as? String ?: ""))
           onComplete(address)
         }
       } else {

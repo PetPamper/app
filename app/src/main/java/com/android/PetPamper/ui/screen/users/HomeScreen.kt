@@ -2,7 +2,6 @@ package com.android.PetPamper.ui.screen.users
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,8 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -65,9 +66,6 @@ fun HomeScreen(navController: NavController, email: String?) {
     if (resa.value.isNotEmpty()) {
       CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
     }
-
-    // Text(text = "Home screen")
-
   }
 }
 
@@ -83,8 +81,10 @@ fun CarouselCard(
   val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
-  Column(modifier = Modifier.fillMaxSize()) {
-    Row(modifier = Modifier.padding(20.dp)) {
+  val scrollState = rememberScrollState()
+
+  Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+    Row(modifier = Modifier.padding(15.dp)) {
       Text(text = "Your pets", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Gray)
     }
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -125,7 +125,12 @@ fun CarouselCard(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
-                    Text(text = petListViewModel.petsList[page].description, color = Color.DarkGray)
+                    Text(
+                        text =
+                            if (petListViewModel.petsList[page].description.length > 150) {
+                              petListViewModel.petsList[page].description.take(150) + "..."
+                            } else petListViewModel.petsList[page].description,
+                        color = Color.DarkGray)
                   }
                   Box(
                       modifier =
@@ -229,11 +234,17 @@ fun CarouselCard(
                             Text(
                                 text = currentReservations.groomerName,
                                 fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(text = "Price: ${currentReservations.price}")
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(
                                 text =
                                     "Experience Years: ${currentReservations.experienceYears} years")
-                            Text(text = "Services: ${currentReservations.services}")
+
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(text = "Date : ${currentReservations.date}")
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(text = "Hour: ${currentReservations.hour}")
                           }
                         }
 
@@ -241,24 +252,20 @@ fun CarouselCard(
                         // Spacer(modifier = Modifier.height(5.dp))
 
                         // Additional details: Service type, date joined, total price
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.align(Alignment.BottomCenter)) {
-                              Text(text = "Date : ${currentReservations.date}")
-                              Text(text = "Hour: ${currentReservations.hour}")
-                              Spacer(modifier = Modifier.height(10.dp))
-                            }
+                        //                        Column(
+                        //                            verticalArrangement =
+                        // Arrangement.spacedBy(4.dp),
+                        //                            modifier =
+                        // Modifier.align(Alignment.BottomCenter)) {
+                        //                              Text(text = "Date :
+                        // ${currentReservations.date}")
+                        //                              Text(text = "Hour:
+                        // ${currentReservations.hour}")
+                        //                              Spacer(modifier = Modifier.height(10.dp))
+                        //                            }
 
                         // Start chatting button
-                        Button(
-                            onClick = { /* Handle start chatting action */},
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF2490DF),
-                                    contentColor = Color.White)) {
-                              Text("Chat")
-                            }
+
                       }
                 }
           }

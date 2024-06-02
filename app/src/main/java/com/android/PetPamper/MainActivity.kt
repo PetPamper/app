@@ -30,6 +30,7 @@ import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
 import com.android.PetPamper.ui.screen.forgotPass.*
 import com.android.PetPamper.ui.screen.groomers.GroomerHome
+import com.android.PetPamper.ui.screen.groomers.GroomerHomeScreen
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
@@ -59,11 +60,13 @@ import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.InitializationState
+import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import kotlin.math.round
+import okhttp3.*
 
 class MainActivity : ComponentActivity() {
     private lateinit var client: ChatClient
@@ -108,9 +111,16 @@ fun createChannel(
             Log.d("salam", "current user: ${client.getCurrentUser()}")
             Log.d("salam", "Channel created: ${channel.cid}")
 
+
+            // Send a default message
+            val message =
+                Message(
+                    text = "Hello! How can I assist you today?", // The ID of the user sending the message
+                )
+
             onSuccess(channel.cid)
         } else {
-            Log.e("salam", "Error creating channel: ")
+            Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
             onError(result.errorOrNull()?.message ?: "Unknown error")
         }
     }
@@ -118,8 +128,7 @@ fun createChannel(
 
 fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: (String) -> Unit) {
 
-    val token = client.devToken(user.id) // Ensure the token is correct
-
+    val token = client.devToken(user.id)
     if (client.getCurrentUser() != null) {
         Log.d("ChatApp", "User already connected")
         onSuccess()
@@ -129,8 +138,15 @@ fun connectUser(client: ChatClient, user: User, onSuccess: () -> Unit, onError: 
                 Log.d("ChatApp", "User connected: ${user.id}")
                 onSuccess()
             } else {
-                Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
-                onError(result.errorOrNull()?.message ?: "Unknown error")
+                client.connectUser(user, token).enqueue { result ->
+                    if (result.isSuccess) {
+                        Log.d("ChatApp", "User connected: ${user.id}")
+                        onSuccess()
+                    } else {
+                        Log.e("ChatApp", "Error connecting user: ${result.errorOrNull()?.message}")
+                        onError(result.errorOrNull()?.message ?: "Unknown error")
+                    }
+                }
             }
         }
     }
@@ -172,7 +188,25 @@ fun AppNavigation(client: ChatClient) {
                 GroomerHome(email)
             }
         }
+
+    composable("GroomerRegisterScreen") { GroomerRegister(groomerSignUp, navController) }
+    composable("GroomerRegisterScreenAlreadyUser") {
+      GroomerRegister(groomerSignUp, navController, true)
     }
+    composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
+
+    composable("HomeScreen/{email}") { backStackEntry ->
+      val email = backStackEntry.arguments?.getString("email")
+      AppNavigation(email, client)
+    }
+    composable("GroomerHomeScreen/{email}") { backStackEntry ->
+      val email = backStackEntry.arguments?.getString("email")
+      if (email != null) {
+
+        GroomerHomeScreen(email)
+      }
+    }
+  }
 }
 
 @Composable
@@ -251,11 +285,24 @@ fun AppNavigation(email: String?, client: ChatClient) {
             navController = navController,
             startDestination = BarScreen.Home.route,
             modifier = Modifier.padding(innerPadding)) {
-            composable(BarScreen.Home.route) { HomeScreen(navController, email) }
+
+              composable(BarScreen.Home.route) { HomeScreen(navController, email) }
 
             composable("ReservationsScreen") {
                 val reservations = remember { mutableStateOf(listOf<Reservation>()) }
-                firebaseConnection.fetchReservations(email!!) { res -> reservations.value = res }
+                firebaseConnection.fetchReservations(email) { res -> reservations.value = res }
+
+                ReservationsScreen(
+                    reservations = reservations.value,
+                    onBackPressed = { navController.navigateUp() })
+              }
+
+              composable("ReservationsScreenGroomers/{email}") { backStackEntry ->
+                val email2 = backStackEntry.arguments?.getString("email")
+                val reservations = remember { mutableStateOf(listOf<Reservation>()) }
+                firebaseConnection.fetchGroomerReservations(email2!!) { res ->
+                  reservations.value = res
+                }
 
                 ReservationsScreen(
                     reservations = reservations.value,
@@ -264,14 +311,14 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
             composable("PetListScreen") {
                 PetListScreen(
-                    viewModel = PetListViewModel(email!!, PetDataHandler()),
+                    viewModel = PetListViewModel(email, PetDataHandler()),
                     onBackPressed = { navController.navigateUp() },
                     navController = navController)
             }
 
             composable("AddPetScreen") {
                 AddPetScreen(
-                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler()),
+                    viewModel = AddPetScreenViewModel(email, PetDataHandler()),
                     onBackPressed = { navController.navigateUp() })
             }
 
@@ -331,10 +378,12 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
             }
 
-            composable(BarScreen.Map.route) { MapView(userVM) }
-            composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
 
-            composable(BarScreen.Groomers.route) {
+              composable(BarScreen.Map.route) { MapView(userVM) }
+
+              composable(BarScreen.Profile.route) { UserProfileScreen(navController, userVM) }
+
+              composable(BarScreen.Groomers.route) {
                 val sampleGroomers = remember { mutableStateOf(listOf<GroomerReview>()) }
                 val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
                 val groomersWithReviews = remember {
@@ -358,12 +407,14 @@ fun AppNavigation(email: String?, client: ChatClient) {
                                     }
                             }
                         }
+
                 }
 
                 LaunchedEffect(
                     groomersNearby.value, groomersWithReviews.value, userVM.getUser().address) {
                     sampleGroomers.value =
                         groomersNearby.value.map { groomer ->
+
                             val distanceWithGroomer =
                                 distance(
                                     userVM.getUser().address.location.latitude,
@@ -381,6 +432,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
                                 groomer.profilePic)
                         }
                 }
+
 
                 Column {
                     GroomerTopBar(

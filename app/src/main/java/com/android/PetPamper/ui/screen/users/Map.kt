@@ -19,37 +19,63 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.android.PetPamper.database.FirebaseConnection
+import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.resources.distance
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 
 @Composable
-fun MapView(userVM: UserViewModel) {
-  var user by remember { mutableStateOf(userVM.getUser()) }
+fun MapView(userViewModel: UserViewModel) {
   val context = LocalContext.current
   val firebaseConnection = FirebaseConnection()
-  var groomersNearby by remember { mutableStateOf(listOf<Groomer>()) }
+  val address = remember { mutableStateOf(Address("", "", "", "", LocationMap())) }
+  val groomersNearby = remember { mutableStateOf(listOf<Groomer>()) }
   var showDialog by remember { mutableStateOf(false) }
   var selectedGroomer by remember { mutableStateOf<Groomer?>(null) }
+  var showUserLocationDialog by remember { mutableStateOf(false) }
 
-  LaunchedEffect(userVM.uid) { user = userVM.getUser() }
 
-  LaunchedEffect(user.address) {
-    firebaseConnection.fetchNearbyGroomers(user.address).addOnSuccessListener { groomers ->
-      groomersNearby = groomers
+  LaunchedEffect(userViewModel.getUser().address) {
+    userViewModel.getUser().address.let { address.value = it }
+  }
+
+  LaunchedEffect(address.value) {
+    firebaseConnection.fetchNearbyGroomers(address.value).addOnSuccessListener { groomers ->
+      groomersNearby.value = groomers
     }
   }
 
-  val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(46.516, 6.63282), 10f)
+  val cameraPositionState = rememberCameraPositionState()
+
+  // Update camera position state when address changes
+  LaunchedEffect(address.value) {
+    val location = address.value.location
+    if (location.latitude != 0.0 && location.longitude != 0.0) {
+      cameraPositionState.position =
+          CameraPosition.fromLatLngZoom(LatLng(location.latitude, location.longitude), 14f)
+    }
   }
 
   GoogleMap(modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
-    groomersNearby.forEach { groomer ->
+    Marker(
+        state =
+            MarkerState(
+                position =
+                    LatLng(address.value.location.latitude, address.value.location.longitude)),
+        title = "Your location",
+        snippet = "You are here",
+        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
+        onClick = {
+          showUserLocationDialog = true
+          true
+        })
+
+    groomersNearby.value.forEach { groomer ->
       Marker(
           state =
               MarkerState(
@@ -70,12 +96,34 @@ fun MapView(userVM: UserViewModel) {
     AlertDialog(
         onDismissRequest = { showDialog = false },
         title = { Text(text = "Groomer Details") },
-        text = { selectedGroomer?.let { InfoWindow(it, user.address.location) } },
+        text = { selectedGroomer?.let { InfoWindow(it, address.value.location) } },
         confirmButton = {
           Button(
               colors =
                   ButtonColors(Color.LightGray, Color.LightGray, Color.LightGray, Color.LightGray),
               onClick = { showDialog = false }) {
+                Text("Close")
+              }
+        })
+  }
+
+  if (showUserLocationDialog) {
+    AlertDialog(
+        onDismissRequest = { showUserLocationDialog = false },
+        title = {
+          Text(
+              text = "Your Location",
+              color = Color(0xFF000080), // Navy blue color
+              fontSize = 26.sp,
+              fontWeight = FontWeight.Bold)
+        },
+        text = { Text("You are here", fontWeight = FontWeight.Bold) },
+        confirmButton = {
+          Button(
+              colors =
+                  ButtonDefaults.buttonColors(
+                      backgroundColor = Color.LightGray, contentColor = Color.Black),
+              onClick = { showUserLocationDialog = false }) {
                 Text("Close")
               }
         })
@@ -113,10 +161,15 @@ fun InfoWindow(groomer: Groomer, userLocation: LocationMap) {
             Text(
                 text =
                     "Distance: ${
-                        String.format("%.2f", distance(
-                            userLocation.latitude, userLocation.longitude,
-                            groomer.address.location.latitude, groomer.address.location.longitude
-                        ))} km",
+                              String.format(
+                                  "%.2f", distance(
+                                      userLocation.latitude,
+                                      userLocation.longitude,
+                                      groomer.address.location.latitude,
+                                      groomer.address.location.longitude
+                                  )
+                              )
+                          } km",
                 fontWeight = FontWeight.Bold)
             Text(
                 text = "Groomable Pets: ${groomer.petTypes.joinToString(", ")}",
