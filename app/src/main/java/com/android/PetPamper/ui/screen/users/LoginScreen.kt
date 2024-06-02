@@ -53,12 +53,15 @@ import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.resources.C
+import com.android.PetPamper.RePatterns
+import com.android.PetPamper.StringSanitizer
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+
 
 private fun OnSignInResult(
     result: FirebaseAuthUIAuthenticationResult,
@@ -147,7 +150,9 @@ fun SignIn(navController: NavHostController) {
 
                 OutlinedTextField(
                     value = email, // Bind to state in real implementation
-                    onValueChange = { email = it }, // Implement logic in real implementation
+                    onValueChange = {
+                      Log.d("loginScreen_email","|$it|")
+                      email = StringSanitizer.sanitizeEmail(it)}, // Implement logic in real implementation
                     label = { Text("Email") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth().testTag("EmailTextField"))
@@ -156,7 +161,8 @@ fun SignIn(navController: NavHostController) {
 
                 OutlinedTextField(
                     value = password, // Bind to state in real implementation
-                    onValueChange = { password = it }, // Implement logic in real implementation
+                    onValueChange = { password = it
+                                    }, // Implement logic in real implementation
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -198,12 +204,17 @@ fun SignIn(navController: NavHostController) {
 
                 Button(
                     onClick = {
+                      Log.d("loginScreen_loginBtn","Login with email:$email and pwd:$password")
                       errorMessage = "Login failed, email or password is incorrect"
                       val groomerStr1 = if (isGroomer) "Groomer" else ""
                       val groomerStr2 = if (isGroomer) "groomer" else "user"
                       if (email.isBlank() || password.isBlank()) {
+                        errorMessage = "Please enter your email and password!"
                         login = false
-                      } else {
+                      } else if(!email.matches(Regex(RePatterns().AUTOLINK_EMAIL_ADDRESS.pattern()))||email.contains(Regex("""\.{2,}"""))){
+                        errorMessage = "Invalid or unsupported email format"
+                        login = false
+                      }else{
                         firebaseConnection.loginUser(
                             email,
                             password,
