@@ -8,7 +8,7 @@ enum class PetType(val petType: String) {
 }
 
 sealed class Pet(
-    protected open val _id: String = "",
+    protected open var _id: String = "",
     protected open var _petType: PetType = PetType.OTHER,
     protected open var _name: String = "Unnamed",
     protected open var _birthDate: LocalDate = LocalDate.of(0, 1, 1),
@@ -16,8 +16,11 @@ sealed class Pet(
     protected open var _pictures: List<String> = listOf(""),
     protected open var _ownerId: String = "PetPamper"
 ) {
-  val id
+  var id
     get() = _id
+    set(value) {
+      _id = value
+    }
 
   var petType
     get() = _petType

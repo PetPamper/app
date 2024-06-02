@@ -104,7 +104,7 @@ fun GroomerRegister(
     navController: NavController,
     hasUserAccount: Boolean = false
 ) {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val db = Firebase.firestore
 
   val initialStep = if (!hasUserAccount) 1 else 20

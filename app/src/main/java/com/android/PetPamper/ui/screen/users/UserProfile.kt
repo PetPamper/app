@@ -445,19 +445,63 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
                     }
               }
         }
+    Spacer(modifier = Modifier.height(12.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Box(
+          modifier =
+              Modifier.width(120.dp)
+                  .height(40.dp)
+                  .shadow(elevation = 4.dp, shape = RoundedCornerShape(4.dp))
+                  .clip(
+                      RoundedCornerShape(
+                          8.dp)) // Ensures that the background is clipped to the rounded
+                  // corners
+                  .background(Color(0xFFF4F3F3))
+                  .padding(8.dp),
+          // shape = RoundedCornerShape(8.dp)
+      ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          ClickableText(
+              onClick = {
+                  navController.navigate("LoginScreen")
+              },
+              text = AnnotatedString("Log out"),
+              modifier = Modifier.weight(1f),
+              style =
+                  TextStyle(
+                      fontSize = 14.sp,
+                      fontWeight = FontWeight(400),
+                      color = Color(0xFF11347A),
+                      textAlign = TextAlign.Center))
+
+          Image(
+              painter = painterResource(id = R.drawable.baseline_logout_24),
+              contentDescription = "Log out button",
+              contentScale = ContentScale.FillBounds)
+        }
+      }
+    }
     Spacer(modifier = Modifier.height(124.dp))
     Box(
         Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
             .width(395.dp)
             .height(75.dp)
-            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp)),
+            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 4.dp)),
     ) {
       Row(
           horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
           verticalAlignment = Alignment.Top,
       ) {
         Image(
-            modifier = Modifier.width(30.dp).height(65.dp),
+            modifier = Modifier.width(30.dp).height(30.dp),
             painter = painterResource(id = R.drawable.settings),
             contentDescription = "image description",
             contentScale = ContentScale.FillBounds)

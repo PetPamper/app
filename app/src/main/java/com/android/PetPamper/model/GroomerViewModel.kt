@@ -18,7 +18,7 @@ open class GroomerViewModel(var email: String) : ViewModel() {
   var allHours: MutableState<Map<String, List<Calendar>>> = mutableStateOf(mapOf())
 
   var groomer: MutableLiveData<Groomer> = MutableLiveData()
-  private var firebaseConnection: FirebaseConnection = FirebaseConnection()
+  private var firebaseConnection: FirebaseConnection = FirebaseConnection.getInstance()
 
   fun getNameFromFirebase(onComplete: (String) -> Unit) {
     firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->

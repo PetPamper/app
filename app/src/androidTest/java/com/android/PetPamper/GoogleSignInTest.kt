@@ -25,7 +25,7 @@ class GoogleSignInTest : TestCase() {
     composeTestRule.setContent {
       val navController = rememberNavController()
       SignUpScreenGoogle(SignUpViewModelGoogle(), navController, "alitennis131800@gmail.com")
-      val firebaseConnection = FirebaseConnection()
+      val firebaseConnection = FirebaseConnection.getInstance()
     }
   }
 

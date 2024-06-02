@@ -37,7 +37,7 @@ data class PetData(
 const val petsDBPath = "pets"
 val petsFields = listOf("id", "petType", "name", "birthDate", "description", "pictures", "ownerId")
 
-class PetDataHandler(private val db: Database = FirebaseConnection()) {
+class PetDataHandler(private val db: Database) {
 
   /**
    * Converts map representing pet to Pet object
@@ -61,85 +61,145 @@ class PetDataHandler(private val db: Database = FirebaseConnection()) {
     return pet
   }
 
+  private fun petToMap(pet: Pet): Map<String, Any> {
+    return mapOf(
+        "id" to pet.id,
+        "petType" to pet.petType.petType,
+        "name" to pet.name,
+        "birthYear" to pet.birthDate.year.toLong(),
+        "birthMonth" to pet.birthDate.monthValue.toLong(),
+        "birthDay" to pet.birthDate.dayOfMonth.toLong(),
+        "description" to pet.description,
+        "pictures" to pet.pictures,
+        "ownerId" to pet.ownerId)
+  }
+
+  private fun copyFromPet(oldPet: Pet?, newPet: Pet?) {
+    if (newPet != null) {
+      oldPet?.id = newPet.id
+      oldPet?.name = newPet.name
+      oldPet?.petType = newPet.petType
+      oldPet?.birthDate = newPet.birthDate
+      oldPet?.description = newPet.description
+      oldPet?.pictures = newPet.pictures
+      oldPet?.ownerId = newPet.ownerId
+    }
+  }
+
   /**
    * Retrieves a pet from the database
    *
    * @param petId ID of the pet to retrieve from the database
-   * @return pet object corresponding to the pet retrieved from the database if successful, or null
-   *   if unsuccessful
+   * @param receivedPet pet object to load with data from the retrieved pet
+   * @param onSuccess function to call if the operation is successful
+   * @param errorHandler function to call in case of error
    */
-  suspend fun retrievePetFromDatabase(petId: String): Pet? {
-    var (success, data) = db.fetchData(petsDBPath, petId)
-    if (!success) {
-      return null
-    }
-    data = data!!
-
-    return petFromMap(data)
+  fun retrievePetFromDatabase(
+      petId: String,
+      receivedPet: Pet?,
+      onSuccess: () -> Unit = {},
+      errorHandler: (Exception) -> Unit = {}
+  ) {
+    db.fetchData(
+        petsDBPath,
+        petId,
+        onSuccess = { data ->
+          onSuccess()
+          copyFromPet(receivedPet, petFromMap(data))
+        },
+        onFailure = { exception ->
+          Log.e("PetData", "Could not retrieve pet from database. Error: $exception")
+          errorHandler(exception)
+        })
   }
 
   /**
    * Retrieves owner's pets as a list
    *
    * @param ownerId ID of the pet owner to retrieve pets from
-   * @return list of pets from owner if successful, or null if unsuccessful
+   * @param receivedPetList list to load with retrieved pets
+   * @param onSuccess function to call if the operation is successful
+   * @param errorHandler function to call in case of error
    */
-  suspend fun retrievePetsFromOwner(ownerId: String): List<Pet>? {
+  fun retrievePetsFromOwner(
+      ownerId: String,
+      receivedPetList: MutableList<Pet>,
+      onSuccess: () -> Unit = {},
+      errorHandler: (Exception) -> Unit = {}
+  ) {
     if (db !is FirebaseConnection) {
       throw Exception("Query is not supported")
     }
 
-    val (success, data) = db.query(petsDBPath, Filter.equalTo("ownerId", ownerId))
-    if (!success) {
-      return null
-    }
+    receivedPetList.clear()
 
-    return data.map { petData -> petFromMap(petData!!) }
+    db.query(
+        petsDBPath,
+        Filter.equalTo("ownerId", ownerId),
+        onSuccess = { dataList ->
+          onSuccess()
+          dataList.forEach { petData -> receivedPetList.add(petFromMap(petData)) }
+        },
+        onFailure = { exception ->
+          Log.e("PetData", "Could not retrieve pets from database. Error: $exception")
+          errorHandler(exception)
+        })
   }
 
   /**
    * Stores a pet to the database
    *
    * @param pet pet to store to the database
-   * @return success of the store operation
+   * @param onSuccess function to call if the operation is successful
+   * @param errorHandler function to call in case of error
    */
-  suspend fun storePetToDatabase(pet: Pet): Boolean {
-    return storePetToDatabase(PetData(pet))
+  fun storePetToDatabase(
+      pet: Pet,
+      onSuccess: () -> Unit = {},
+      errorHandler: (Exception) -> Unit = {}
+  ) {
+    storePetToDatabase(PetData(pet), onSuccess, errorHandler)
   }
 
-  private suspend fun storePetToDatabase(pet: PetData): Boolean {
-    val (success, petFound) = db.documentExists(petsDBPath, pet.id)
-    if (petFound) {
-      Log.e("IllegalStore", "Tried to store a pet that already exists in the database")
-      return false
-    }
-    if (!success) {
-      Log.e("StoreUnsuccessful", "Storing pet wasn't successful")
-      return false
-    }
-    return db.storeData(petsDBPath, pet.id, pet)
+  private fun storePetToDatabase(
+      pet: PetData,
+      onSuccess: () -> Unit = {},
+      errorHandler: (Exception) -> Unit = {}
+  ) {
+    db.storeDataNoOverride(
+        petsDBPath,
+        pet.id,
+        pet,
+        onSuccess = {
+          onSuccess()
+          Log.d("PetData", "Pet was successfully stored.")
+        },
+        onFailure = { exception ->
+          Log.e("PetData", "Could not store pet to database. Error: $exception")
+          errorHandler(exception)
+        })
   }
 
   /**
    * Modifies a pet entry in the database
    *
-   * @param pet modified pet to store to the database
-   * @return success of the modification
+   * @param pet updated pet to store to the database
+   * @param onSuccess function to call if the operation is successful
+   * @param errorHandler function to call in case of error
    */
-  suspend fun modifyPetEntry(pet: Pet): Boolean {
-    return modifyPetEntry(PetData(pet))
-  }
-
-  private suspend fun modifyPetEntry(pet: PetData): Boolean {
-    val (success, petFound) = db.documentExists(petsDBPath, pet.id)
-    if (!petFound) {
-      Log.e("IllegalModification", "Tried to modify a pet that isn't in the database")
-      return false
-    }
-    if (!success) {
-      return false
-    }
-    return db.storeData(petsDBPath, pet.id, pet)
+  fun modifyPetEntry(pet: Pet, onSuccess: () -> Unit = {}, errorHandler: (Exception) -> Unit = {}) {
+    db.updateData(
+        petsDBPath,
+        pet.id,
+        petToMap(pet),
+        onSuccess = {
+          onSuccess()
+          Log.d("PetData", "Pet was successfully updated.")
+        },
+        onFailure = { exception ->
+          Log.e("PetData", "Could not update pet in database. Error: $exception")
+          errorHandler(exception)
+        })
   }
 
   /**

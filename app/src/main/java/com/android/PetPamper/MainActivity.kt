@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import com.android.PetPamper.database.FirebaseConnection
 import com.android.PetPamper.database.PetDataHandler
@@ -53,6 +54,8 @@ import com.android.PetPamper.ui.screen.users.ReservationsScreen
 import com.android.PetPamper.ui.screen.users.SignIn
 import com.android.PetPamper.ui.screen.users.UserProfileScreen
 import com.example.PetPamper.ChannelActivity
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.compose.ui.channels.ChannelsScreen
@@ -115,7 +118,6 @@ fun createChannel(
           Message(
               text = "Hello! How can I assist you today?", // The ID of the user sending the message
           )
-
       onSuccess(channel.cid)
     } else {
       Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
@@ -149,7 +151,18 @@ fun AppNavigation(client: ChatClient) {
   val groomerSignUp = GroomerSignUpViewModel()
   val emailViewModel = EmailViewModel()
 
-  NavHost(navController = navController, startDestination = "LoginScreen") {
+  val currentUser = Firebase.auth.currentUser
+  val startDestination =
+      if (currentUser?.email == null) {
+        Log.d("MainActivity", "current user not connected")
+        "LoginScreen"
+      } else {
+        val email = currentUser.email
+        // Log.d("MainActivity", "current email is $email")
+        "HomeScreen/$email"
+      }
+
+  NavHost(navController = navController, startDestination = startDestination) {
     composable("LoginScreen") { SignIn(navController) }
 
     composable("RegisterScreen1") { Register(signUp, navController) }
@@ -168,8 +181,8 @@ fun AppNavigation(client: ChatClient) {
     composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
     composable("HomeScreen/{email}") { backStackEntry ->
-      val email = backStackEntry.arguments?.getString("email")
-      AppNavigation(email, client)
+      val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
+      AppNavigation(email, client, navController)
     }
     composable("GroomerHomeScreen/{email}") { backStackEntry ->
       val email = backStackEntry.arguments?.getString("email")
@@ -182,7 +195,7 @@ fun AppNavigation(client: ChatClient) {
 }
 
 @Composable
-fun AppNavigation(email: String?, client: ChatClient) {
+fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavController) {
   val navController = rememberNavController()
   val items =
       listOf(
@@ -196,7 +209,7 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
   val user1Id = remember { mutableStateOf("alilebg@gmail.com") }
 
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
 
   LaunchedEffect(email) {
     if (email != null) {
@@ -282,14 +295,14 @@ fun AppNavigation(email: String?, client: ChatClient) {
 
               composable("PetListScreen") {
                 PetListScreen(
-                    viewModel = PetListViewModel(email, PetDataHandler()),
+                    viewModel = PetListViewModel(email, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() },
                     navController = navController)
               }
 
               composable("AddPetScreen") {
                 AddPetScreen(
-                    viewModel = AddPetScreenViewModel(email, PetDataHandler()),
+                    viewModel = AddPetScreenViewModel(email, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() })
               }
 
@@ -427,6 +440,9 @@ fun AppNavigation(email: String?, client: ChatClient) {
                 }
                 GroomerProfile(groomerName.value, navController, user1Id.value, client)
               }
+            composable("LoginScreen") {
+                Firebase.auth.signOut()
+                prevNavController.navigate("LoginScreen") }
             }
       }
 }

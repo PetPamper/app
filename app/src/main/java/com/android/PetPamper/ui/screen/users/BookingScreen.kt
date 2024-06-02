@@ -56,7 +56,7 @@ fun BookingScreen(groomerEmail: String, userEmail: String, navController: NavCon
   val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
   val selectedHoursMap = remember { mutableStateMapOf<String, Int>() }
 
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   LaunchedEffect(groomerEmail) {
     firebaseConnection.fetchAvailableDates(groomerEmail) { fetchedDates ->
       dateList.clear()
@@ -263,7 +263,7 @@ fun ConfirmReservation(
     onError: (String) -> Unit
 ) {
   val context = LocalContext.current
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val groomer = remember { mutableStateOf(Groomer()) }
   firebaseConnection.fetchGroomerData(groomerEmail) { groomer.value = it }
 

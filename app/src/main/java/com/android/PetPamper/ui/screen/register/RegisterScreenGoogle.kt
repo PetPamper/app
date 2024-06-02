@@ -96,7 +96,7 @@ fun SignUpScreenGoogle(
 
               val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-              val firebaseConnection = FirebaseConnection()
+              val firebaseConnection = FirebaseConnection.getInstance()
               firebaseConnection.addUser(
                   User(
                       viewModel.name,
