@@ -30,7 +30,7 @@ import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.resources.distance
 import com.android.PetPamper.ui.screen.chat.*
 import com.android.PetPamper.ui.screen.forgotPass.*
-import com.android.PetPamper.ui.screen.groomers.GroomerHome
+import com.android.PetPamper.ui.screen.groomers.GroomerHomeScreen
 import com.android.PetPamper.ui.screen.register.GroomerRegister
 import com.android.PetPamper.ui.screen.register.GroomerSignUpViewModel
 import com.android.PetPamper.ui.screen.register.Register
@@ -118,16 +118,6 @@ fun createChannel(
           Message(
               text = "Hello! How can I assist you today?", // The ID of the user sending the message
           )
-
-      channelClient.sendMessage(message).enqueue { sendMessageResult ->
-        if (sendMessageResult.isSuccess) {
-          Log.d("salam", "Default message sent successfully")
-        } else {
-          Log.e(
-              "salam", "Error sending default message: ${sendMessageResult.errorOrNull()?.message}")
-        }
-      }
-
       onSuccess(channel.cid)
     } else {
       Log.e("salam", "Error creating channel: ${result.errorOrNull()?.message}")
@@ -198,7 +188,7 @@ fun AppNavigation(client: ChatClient) {
       val email = backStackEntry.arguments?.getString("email")
       if (email != null) {
 
-        GroomerHome(email)
+        GroomerHomeScreen(email)
       }
     }
   }
@@ -284,7 +274,19 @@ fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavCont
 
               composable("ReservationsScreen") {
                 val reservations = remember { mutableStateOf(listOf<Reservation>()) }
-                firebaseConnection.fetchReservations(email!!) { res -> reservations.value = res }
+                firebaseConnection.fetchReservations(email) { res -> reservations.value = res }
+
+                ReservationsScreen(
+                    reservations = reservations.value,
+                    onBackPressed = { navController.navigateUp() })
+              }
+
+              composable("ReservationsScreenGroomers/{email}") { backStackEntry ->
+                val email2 = backStackEntry.arguments?.getString("email")
+                val reservations = remember { mutableStateOf(listOf<Reservation>()) }
+                firebaseConnection.fetchGroomerReservations(email2!!) { res ->
+                  reservations.value = res
+                }
 
                 ReservationsScreen(
                     reservations = reservations.value,
@@ -293,14 +295,14 @@ fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavCont
 
               composable("PetListScreen") {
                 PetListScreen(
-                    viewModel = PetListViewModel(email!!, PetDataHandler(firebaseConnection)),
+                    viewModel = PetListViewModel(email, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() },
                     navController = navController)
               }
 
               composable("AddPetScreen") {
                 AddPetScreen(
-                    viewModel = AddPetScreenViewModel(email!!, PetDataHandler(firebaseConnection)),
+                    viewModel = AddPetScreenViewModel(email, PetDataHandler(firebaseConnection)),
                     onBackPressed = { navController.navigateUp() })
               }
 
