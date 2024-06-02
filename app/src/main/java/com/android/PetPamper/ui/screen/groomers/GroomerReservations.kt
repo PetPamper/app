@@ -56,7 +56,7 @@ fun groomerReservations(
     navController: NavController,
     email: String?,
 ) {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val reservation = remember { mutableStateOf(listOf<Reservation>()) }
   val isLoading = remember { mutableStateOf(true) }
 

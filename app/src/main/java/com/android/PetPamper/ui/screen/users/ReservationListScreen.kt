@@ -57,7 +57,7 @@ fun ReservationsScreen(onBackPressed: () -> Unit, reservations: List<Reservation
 
 @Composable
 fun GroomerCard(reservation: Reservation) {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val groomerName = remember { mutableStateOf("") }
   firebaseConnection.fetchGroomerData(reservation.groomerEmail) {
     println("Groomer Name: $it")
