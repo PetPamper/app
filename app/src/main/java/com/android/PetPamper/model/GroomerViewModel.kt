@@ -32,45 +32,48 @@ open class GroomerViewModel(var email: String) : ViewModel() {
     }
   }
 
-    fun getPhoneNumberFromFirebase(onComplete: (String) -> Unit) {
-        firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            val document = task.result
-            if (document != null) {
-            phoneNumber = document.getString("phoneNumber") ?: ""
-                Log.d("PhoneNumber", "Phone number: $phoneNumber")
-            onComplete(phoneNumber)
-            }
+  fun getPhoneNumberFromFirebase(onComplete: (String) -> Unit) {
+    firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val document = task.result
+        if (document != null) {
+          phoneNumber = document.getString("phoneNumber") ?: ""
+          Log.d("PhoneNumber", "Phone number: $phoneNumber")
+          onComplete(phoneNumber)
         }
-        }
+      }
     }
+  }
 
-    fun getAddressesFromFirebase(onComplete: (Address) -> Unit) {
-        firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val document = task.result
-                if (document != null) {
-                    // Fetch each part of the address from the document
-                    val street = document.getString("address.street") ?: ""
-                    val city = document.getString("address.city") ?: ""
-                    val state = document.getString("address.state") ?: ""
-                    val postalCode = document.getString("address.postalCode") ?: ""
-                    // Construct an Address object
-                    val address = Address(street, city, state, postalCode, LocationMap())
-                    Log.d("Address", "Address: $address")
-                    onComplete(address)
-                }
-            } else {
-                // Handle the task failure if needed
-                onComplete(Address("", "", "", "", LocationMap())) // Provide a default address or handle the error as required
-            }
+  fun getAddressesFromFirebase(onComplete: (Address) -> Unit) {
+    firebaseConnection.getGroomerData(uid).addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val document = task.result
+        if (document != null) {
+          // Fetch each part of the address from the document
+          val street = document.getString("address.street") ?: ""
+          val city = document.getString("address.city") ?: ""
+          val state = document.getString("address.state") ?: ""
+          val postalCode = document.getString("address.postalCode") ?: ""
+          // Construct an Address object
+          val address = Address(street, city, state, postalCode, LocationMap())
+          Log.d("Address", "Address: $address")
+          onComplete(address)
         }
+      } else {
+        // Handle the task failure if needed
+        onComplete(
+            Address(
+                "",
+                "",
+                "",
+                "",
+                LocationMap())) // Provide a default address or handle the error as required
+      }
     }
+  }
 
-
-
-
-    fun updateAvailableHours(
+  fun updateAvailableHours(
       email: String,
       date: String,
       newHours: List<Calendar>,

@@ -2,7 +2,6 @@ package com.android.PetPamper.ui.screen.users
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -67,7 +66,6 @@ fun HomeScreen(navController: NavController, email: String?) {
     if (resa.value.isNotEmpty()) {
       CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
     }
-
   }
 }
 
@@ -83,7 +81,7 @@ fun CarouselCard(
   val sliderList = petListViewModel.petsList
   val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
+  val scrollState = rememberScrollState()
 
   Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
     Row(modifier = Modifier.padding(15.dp)) {
@@ -99,10 +97,7 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier
-              .height(300.dp)
-              .width(350.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
             val pet = petListViewModel.petsList[page]
             Card(
                 shape = RoundedCornerShape(10.dp),
@@ -130,13 +125,17 @@ fun CarouselCard(
                         text = "Description",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2490DF))
-                    Text(text = if (petListViewModel.petsList[page].description.length > 150){petListViewModel.petsList[page].description.take(150)+"..."} else petListViewModel.petsList[page].description, color = Color.DarkGray)
+                    Text(
+                        text =
+                            if (petListViewModel.petsList[page].description.length > 150) {
+                              petListViewModel.petsList[page].description.take(150) + "..."
+                            } else petListViewModel.petsList[page].description,
+                        color = Color.DarkGray)
                   }
                   Box(
                       modifier =
-                      Modifier
-                          .fillMaxWidth()
-                          .aspectRatio(16f / 9f), // or your desired aspect ratio
+                          Modifier.fillMaxWidth()
+                              .aspectRatio(16f / 9f), // or your desired aspect ratio
                       contentAlignment = Alignment.Center) {
                         AsyncImage(
                             model =
@@ -144,16 +143,15 @@ fun CarouselCard(
                                     .data(sliderList[page].pictures.getOrNull(0))
                                     .crossfade(true)
                                     .scale(Scale.FILL)
-                                    .build(), contentDescription = null,
+                                    .build(),
+                            contentDescription = null,
                             placeholder = painterResource(id = R.drawable.placeholder),
                             error = painterResource(id = R.drawable.error_image_generic),
                             modifier = Modifier.fillMaxSize() // Make the image fill the Box
                             )
                       }
 
-                  Spacer(modifier = Modifier
-                      .height(8.dp)
-                      .width(10.dp))
+                  Spacer(modifier = Modifier.height(8.dp).width(10.dp))
                 }
           }
       IconButton(
@@ -200,9 +198,7 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState2,
           contentPadding = PaddingValues(horizontal = 10.dp),
-          modifier = Modifier
-              .height(180.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(180.dp).weight(1f)) { page ->
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -219,42 +215,36 @@ fun CarouselCard(
                     }) {
                   Box(
                       modifier =
-                      Modifier
-                          .padding(16.dp)
-                          // .background(Color.White, RoundedCornerShape(10.dp))
-                          .height(150.dp)
-                          .fillMaxWidth()) {
+                          Modifier.padding(16.dp)
+                              // .background(Color.White, RoundedCornerShape(10.dp))
+                              .height(150.dp)
+                              .fillMaxWidth()) {
                         Row(modifier = Modifier.padding(8.dp)) {
                           // Profile picture
                           Image(
                               painter = painterResource(id = R.drawable.profile),
                               contentDescription = "Profile Picture",
-                              modifier = Modifier
-                                  .size(60.dp)
-                                  .clip(CircleShape))
+                              modifier = Modifier.size(60.dp).clip(CircleShape))
 
                           // Spacer
-                          Spacer(modifier = Modifier
-                              .height(8.dp)
-                              .width(10.dp))
+                          Spacer(modifier = Modifier.height(8.dp).width(10.dp))
 
                           // Details: Name, age, distance
                           Column {
                             Text(
                                 text = currentReservations.groomerName,
                                 fontWeight = FontWeight.Bold)
-                              Spacer(modifier = Modifier.height(5.dp))
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(text = "Price: ${currentReservations.price}")
-                              Spacer(modifier = Modifier.height(5.dp))
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(
                                 text =
                                     "Experience Years: ${currentReservations.experienceYears} years")
 
                             Spacer(modifier = Modifier.height(5.dp))
-                              Text(text = "Date : ${currentReservations.date}")
-                              Spacer(modifier = Modifier.height(5.dp))
-                              Text(text = "Hour: ${currentReservations.hour}")
-
+                            Text(text = "Date : ${currentReservations.date}")
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(text = "Hour: ${currentReservations.hour}")
                           }
                         }
 
@@ -262,13 +252,17 @@ fun CarouselCard(
                         // Spacer(modifier = Modifier.height(5.dp))
 
                         // Additional details: Service type, date joined, total price
-//                        Column(
-//                            verticalArrangement = Arrangement.spacedBy(4.dp),
-//                            modifier = Modifier.align(Alignment.BottomCenter)) {
-//                              Text(text = "Date : ${currentReservations.date}")
-//                              Text(text = "Hour: ${currentReservations.hour}")
-//                              Spacer(modifier = Modifier.height(10.dp))
-//                            }
+                        //                        Column(
+                        //                            verticalArrangement =
+                        // Arrangement.spacedBy(4.dp),
+                        //                            modifier =
+                        // Modifier.align(Alignment.BottomCenter)) {
+                        //                              Text(text = "Date :
+                        // ${currentReservations.date}")
+                        //                              Text(text = "Hour:
+                        // ${currentReservations.hour}")
+                        //                              Spacer(modifier = Modifier.height(10.dp))
+                        //                            }
 
                         // Start chatting button
 

@@ -221,9 +221,9 @@ class FirebaseConnection : Database() {
     return db.collection("users").document(uid).get()
   }
 
-    fun getGroomerData(email: String): Task<DocumentSnapshot> {
-        return db.collection("groomers").document(email).get()
-    }
+  fun getGroomerData(email: String): Task<DocumentSnapshot> {
+    return db.collection("groomers").document(email).get()
+  }
 
   fun fetchGroomerData(email: String, onComplete: (Groomer) -> Unit) {
     db.collection("groomers").get().addOnCompleteListener { task ->
@@ -314,12 +314,11 @@ class FirebaseConnection : Database() {
     return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
 
-    fun getGroomerUidByEmail(email: String): Task<QuerySnapshot> {
-        return db.collection("groomers").whereEqualTo("email", email).get()
-    }
+  fun getGroomerUidByEmail(email: String): Task<QuerySnapshot> {
+    return db.collection("groomers").whereEqualTo("email", email).get()
+  }
 
-
-    fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
+  fun updateAvailableHours(email: String, newHours: List<Calendar>, onComplete: () -> Unit) {
     // Convert each Calendar instance to a Timestamp for Firebase storage
     val hoursData =
         newHours.map { calendar ->
@@ -434,21 +433,21 @@ class FirebaseConnection : Database() {
     }
   }
 
-    fun fetchGroomerReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
-        db.collection("reservations").whereEqualTo("groomerEmail", email).get().addOnCompleteListener {
-            task ->
-        if (task.isSuccessful) {
-            val reservations = task.result?.toObjects(Reservation::class.java)
-            if (reservations != null) {
-            onComplete(reservations)
-            } else {
-            onComplete(emptyList())
-            }
+  fun fetchGroomerReservations(email: String, onComplete: (List<Reservation>) -> Unit) {
+    db.collection("reservations").whereEqualTo("groomerEmail", email).get().addOnCompleteListener {
+        task ->
+      if (task.isSuccessful) {
+        val reservations = task.result?.toObjects(Reservation::class.java)
+        if (reservations != null) {
+          onComplete(reservations)
         } else {
-            onComplete(emptyList())
+          onComplete(emptyList())
         }
-        }
+      } else {
+        onComplete(emptyList())
+      }
     }
+  }
 
   fun registerUser(
       email: String,
