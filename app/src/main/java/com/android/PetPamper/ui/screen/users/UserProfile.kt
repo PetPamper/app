@@ -490,35 +490,35 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
       }
     }
     Spacer(modifier = Modifier.height(124.dp))
-    Box(
-        Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
-            .width(395.dp)
-            .height(75.dp)
-            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 4.dp)),
-    ) {
-      Row(
-          horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-          verticalAlignment = Alignment.Top,
-      ) {
-        Image(
-            modifier = Modifier.width(30.dp).height(30.dp),
-            painter = painterResource(id = R.drawable.settings),
-            contentDescription = "image description",
-            contentScale = ContentScale.FillBounds)
-        Text(
-            text = "Settings",
-            modifier = Modifier.width(357.dp).height(65.dp),
-            style =
-                TextStyle(
-                    fontSize = 24.sp,
-                    // fontFamily = FontFamily(Font(R.font.raleway)),
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF5E5F60),
-                ))
-      }
+//    Box(
+//        Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+//            .width(395.dp)
+//            .height(75.dp)
+//            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 4.dp)),
+//    ) {
+//      Row(
+//          horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
+//          verticalAlignment = Alignment.Top,
+//      ) {
+//        Image(
+//            modifier = Modifier.width(30.dp).height(30.dp),
+//            painter = painterResource(id = R.drawable.settings),
+//            contentDescription = "image description",
+//            contentScale = ContentScale.FillBounds)
+//        Text(
+//            text = "Settings",
+//            modifier = Modifier.width(357.dp).height(65.dp),
+//            style =
+//                TextStyle(
+//                    fontSize = 24.sp,
+//                    // fontFamily = FontFamily(Font(R.font.raleway)),
+//                    fontWeight = FontWeight(400),
+//                    color = Color(0xFF5E5F60),
+//                ))
+
     }
   }
-}
+
 
 @Composable
 fun UserProfileDetail(label: String, detail: String) {

@@ -40,6 +40,7 @@ fun MapView(userViewModel: UserViewModel) {
   var selectedGroomer by remember { mutableStateOf<Groomer?>(null) }
   var showUserLocationDialog by remember { mutableStateOf(false) }
 
+
   LaunchedEffect(userViewModel.getUser().address) {
     userViewModel.getUser().address.let { address.value = it }
   }
