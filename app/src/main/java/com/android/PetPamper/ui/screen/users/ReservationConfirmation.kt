@@ -37,7 +37,7 @@ fun ReservationConfirmation(navController: NavController, backStackEntry: NavBac
   val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
   val selectedHour = backStackEntry.arguments?.getString("selectedHour") ?: ""
 
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val GroomerName = remember { mutableStateOf("") }
   val cost = remember { mutableStateOf<Int>(0) }
   val GroomerServices = remember { mutableListOf<String>("") }

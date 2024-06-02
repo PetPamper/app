@@ -57,7 +57,7 @@ fun ReservationsScreen(onBackPressed: () -> Unit, reservations: List<Reservation
 
 @Composable
 fun GroomerCard(reservation: Reservation) {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val groomerName = remember { mutableStateOf("") }
   firebaseConnection.fetchGroomerData(reservation.groomerEmail) {
     println("Groomer Name: $it")
@@ -72,11 +72,10 @@ fun GroomerCard(reservation: Reservation) {
               painter = painterResource(id = R.drawable.placeholder),
               contentDescription = null,
               modifier = Modifier.size(64.dp).clip(CircleShape))
+
           Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
             Text(text = groomerName.value, style = MaterialTheme.typography.titleSmall)
             Text(text = "Date: ${reservation.date}", style = MaterialTheme.typography.labelMedium)
-          }
-          Column(horizontalAlignment = Alignment.End) {
             Text(text = "${reservation.hour}/hour", style = MaterialTheme.typography.labelMedium)
             Text(
                 text = "${reservation.groomerEmail}/hour",

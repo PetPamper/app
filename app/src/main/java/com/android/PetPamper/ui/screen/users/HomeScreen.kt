@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -29,9 +31,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,13 +62,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController, email: String?) {
   Column {
-    val firebaseConnection = FirebaseConnection()
+    val firebaseConnection = FirebaseConnection.getInstance()
     var resa = remember { mutableStateOf(listOf<Reservation>()) }
     firebaseConnection.fetchReservations(email!!) { resa.value = it }
 
-    if (resa.value.isNotEmpty()) {
-      CarouselCard(navController, email, PetListViewModel(email, PetDataHandler()), resa.value)
-    }
+    CarouselCard(
+        navController,
+        email,
+        PetListViewModel(email, PetDataHandler(firebaseConnection)),
+        resa.value)
 
   }
 }
@@ -78,11 +84,15 @@ fun CarouselCard(
     reservation: List<Reservation>
 ) {
 
-  val sliderList = petListViewModel.petsList
-  val pageState = rememberPagerState(initialPage = 2, pageCount = { sliderList.size })
+  val sliderList by remember { mutableStateOf(petListViewModel.petsList) }
+  val pageState = rememberPagerState(initialPage = 0, pageCount = { sliderList.size })
   val scope = rememberCoroutineScope()
-  Column(modifier = Modifier.fillMaxSize()) {
-    Row(modifier = Modifier.padding(20.dp)) {
+  val scrollState = rememberScrollState()
+
+  Column(modifier = Modifier
+      .fillMaxSize()
+      .verticalScroll(scrollState)) {
+    Row(modifier = Modifier.padding(15.dp)) {
       Text(text = "Your pets", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Gray)
     }
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -95,8 +105,11 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
-            val pet = petListViewModel.petsList[page]
+          modifier = Modifier
+              .height(300.dp)
+              .width(350.dp)
+              .weight(1f)) { page ->
+            val pet = petListViewModel.petsList.getOrNull(page)
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -111,39 +124,50 @@ fun CarouselCard(
                           lerp(
                               start = 0.50f, stop = 1f, fraction = 1f - pageOffset.coerceIn(0f, 1f))
                     }) {
-                  Column(modifier = Modifier.padding(16.dp)) {
-                    // Pet name
-                    Text(text = pet.name, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
-                    // Pet age
-                    Text(
-                        text = "${pet.birthDate.until(LocalDate.now()).years} years old",
-                        color = Color.DarkGray)
-                    // Pet description
-                    Text(
-                        text = "Description",
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2490DF))
-                    Text(text = if (petListViewModel.petsList[page].description.length > 150){petListViewModel.petsList[page].description.take(150)+"..."} else petListViewModel.petsList[page].description, color = Color.DarkGray)
-                  }
-                  Box(
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .aspectRatio(16f / 9f), // or your desired aspect ratio
-                      contentAlignment = Alignment.Center) {
-                        AsyncImage(
-                            model =
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(sliderList[page].pictures.getOrNull(0))
-                                    .crossfade(true)
-                                    .scale(Scale.FILL)
-                                    .build(), contentDescription = null,
-                            placeholder = painterResource(id = R.drawable.placeholder),
-                            error = painterResource(id = R.drawable.error_image_generic),
-                            modifier = Modifier.fillMaxSize() // Make the image fill the Box
-                            )
-                      }
+                  if (pet != null) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                      // Pet name
+                      Text(text = pet.name, fontWeight = FontWeight.Bold, color = Color(0xFF2490DF))
+                      // Pet age
+                      Text(
+                          text = "${pet.birthDate.until(LocalDate.now()).years} years old",
+                          color = Color.DarkGray)
+                      // Pet description
+                      Text(
+                          text = "Description",
+                          fontWeight = FontWeight.Bold,
+                          color = Color(0xFF2490DF))
+                      Text(
+                          text =
+                              if (petListViewModel.petsList[page].description.length > 150) {
+                                petListViewModel.petsList[page].description.take(150) + "..."
+                              } else petListViewModel.petsList[page].description,
+                          color = Color.DarkGray)
+                    }
+                    Box(
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f), // or your desired aspect ratio
+                        contentAlignment = Alignment.Center) {
+                          AsyncImage(
+                              model =
+                                  ImageRequest.Builder(LocalContext.current)
+                                      .data(sliderList[page].pictures.getOrNull(0))
+                                      .crossfade(true)
+                                      .scale(Scale.FILL)
+                                      .build(),
+                              contentDescription = null,
+                              placeholder = painterResource(id = R.drawable.placeholder),
+                              error = painterResource(id = R.drawable.error_image_generic),
+                              modifier = Modifier.fillMaxSize() // Make the image fill the Box
+                              )
+                        }
 
-                  Spacer(modifier = Modifier.height(8.dp).width(10.dp))
+                    Spacer(modifier = Modifier
+                        .height(8.dp)
+                        .width(10.dp))
+                  }
                 }
           }
       IconButton(
@@ -168,7 +192,7 @@ fun CarouselCard(
 
     val pageState2 = rememberPagerState(initialPage = 0, pageCount = { reservation.size })
     val scope2 = rememberCoroutineScope()
-    val currentReservations = reservation[pageState2.currentPage]
+    val currentReservations = reservation.getOrNull(pageState2.currentPage)
 
     Row(modifier = Modifier.padding(15.dp)) {
       Text(
@@ -190,7 +214,9 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState2,
           contentPadding = PaddingValues(horizontal = 10.dp),
-          modifier = Modifier.height(180.dp).weight(1f)) { page ->
+          modifier = Modifier
+              .height(180.dp)
+              .weight(1f)) { page ->
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -207,55 +233,67 @@ fun CarouselCard(
                     }) {
                   Box(
                       modifier =
-                          Modifier.padding(16.dp)
-                              // .background(Color.White, RoundedCornerShape(10.dp))
-                              .height(150.dp)
-                              .fillMaxWidth()) {
-                        Row(modifier = Modifier.padding(8.dp)) {
-                          // Profile picture
-                          Image(
-                              painter = painterResource(id = R.drawable.profile),
-                              contentDescription = "Profile Picture",
-                              modifier = Modifier.size(60.dp).clip(CircleShape))
+                      Modifier
+                          .padding(16.dp)
+                          // .background(Color.White, RoundedCornerShape(10.dp))
+                          .height(150.dp)
+                          .fillMaxWidth()) {
+                        if (currentReservations != null) {
+                          Row(modifier = Modifier.padding(8.dp)) {
+                            // Profile picture
+                            Image(
+                                painter = painterResource(id = R.drawable.profile),
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clip(CircleShape))
+
+                            // Spacer
+                            Spacer(modifier = Modifier
+                                .height(8.dp)
+                                .width(10.dp))
+
+                            // Details: Name, age, distance
+                            Column {
+                              Text(
+                                  text = currentReservations.groomerName,
+                                  fontWeight = FontWeight.Bold)
+                                Spacer(modifier = Modifier.height(5.dp))
+                              Text(text = "Price: ${currentReservations.price}")
+                                Spacer(modifier = Modifier.height(5.dp))
+                              Text(
+                                  text =
+                                      "Experience Years: ${currentReservations.experienceYears} years")
+                                Spacer(modifier = Modifier.height(5.dp))
+                                    Text(text = "Date : ${currentReservations.date}")
+                                    Spacer(modifier = Modifier.height(5.dp))
+                                    Text(text = "Hour: ${currentReservations.hour}")
+                            }
+                          }
 
                           // Spacer
-                          Spacer(modifier = Modifier.height(8.dp).width(10.dp))
+                          // Spacer(modifier = Modifier.height(5.dp))
 
-                          // Details: Name, age, distance
-                          Column {
-                            Text(
-                                text = currentReservations.groomerName,
-                                fontWeight = FontWeight.Bold)
-                            Text(text = "Price: ${currentReservations.price}")
-                            Text(
-                                text =
-                                    "Experience Years: ${currentReservations.experienceYears} years")
-                            Text(text = "Services: ${currentReservations.services}")
-                          }
+                          // Additional details: Service type, date joined, total price
+                          Column(
+                              verticalArrangement = Arrangement.spacedBy(4.dp),
+                              modifier = Modifier.align(Alignment.BottomCenter)) {
+
+                                Spacer(modifier = Modifier.height(10.dp))
+                              }
+
+                          // Start chatting button
+                          Button(
+                              onClick = { /* Handle start chatting action */},
+                              modifier = Modifier.align(Alignment.BottomEnd),
+                              colors =
+                                  ButtonDefaults.buttonColors(
+                                      containerColor = Color(0xFF2490DF),
+                                      contentColor = Color.White)) {
+                                Text("Chat")
+                              }
                         }
 
-                        // Spacer
-                        // Spacer(modifier = Modifier.height(5.dp))
-
-                        // Additional details: Service type, date joined, total price
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.align(Alignment.BottomCenter)) {
-                              Text(text = "Date : ${currentReservations.date}")
-                              Text(text = "Hour: ${currentReservations.hour}")
-                              Spacer(modifier = Modifier.height(10.dp))
-                            }
-
-                        // Start chatting button
-                        Button(
-                            onClick = { /* Handle start chatting action */},
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF2490DF),
-                                    contentColor = Color.White)) {
-                              Text("Chat")
-                            }
                       }
                 }
           }

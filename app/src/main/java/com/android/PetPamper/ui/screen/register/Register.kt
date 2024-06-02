@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.register
 
-import com.android.PetPamper.viewmodel.AddressViewModel
 import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
@@ -77,6 +76,7 @@ import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.model.User
 import com.android.PetPamper.ui.screen.users.CustomTextButton
+import com.android.PetPamper.viewmodel.AddressViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -97,7 +97,7 @@ fun Register(
     navController: NavController,
     hasGroomerAccount: Boolean = false
 ) {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   val db = Firebase.firestore
 
   val initialStep = if (!hasGroomerAccount) 1 else 10
@@ -422,7 +422,7 @@ fun RegisterLayout(
   var expandedState by remember { mutableStateOf(false) }
   val addressSuggestions = remember { mutableStateListOf<Address>() }
   val focusRequester = remember { FocusRequester() }
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
 
   fun proceedWithNext() {
     var isValidInput = true
@@ -704,7 +704,7 @@ fun isValidEmail(email: String) =
     email.contains('@') && email.contains('.') // Simplified validation
 
 fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   var alreadyinuse = false
   var isValid = false
   firebaseConnection

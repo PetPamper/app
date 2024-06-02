@@ -44,7 +44,7 @@ fun EmailScreen(viewModel: EmailViewModel, navController: NavController) {
         EmailScreenLayout("Enter your email", "Email", viewModel) { email ->
           viewModel.email = email
           if (email.isNotBlank()) {
-            val firebaseConnection = FirebaseConnection()
+            val firebaseConnection = FirebaseConnection.getInstance()
             if (firebaseConnection.restPasswordSendEmail(email)) {
               print("Email sent")
             }

@@ -32,36 +32,38 @@ import androidx.navigation.NavController
 import com.android.PetPamper.R
 import com.android.PetPamper.model.Address
 import com.android.PetPamper.model.LocationMap
-import com.android.PetPamper.model.UserViewModel
 import com.android.PetPamper.model.User
+import com.android.PetPamper.model.UserViewModel
 
 @Composable
 fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
   var user by remember { mutableStateOf(userVM.getUser()) }
 
-    var showEditProfile by remember { mutableStateOf(false) }
+  var showEditProfile by remember { mutableStateOf(false) }
 
-    var needRecompose by remember { mutableStateOf(false) }
+  var needRecompose by remember { mutableStateOf(false) }
 
-    if (showEditProfile){
-        EditProfileDialog(
-            onDismiss = {
-                showEditProfile = false
-                needRecompose = true},
-            onSave = {
-                userVM.updateUser(name = it.name, email = it.email, phone = it.phoneNumber)
-                showEditProfile = false
-                needRecompose = true},
-            user)
-    }
+  if (showEditProfile) {
+    EditProfileDialog(
+        onDismiss = {
+          showEditProfile = false
+          needRecompose = true
+        },
+        onSave = {
+          userVM.updateUser(name = it.name, email = it.email, phone = it.phoneNumber)
+          showEditProfile = false
+          needRecompose = true
+        },
+        user)
+  }
 
-    LaunchedEffect(userVM.uid, needRecompose) {
-        Log.d("LaunchedEffectTAG","UserProfileScreen recomposed")
-        user = userVM.getUser()
-        needRecompose = false
-    }
+  LaunchedEffect(userVM.uid, needRecompose) {
+    Log.d("LaunchedEffectTAG", "UserProfileScreen recomposed")
+    user = userVM.getUser()
+    needRecompose = false
+  }
 
-    Log.d("UserProfile1", "phone: ${user.phoneNumber}")
+  Log.d("UserProfile1", "phone: ${user.phoneNumber}")
 
   Column(modifier = Modifier.padding(12.dp)) { // Adding padding around the entire screen content
     // user name
@@ -80,7 +82,7 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
     Box(
         modifier =
             Modifier.fillMaxWidth()
-                .height(194.dp)
+                .height(160.dp)
                 .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
                 .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(8.dp))
                 .padding(12.dp)) {
@@ -92,14 +94,14 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
               Image(
                   painter = painterResource(id = R.drawable.user_image),
                   contentDescription = "User profile image",
-                  modifier = Modifier.size(width = 160.dp, height = 150.dp),
+                  modifier = Modifier.size(width = 100.dp, height = 100.dp),
                   contentScale = ContentScale.FillBounds)
               Button(
                   onClick = { /* Handle your click here */},
                   modifier =
                       Modifier.width(90.dp) // Adjusted for visual balance
                           .height(40.dp)
-                          .padding(start = 75.dp),
+                          .padding(start = 30.dp),
                   // Adjusted for visual balance
                   colors = ButtonDefaults.buttonColors(Color.Transparent),
                   contentPadding =
@@ -342,7 +344,7 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
                 .height(43.dp)
                 .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp))) {
           Button(
-              onClick = { showEditProfile = true},
+              onClick = { showEditProfile = true },
               modifier =
                   Modifier.matchParentSize(), // Ensures the Button matches the size of the Box
               colors =
@@ -443,19 +445,63 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
                     }
               }
         }
+    Spacer(modifier = Modifier.height(12.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Box(
+          modifier =
+              Modifier.width(120.dp)
+                  .height(40.dp)
+                  .shadow(elevation = 4.dp, shape = RoundedCornerShape(4.dp))
+                  .clip(
+                      RoundedCornerShape(
+                          8.dp)) // Ensures that the background is clipped to the rounded
+                  // corners
+                  .background(Color(0xFFF4F3F3))
+                  .padding(8.dp),
+          // shape = RoundedCornerShape(8.dp)
+      ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          ClickableText(
+              onClick = {
+                  navController.navigate("LoginScreen")
+              },
+              text = AnnotatedString("Log out"),
+              modifier = Modifier.weight(1f),
+              style =
+                  TextStyle(
+                      fontSize = 14.sp,
+                      fontWeight = FontWeight(400),
+                      color = Color(0xFF11347A),
+                      textAlign = TextAlign.Center))
+
+          Image(
+              painter = painterResource(id = R.drawable.baseline_logout_24),
+              contentDescription = "Log out button",
+              contentScale = ContentScale.FillBounds)
+        }
+      }
+    }
     Spacer(modifier = Modifier.height(124.dp))
     Box(
         Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
             .width(395.dp)
             .height(75.dp)
-            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 8.dp)),
+            .background(color = Color(0xFFF4F3F3), shape = RoundedCornerShape(size = 4.dp)),
     ) {
       Row(
           horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
           verticalAlignment = Alignment.Top,
       ) {
         Image(
-            modifier = Modifier.width(30.dp).height(65.dp),
+            modifier = Modifier.width(30.dp).height(30.dp),
             painter = painterResource(id = R.drawable.settings),
             contentDescription = "image description",
             contentScale = ContentScale.FillBounds)
@@ -487,13 +533,17 @@ fun UserProfileDetail(label: String, detail: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewUserProfile() {
-    class previewUVM: UserViewModel("alitennis131800@gmail.com"){
-        override fun getUser(force: Boolean): User {
-            return User("Ali Tennis",super.uid,"0041234567890", Address("Rte des Essai 40, Apt. 4","Essex","Suisse","1234",
-                LocationMap()
-            )
-            )
-        }
+  class previewUVM : UserViewModel("alitennis131800@gmail.com") {
+    override fun getUser(force: Boolean): User {
+      return User(
+          "Ali Tennis",
+          super.uid,
+          "0041234567890",
+          Address("Rte des Essai 40, Apt. 4", "Essex", "Suisse", "1234", LocationMap()))
     }
-    MaterialTheme { UserProfileScreen(userVM = previewUVM(), navController = NavController(context = LocalContext.current)) }
+  }
+  MaterialTheme {
+    UserProfileScreen(
+        userVM = previewUVM(), navController = NavController(context = LocalContext.current))
+  }
 }

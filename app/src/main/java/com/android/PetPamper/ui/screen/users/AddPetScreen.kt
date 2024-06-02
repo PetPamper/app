@@ -1,5 +1,6 @@
 package com.android.PetPamper.ui.screen.users
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -24,8 +25,10 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -36,6 +39,15 @@ import com.android.PetPamper.ui.screen.register.GalleryImagePicker
 
 @Composable
 fun AddPetScreen(viewModel: AddPetScreenViewModel, onBackPressed: () -> Unit) {
+
+  val errorToast = Toast.makeText(LocalContext.current, viewModel.addPetError, Toast.LENGTH_SHORT)
+
+  LaunchedEffect(key1 = viewModel.goToPreviousScreen) {
+    if (viewModel.goToPreviousScreen) {
+      onBackPressed()
+    }
+  }
+
   Scaffold(
       topBar = {
         TopAppBar(
@@ -116,11 +128,7 @@ fun AddPetScreen(viewModel: AddPetScreenViewModel, onBackPressed: () -> Unit) {
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
           Button(
-              onClick = {
-                if (viewModel.onAddPet()) {
-                  onBackPressed()
-                }
-              },
+              onClick = { viewModel.onAddPet { errorToast.show() } },
               // enabled = viewModel.addPetEnabled.value,
               shape = RoundedCornerShape(50.dp)) {
                 Text(

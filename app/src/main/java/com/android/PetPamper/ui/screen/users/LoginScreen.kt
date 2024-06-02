@@ -86,7 +86,7 @@ fun SignIn(navController: NavHostController) {
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  val firebaseConnection = FirebaseConnection()
+  val firebaseConnection = FirebaseConnection.getInstance()
   var login by remember { mutableStateOf(true) }
 
   var errorMessage by remember { mutableStateOf("Login failed, email or password is incorrect") }
