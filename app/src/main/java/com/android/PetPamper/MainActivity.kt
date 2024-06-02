@@ -158,18 +158,31 @@ fun AppNavigation(client: ChatClient) {
     val signUp = SignUpViewModel()
     val groomerSignUp = GroomerSignUpViewModel()
     val emailViewModel = EmailViewModel()
+  val firebaseConnection = FirebaseConnection.getInstance()
 
+  var startDestination by remember { mutableStateOf("LoginScreen") }
 
   val currentUser = Firebase.auth.currentUser
-  val startDestination =
-      if (currentUser?.email == null) {
-        Log.d("MainActivity", "current user not connected")
-        "LoginScreen"
-      } else {
-        val email = currentUser.email
-        // Log.d("MainActivity", "current email is $email")
-        "HomeScreen/$email"
-      }
+  if (currentUser == null || currentUser.email == null) {
+    Log.d("MainActivity", "current user not connected")
+  } else {
+    val email = currentUser.email
+    firebaseConnection.documentExists("users",
+        email!!,
+        onExists = { startDestination = "HomeScreen/$email"},
+        onNotExists = { Log.d("MainActivity", "Signed out")
+          Firebase.auth.signOut()
+          //Log.d("MainActivity", "Current email: ${currentUser.email ?: ""}" )
+          },
+        onFailure = { Firebase.auth.signOut() }
+    )
+  }
+
+  LaunchedEffect(key1 = startDestination) {
+    if (startDestination != "LoginScreen") {
+      navController.navigate(startDestination)
+    }
+  }
 
   NavHost(navController = navController, startDestination = startDestination) {
     composable("LoginScreen") { SignIn(navController) }
@@ -208,7 +221,7 @@ fun AppNavigation(client: ChatClient) {
     composable("EmailScreen") { EmailScreen(emailViewModel, navController) }
 
     composable("HomeScreen/{email}") { backStackEntry ->
-      val email = currentUser?.email ?: backStackEntry.arguments?.getString("email")
+      val email = backStackEntry.arguments?.getString("email")
       AppNavigation(email, client, navController)
     }
     composable("GroomerHomeScreen/{email}") { backStackEntry ->
@@ -266,7 +279,9 @@ fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavCont
     Scaffold(
         bottomBar = {
             BottomNavigation(
-                backgroundColor = Color.White, modifier = Modifier.height(60.dp).fillMaxWidth()) {
+                backgroundColor = Color.White, modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()) {
                 val currentRoute =
                     navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -278,7 +293,9 @@ fun AppNavigation(email: String?, client: ChatClient, prevNavController: NavCont
                             Icon(
                                 painterResource(id = screen.icon),
                                 contentDescription = null,
-                                modifier = Modifier.size(40.dp).padding(bottom = 4.dp, top = 7.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(bottom = 4.dp, top = 7.dp),
                                 tint = iconColor)
                         },
                         label = { Text(text = screen.label, fontSize = 13.sp, color = iconColor) },
