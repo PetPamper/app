@@ -1,6 +1,5 @@
 package com.android.PetPamper.ui.screen.register
 
-import com.android.PetPamper.viewmodel.AddressViewModel
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -75,6 +74,7 @@ import com.android.PetPamper.model.Groomer
 import com.android.PetPamper.model.GroomerReviews
 import com.android.PetPamper.model.LocationMap
 import com.android.PetPamper.ui.screen.users.CustomTextButton
+import com.android.PetPamper.viewmodel.AddressViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
@@ -671,7 +671,7 @@ fun GroomerRegisterMultipleLayout(
   val shownErrorTexts = remember { mutableStateListOf<String>() }
   val addressVM = AddressViewModel()
   var expandedState by remember { mutableStateOf(false) }
-  val locationOptions = remember { mutableStateListOf<LocationMap>() }
+  val locationOptions = remember { mutableStateListOf<Address>() }
   val focusRequester = remember { FocusRequester() }
 
   for (i in 1..numFields) {
@@ -727,7 +727,18 @@ fun GroomerRegisterMultipleLayout(
                 modifier = Modifier.fillMaxWidth()) {
                   OutlinedTextField(
                       value = textFields[0],
-                      onValueChange = { newValue -> textFields[0] = newValue },
+                      onValueChange = { newValue ->
+                        textFields[0] = newValue
+                        addressVM.fetchAddresses(newValue) { addresses ->
+                          if (addresses != null) {
+                            locationOptions.clear()
+                            locationOptions.addAll(addresses)
+                            Log.d(
+                                "LocationInput",
+                                "Updated location options: ${locationOptions.joinToString { it.location.name }}")
+                          }
+                        }
+                      },
                       label = { Text("Location") },
                       placeholder = { Text("Enter an address") },
                       modifier =
@@ -744,11 +755,11 @@ fun GroomerRegisterMultipleLayout(
                         locationOptions.forEach { location ->
                           DropdownMenuItem(
                               onClick = {
-                                textFields[0] = location.name
-                                viewModel.locationMap = location
+                                textFields[0] = location.location.name
+                                viewModel.locationMap = location.location
                                 expandedState = false
                               }) {
-                                Text(location.name)
+                                Text(location.location.name)
                               }
                         }
                       }

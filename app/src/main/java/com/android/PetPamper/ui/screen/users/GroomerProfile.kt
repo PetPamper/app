@@ -4,6 +4,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,6 +34,8 @@ import com.android.PetPamper.connectUser
 import com.android.PetPamper.createChannel
 import com.android.PetPamper.model.Groomer
 import com.example.PetPamper.ChannelActivity
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
@@ -68,20 +72,19 @@ fun GroomerProfile(
                         contentScale = ContentScale.Crop)
                   }
 
-              Row(
+              FlowRow(
                   modifier = Modifier.fillMaxWidth().padding(16.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween) {
+                  mainAxisSpacing = 10.dp,
+                  crossAxisSpacing = 10.dp,
+                  mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween) {
                     InfoCard(
                         title = "Groomable Pets",
                         description = groomer.petTypes.joinToString(", "),
                         iconResource = R.mipmap.pets_foreground)
-                    Spacer(modifier = Modifier.width(10.dp))
                     InfoCard(
                         title = "Experience years",
                         description = groomer.yearsExperience,
                         iconResource = R.mipmap.calendar_foreground)
-                    Spacer(modifier = Modifier.width(10.dp))
-
                     InfoCard(
                         title = "Location",
                         description = groomer.address.location.name.take(20) + "...",
@@ -177,7 +180,10 @@ fun ChatWithGroomerButton(
                   image = profilePic,
               )
 
-            connectUser(client, groomer, onSuccess = { println("User connected successfully") },
+          connectUser(
+              client,
+              groomer,
+              onSuccess = { println("User connected successfully") },
               onError = { println("Error connecting user: $it") })
           // First, connect the groomer
           // Then, create or load the channel
@@ -273,20 +279,19 @@ fun GroomerLocationMap(
       })
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ServicesSection(ListOfServices: List<String>) {
-  Column(modifier = Modifier.padding(2.dp)) {
-    Text(
-        text = "Types of services provided",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.Black,
-        modifier = Modifier.padding(bottom = 9.dp))
-    Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
-      for (service in ListOfServices) {
-        ServiceItem(serviceName = service)
-      }
-    }
+  Column {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        mainAxisSpacing = 8.dp,
+        crossAxisSpacing = 8.dp,
+        mainAxisAlignment = FlowMainAxisAlignment.Start) {
+          for (service in ListOfServices) {
+            ServiceItem(serviceName = service)
+          }
+        }
   }
 }
 
@@ -337,7 +342,7 @@ fun GroomerProfileCard(
             Text(
                 text = name,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 15.sp,
                 color = Color(0xFF2490DF))
             Text(text = "Pet Groomer", fontSize = 16.sp, color = Color.Gray)
           }

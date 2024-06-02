@@ -1,6 +1,5 @@
 package com.android.PetPamper.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.PetPamper.model.Address
@@ -19,24 +18,35 @@ class AddressViewModel : ViewModel() {
     val addresses = mutableListOf<Address>()
     for (i in 0 until jsonArray.length()) {
       val gcGeometry = jsonArray.getJSONObject(i).getJSONObject("geometry")
-      jsonArray.getJSONObject(i).getJSONObject("properties").getJSONObject("geocoding").let { jsonObj ->
-        val gcLabel =  jsonObj.optString("label","")
-        val gcName = jsonObj.optString("name","")
-        val gcHouse = jsonObj.optString("housenumber","")
-        val gcStreet = jsonObj.optString("street","")
-        val gcPostcode = jsonObj.optString("postcode","")
-        val gcCity = jsonObj.optString("city","")
-        val gcDistrict = jsonObj.optString("district","")
-        val gcCounty = jsonObj.optString("county","")
-        val gcState = jsonObj.optString("state","")
-        val gcCountry = jsonObj.optString("country","")
-        val gcCountryCode = jsonObj.optString("country_code","")
+      jsonArray.getJSONObject(i).getJSONObject("properties").getJSONObject("geocoding").let {
+          jsonObj ->
+        val gcLabel = jsonObj.optString("label", "")
+        val gcName = jsonObj.optString("name", "")
+        val gcHouse = jsonObj.optString("housenumber", "")
+        val gcStreet = jsonObj.optString("street", "")
+        val gcPostcode = jsonObj.optString("postcode", "")
+        val gcCity = jsonObj.optString("city", "")
+        val gcDistrict = jsonObj.optString("district", "")
+        val gcCounty = jsonObj.optString("county", "")
+        val gcState = jsonObj.optString("state", "")
+        val gcCountry = jsonObj.optString("country", "")
+        val gcCountryCode = jsonObj.optString("country_code", "")
         addresses.add(
-          Address(gcStreet.plus(if(gcHouse.isNotEmpty()){" $gcHouse"}else{""}),gcCity,gcState,gcPostcode,
-            LocationMap(
-                latitude = gcGeometry.getJSONArray("coordinates").getDouble(1),
-                longitude = gcGeometry.getJSONArray("coordinates").getDouble(0),
-                name ="${ if(gcName.isNotEmpty()){gcName.plus(": ")}else{""}}$gcStreet $gcHouse, ${if(gcState.isNotEmpty()){"$gcState, "}else if(gcCounty.isNotEmpty()){"$gcCounty, "}else if(gcDistrict.isNotEmpty()){"$gcDistrict, "}else{""} }$gcCountry (${gcCountryCode.uppercase()})")))
+            Address(
+                gcStreet.plus(
+                    if (gcHouse.isNotEmpty()) {
+                      " $gcHouse"
+                    } else {
+                      ""
+                    }),
+                gcCity,
+                gcState,
+                gcPostcode,
+                LocationMap(
+                    latitude = gcGeometry.getJSONArray("coordinates").getDouble(1),
+                    longitude = gcGeometry.getJSONArray("coordinates").getDouble(0),
+                    name =
+                        "${ if(gcName.isNotEmpty()){gcName.plus(": ")}else{""}}$gcStreet $gcHouse, ${if(gcState.isNotEmpty()){"$gcState, "}else if(gcCounty.isNotEmpty()){"$gcCounty, "}else if(gcDistrict.isNotEmpty()){"$gcDistrict, "}else{""} }$gcCountry (${gcCountryCode.uppercase()})")))
       }
     }
     return addresses
@@ -58,13 +68,9 @@ class AddressViewModel : ViewModel() {
 
         val addressList = handleResponse(responseBody)
 
-        withContext(Dispatchers.Main) {
-          onResult(addressList)
-        }
+        withContext(Dispatchers.Main) { onResult(addressList) }
       } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
-          onResult(null)
-        }
+        withContext(Dispatchers.Main) { onResult(null) }
       }
     }
   }
