@@ -22,5 +22,4 @@ https://www.figma.com/file/qlYy5i2OyPBfw2wrRyCuLU/PetPamper?type=design&node-id=
 ### Architecture Diagram
 Below is our architecture diagram for this app, illustrating how we integrate various SDKs and APIs like Firebase, Nominatim, and Google Maps to enhance our app’s functionality.
 
-<img width="809" alt="Screenshot 2024-04-12 at 15 47 13" src="https://github.com/PetPamper/PetPamper/assets/91835061/0c045c35-2381-47dd-b56a-f5a4accd1201">
-
+<img width="697" alt="Screenshot 2024-06-02 at 17 43 11" src="https://github.com/PetPamper/PetPamper/assets/91835061/d6728653-80d4-40a2-9c5a-40010dabb611">
