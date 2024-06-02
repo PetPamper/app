@@ -253,9 +253,11 @@ class FirebaseConnection private constructor() : Database() {
 
     return source.task
   }
+
   fun changeUserImage(email: String, image: String) {
     db.collection("users").document(email).update("profilePictureUrl", image)
   }
+
   fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("groomers")
         .document(groomer.email) // Using email as a unique identifier; adjust if needed
@@ -558,9 +560,13 @@ class FirebaseConnection private constructor() : Database() {
     return res
   }
 
-    fun sendNotificationToGroomer(context: Context, groomerEmail: String, title: String, content: String) {
-        val notificationHelper = NotificationHelper(context)  // Pass the provided context
-        notificationHelper.showNotification(title, content)
-    }
-
+  fun sendNotificationToGroomer(
+      context: Context,
+      groomerEmail: String,
+      title: String,
+      content: String
+  ) {
+    val notificationHelper = NotificationHelper(context) // Pass the provided context
+    notificationHelper.showNotification(title, content)
+  }
 }
