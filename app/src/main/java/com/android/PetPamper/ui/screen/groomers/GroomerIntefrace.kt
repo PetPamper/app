@@ -53,7 +53,7 @@ fun GroomerHomeScreen(email: String) {
                 onClick = { selectedItem = index })
           }
         }
-      }) {
+      }) {it
         navItems[selectedItem].screen()
       }
 }
