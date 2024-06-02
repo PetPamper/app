@@ -306,6 +306,24 @@ class FirebaseConnection : Database() {
     }
   }
 
+    fun deleteReservedHours(email: String, date: String, hour: Long){
+        db.collection("groomerAvailabilities")
+            .document(email)
+            .collection("dates")
+            .document(date)
+            .collection("availableHours")
+            .document(hour.toString())
+            .delete()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    println("Hour deleted ${hour}")
+                } else {
+                    println("Error deleting hour: ${task.exception?.message}")
+                }
+            }
+
+    }
+
   fun getUserUidByEmail(email: String): Task<QuerySnapshot> {
     return db.collection(COLLECTION_USER).whereEqualTo("email", email).get()
   }
