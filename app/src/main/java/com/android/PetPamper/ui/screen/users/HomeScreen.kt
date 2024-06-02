@@ -71,7 +71,6 @@ fun HomeScreen(navController: NavController, email: String?) {
         email,
         PetListViewModel(email, PetDataHandler(firebaseConnection)),
         resa.value)
-
   }
 }
 
@@ -89,9 +88,7 @@ fun CarouselCard(
   val scope = rememberCoroutineScope()
   val scrollState = rememberScrollState()
 
-  Column(modifier = Modifier
-      .fillMaxSize()
-      .verticalScroll(scrollState)) {
+  Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
     Row(modifier = Modifier.padding(15.dp)) {
       Text(text = "Your pets", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color.Gray)
     }
@@ -105,10 +102,7 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState,
           contentPadding = PaddingValues(horizontal = 5.dp),
-          modifier = Modifier
-              .height(300.dp)
-              .width(350.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(300.dp).width(350.dp).weight(1f)) { page ->
             val pet = petListViewModel.petsList.getOrNull(page)
             Card(
                 shape = RoundedCornerShape(10.dp),
@@ -146,9 +140,8 @@ fun CarouselCard(
                     }
                     Box(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f), // or your desired aspect ratio
+                            Modifier.fillMaxWidth()
+                                .aspectRatio(16f / 9f), // or your desired aspect ratio
                         contentAlignment = Alignment.Center) {
                           AsyncImage(
                               model =
@@ -164,9 +157,7 @@ fun CarouselCard(
                               )
                         }
 
-                    Spacer(modifier = Modifier
-                        .height(8.dp)
-                        .width(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp).width(10.dp))
                   }
                 }
           }
@@ -214,9 +205,7 @@ fun CarouselCard(
       HorizontalPager(
           state = pageState2,
           contentPadding = PaddingValues(horizontal = 10.dp),
-          modifier = Modifier
-              .height(180.dp)
-              .weight(1f)) { page ->
+          modifier = Modifier.height(180.dp).weight(1f)) { page ->
             Card(
                 shape = RoundedCornerShape(10.dp),
                 modifier =
@@ -233,41 +222,36 @@ fun CarouselCard(
                     }) {
                   Box(
                       modifier =
-                      Modifier
-                          .padding(16.dp)
-                          // .background(Color.White, RoundedCornerShape(10.dp))
-                          .height(150.dp)
-                          .fillMaxWidth()) {
+                          Modifier.padding(16.dp)
+                              // .background(Color.White, RoundedCornerShape(10.dp))
+                              .height(150.dp)
+                              .fillMaxWidth()) {
                         if (currentReservations != null) {
                           Row(modifier = Modifier.padding(8.dp)) {
                             // Profile picture
                             Image(
                                 painter = painterResource(id = R.drawable.profile),
                                 contentDescription = "Profile Picture",
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape))
+                                modifier = Modifier.size(60.dp).clip(CircleShape))
 
                             // Spacer
-                            Spacer(modifier = Modifier
-                                .height(8.dp)
-                                .width(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp).width(10.dp))
 
                             // Details: Name, age, distance
                             Column {
                               Text(
                                   text = currentReservations.groomerName,
                                   fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.height(5.dp))
+                              Spacer(modifier = Modifier.height(5.dp))
                               Text(text = "Price: ${currentReservations.price}")
-                                Spacer(modifier = Modifier.height(5.dp))
+                              Spacer(modifier = Modifier.height(5.dp))
                               Text(
                                   text =
                                       "Experience Years: ${currentReservations.experienceYears} years")
-                                Spacer(modifier = Modifier.height(5.dp))
-                                    Text(text = "Date : ${currentReservations.date}")
-                                    Spacer(modifier = Modifier.height(5.dp))
-                                    Text(text = "Hour: ${currentReservations.hour}")
+                              Spacer(modifier = Modifier.height(5.dp))
+                              Text(text = "Date : ${currentReservations.date}")
+                              Spacer(modifier = Modifier.height(5.dp))
+                              Text(text = "Hour: ${currentReservations.hour}")
                             }
                           }
 
@@ -278,7 +262,6 @@ fun CarouselCard(
                           Column(
                               verticalArrangement = Arrangement.spacedBy(4.dp),
                               modifier = Modifier.align(Alignment.BottomCenter)) {
-
                                 Spacer(modifier = Modifier.height(10.dp))
                               }
 
@@ -293,7 +276,6 @@ fun CarouselCard(
                                 Text("Chat")
                               }
                         }
-
                       }
                 }
           }
