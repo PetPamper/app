@@ -88,15 +88,20 @@ fun BookingScreen(groomerEmail: String, userEmail: String, navController: NavCon
     val selectedHourKey = selectedDateToString(selectedDate.value)
 
     val selectedHour = selectedHoursMap[selectedHourKey]?.let { "$it:00" }
+
+
     Spacer(modifier = Modifier.height(16.dp))
 
     if (selectedHour != null) {
+        val selectedHourForDeletion = selectedHoursMap[selectedHourKey]?.let { it }
+        val hourTimestamp = createTimestamp(selectedDate.value, selectedHourForDeletion!!)
       ConfirmReservation(
           groomerEmail = groomerEmail,
           userEmail = userEmail,
           selectedDate = selectedDateToString(selectedDate.value),
           selectedHour = selectedHour,
           onConfirmation = {
+              firebaseConnection.deleteReservedHours(groomerEmail, selectedDateToString(selectedDate.value), hourTimestamp)
             navController.navigate(
                 "reservationConfirmation/${groomerEmail}/${userEmail}/${selectedDateToString(selectedDate.value)}/${selectedHour}")
             println("Reservation Confirmed")
@@ -107,6 +112,17 @@ fun BookingScreen(groomerEmail: String, userEmail: String, navController: NavCon
           })
     }
   }
+}
+
+fun createTimestamp(selectedDate: Calendar, hour: Int): Long {
+    val calendar = Calendar.getInstance().apply {
+        time = selectedDate.time
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    return calendar.timeInMillis
 }
 
 @Composable
