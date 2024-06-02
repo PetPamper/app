@@ -88,7 +88,7 @@ fun CaptureCamera(email: String) {
     }
 
     if (capturedImageUri.path?.isNotEmpty() == true) {
-        val firebaseConnection = FirebaseConnection()
+        val firebaseConnection = FirebaseConnection.getInstance()
         var uri = capturedImageUri
         var imageUri = capturedImageUri.path
         if (uri != null) {
