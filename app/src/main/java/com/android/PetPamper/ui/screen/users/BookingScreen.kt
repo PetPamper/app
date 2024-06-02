@@ -282,16 +282,19 @@ fun ConfirmReservation(
                 userEmail = userEmail,
                 date = selectedDate,
                 hour = selectedHour)
-        firebaseConnection.addReservationToFirebase(reservation, context, onConfirmation = {
-            // Here, you send the notification after confirmation of reservation
-            firebaseConnection.sendNotificationToGroomer(
-                context, // Passing the Compose local context
-                groomerEmail,
-                "New Booking",
-                "You have a new booking from $userEmail on $selectedDate at $selectedHour."
-            )
-            onConfirmation() // Proceed to confirm the action in UI
-        }, onError)
+        firebaseConnection.addReservationToFirebase(
+            reservation,
+            context,
+            onConfirmation = {
+              // Here, you send the notification after confirmation of reservation
+              firebaseConnection.sendNotificationToGroomer(
+                  context, // Passing the Compose local context
+                  groomerEmail,
+                  "New Booking",
+                  "You have a new booking from $userEmail on $selectedDate at $selectedHour.")
+              onConfirmation() // Proceed to confirm the action in UI
+            },
+            onError)
       },
       modifier = Modifier.fillMaxWidth(),
       colors = ButtonDefaults.buttonColors(Color(0xFF2196F3)),

@@ -10,7 +10,6 @@ open class UserViewModel(var email: String) : ViewModel() {
   private var isLoaded = false
   private val firebaseConnection: FirebaseConnection = FirebaseConnection.getInstance()
 
-
   open fun getUser(force: Boolean = false): User {
     if (!isLoaded || force) {
       fetchUser()
