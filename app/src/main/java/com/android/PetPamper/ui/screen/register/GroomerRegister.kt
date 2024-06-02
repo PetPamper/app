@@ -120,7 +120,7 @@ fun GroomerRegister(
           1,
           "Let’s start with your name",
           "Name",
-          isValidInput = ::isValidName,
+          isValidInput = { input -> isValidName(input).first },
           errorText = "Please enter a valid name.",
           onNext = { newName ->
             viewModel.name = newName
@@ -133,7 +133,7 @@ fun GroomerRegister(
             2,
             "Hello ${viewModel.name}, enter your email",
             "Email",
-            isValidEmail = ::isValidEmail1,
+            isValidInput = { input -> isValidEmail(input).first },
             errorText = "Please enter a valid email.",
             onNext = { newEmail ->
               viewModel.email = newEmail
@@ -145,7 +145,7 @@ fun GroomerRegister(
             3,
             "What’s your phone number?",
             "Phone Number",
-            isValidInput = ::isValidPhone,
+            isValidInput = { input -> isValidPhone(input).first },
             errorText = "Please enter a valid phone number.",
             onNext = { newPhoneNumber ->
               viewModel.phoneNumber = newPhoneNumber
@@ -157,7 +157,7 @@ fun GroomerRegister(
             4,
             "Great! Create your password",
             "Password",
-            isValidInput = ::isValidPassword,
+            isValidInput = { input -> isValidPassword(input).first },
             errorText = "Password must be at least 8 characters.",
             onNext = { password ->
               viewModel.password = password

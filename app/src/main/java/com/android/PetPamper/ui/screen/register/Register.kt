@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.android.PetPamper.R
@@ -80,33 +81,23 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 
-class SignUpViewModel {
-
-  var name by mutableStateOf("")
-  var email by mutableStateOf("")
-  var phoneNumber by mutableStateOf("")
-  var address by mutableStateOf(Address("", "", "", "", LocationMap()))
-  var password by mutableStateOf("")
-  var locationMap: LocationMap = LocationMap()
-}
-
 @Composable
 fun Register(
     viewModel: SignUpViewModel,
     navController: NavController,
-    hasGroomerAccount: Boolean = false
 ) {
-  val firebaseConnection = FirebaseConnection.getInstance()
-  val db = Firebase.firestore
-
-  val initialStep = if (!hasGroomerAccount) 1 else 10
-  var currentStep by remember { mutableIntStateOf(initialStep) }
-
-  var registeredAsGroomer by remember { mutableStateOf(false) }
-
-  when (currentStep) {
-    1 -> {
-      Column {
+  when (viewModel.currentStep) {
+      1, 2, 3, 5 ->
+          RegisterLayout(
+              viewModel = viewModel,
+              currentStep = viewModel.currentStep,
+              isAddress = false,
+              isEmail = false,
+              textShown = viewModel.curTextShown,
+              fieldName = viewModel.curFieldName,
+              onNext = { viewModel.onNext() }
+          )
+    1 ->
         RegisterLayout(
             viewModel = viewModel,
             1,
@@ -118,8 +109,6 @@ fun Register(
               viewModel.name = newName
               currentStep++
             })
-      }
-    }
     2 ->
         RegisterLayout(
             viewModel,
@@ -193,205 +182,15 @@ fun Register(
           })
     }
     7 -> {
-      if (!registeredAsGroomer) {
-        firebaseConnection.registerUser(
-            viewModel.email,
-            viewModel.password,
-            onSuccess = {
-              val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-              firebaseConnection.addUser(
-                  User(
-                      viewModel.name,
-                      viewModel.email,
-                      viewModel.phoneNumber,
-                      viewModel.address,
-                      0,
-                      "",
-                      uid),
-                  onSuccess = { currentStep++ },
-                  onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-            },
-            onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-      } else {
-        // Need to check that user wasn't already registered to avoid duplicate accounts
-        val userRef = db.collection("users").document(viewModel.email)
-        userRef
-            .get()
-            .addOnSuccessListener { document ->
-              if (!document.exists()) {
-                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                firebaseConnection.addUser(
-                    User(
-                        viewModel.name,
-                        viewModel.email,
-                        viewModel.phoneNumber,
-                        viewModel.address,
-                        0,
-                        "",
-                        uid),
-                    onSuccess = { currentStep++ },
-                    onFailure = { error -> Log.e("SignUp", "Registration failed", error) })
-              } else {
-                Log.e("AlreadyRegistered", "user was already registered")
-              }
-            }
-            .addOnFailureListener { exception ->
-              Log.e("Firebase query", "Get failed with ", exception)
-            }
-      }
+        viewModel.register()
     }
     8 -> {
-      BoxWithConstraints(
-          modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ForgetPassword")) {
-            with(LocalDensity.current) { constraints.maxHeight.toDp() }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()) {
-                  Text(
-                      text = "Congratulation! You successfully created an account.",
-                      style =
-                          TextStyle(
-                              fontSize = 20.sp,
-                              lineHeight = 24.sp,
-                              fontWeight = FontWeight(800),
-                              color = Color(0xFF2490DF),
-                              textAlign = TextAlign.Center,
-                          ),
-                      modifier = Modifier.testTag("SuccessfullMessage"))
-                  Spacer(modifier = Modifier.height(20.dp))
-                  Spacer(modifier = Modifier.height(10.dp))
-                  Image(
-                      painter = painterResource(id = R.drawable.check_success),
-                      contentDescription = "Succuss Icon",
-                      modifier = Modifier.size(120.dp).clip(CircleShape))
-                  Column(
-                      modifier = Modifier.fillMaxSize().padding(16.dp),
-                      verticalArrangement = Arrangement.Bottom,
-                      horizontalAlignment = Alignment.End) {
-                        Button(
-                            onClick = { navController.navigate("LoginScreen") },
-                            modifier =
-                                Modifier.wrapContentWidth(), // Make the button wrap its content
-                            colors =
-                                ButtonDefaults.buttonColors( // Set the button's background color
-                                    containerColor = Color(0xFF2491DF))) {
-                              Icon(
-                                  imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                  contentDescription = "Go forward",
-                                  tint = Color.White // Set the icon color to blue
-                                  )
-                            }
-                      }
-                }
-          }
+        SuccessScreen {
+            viewModel.onRegistrationSuccess()
+        }
     }
     10 -> {
-      var email by remember { mutableStateOf("") }
-      var password by remember { mutableStateOf("") }
-      var login by remember { mutableStateOf(true) }
-
-      var errorMessage by remember {
-        mutableStateOf("Login failed, email or password is incorrect")
-      }
-
-      Column(
-          horizontalAlignment = Alignment.Start,
-          verticalArrangement = Arrangement.Center,
-          modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(
-                text = "Please enter your user credentials",
-                style =
-                    TextStyle(
-                        fontSize = 23.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = FontWeight(800),
-                        color = Color(0xFF2490DF),
-                        textAlign = TextAlign.Center,
-                    ),
-                modifier = Modifier.testTag("AlreadyUserText"))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth())
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth())
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            if (!login) {
-              Text(
-                  text = errorMessage,
-                  color = Color.Red,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth().testTag("ErrorMessage"))
-
-              Spacer(modifier = Modifier.height(4.dp))
-            }
-
-            CustomTextButton("Forgot password?", "", "forgetButton") {
-              navController.navigate("EmailScreen")
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = {
-                  errorMessage = ""
-                  if (email.isBlank() || password.isBlank()) {
-                    login = false
-                  } else {
-                    firebaseConnection.loginUser(
-                        email,
-                        password,
-                        {
-                          val groomerRef = db.collection("groomers").document(email)
-                          groomerRef
-                              .get()
-                              .addOnSuccessListener { document ->
-                                if (document.exists()) {
-                                  login = true
-                                  Log.d(
-                                      "Firebase query",
-                                      "User found," + " name is ${document.get("name")}")
-                                  viewModel.name = document.get("name").toString()
-                                  viewModel.email = document.get("email").toString()
-                                  viewModel.phoneNumber = document.get("phoneNumber").toString()
-                                  registeredAsGroomer = true
-                                  currentStep = 4
-                                } else {
-                                  login = false
-                                  errorMessage = "Groomer is not registered"
-                                  Log.e("Firebase query", "No such groomer")
-                                }
-                              }
-                              .addOnFailureListener { exception ->
-                                login = false
-                                errorMessage = "Login failed, email or password is incorrect"
-                                Log.e("Firebase query", "Get failed with ", exception)
-                              }
-                        },
-                        { login = false })
-                  }
-                },
-                colors = ButtonDefaults.buttonColors(Color(0xFF2491DF)),
-                modifier = Modifier.fillMaxWidth().height(48.dp).testTag("LoginButton")) {
-                  Text("LOG IN", fontSize = 18.sp)
-                }
-          }
+        LoginComponent(viewModel::onForgotPassword)
     }
 
   // Add more steps as needed
@@ -467,20 +266,26 @@ fun RegisterLayout(
   }
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("RegisterScreen")) {
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp)
+          .testTag("RegisterScreen")) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()) {
               Row(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = 16.dp)
-                          .testTag("RegisterScreen")) {
+                  Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 16.dp)
+                      .testTag("RegisterScreen")) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Go back",
-                        modifier = Modifier.clickable {}.size(30.dp),
+                        modifier = Modifier
+                            .clickable {}
+                            .size(30.dp),
                         tint = Color.Black)
 
                     Spacer(modifier = Modifier.width(20.dp))
@@ -511,7 +316,9 @@ fun RegisterLayout(
                         if (fieldName == "Password" || fieldName == "Confirm Password")
                             PasswordVisualTransformation()
                         else VisualTransformation.None,
-                    modifier = Modifier.fillMaxWidth().testTag("inputText"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("inputText"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -549,10 +356,11 @@ fun RegisterLayout(
                           label = { Text("Location") },
                           placeholder = { Text("Enter an address") },
                           modifier =
-                              Modifier.fillMaxWidth()
-                                  .menuAnchor()
-                                  .focusRequester(focusRequester)
-                                  .testTag("inputText"),
+                          Modifier
+                              .fillMaxWidth()
+                              .menuAnchor()
+                              .focusRequester(focusRequester)
+                              .testTag("inputText"),
                           trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
                           },
@@ -576,7 +384,9 @@ fun RegisterLayout(
                   text = errorText,
                   color = MaterialTheme.colorScheme.error,
                   style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.padding(top = 4.dp).testTag("errorText"))
+                  modifier = Modifier
+                      .padding(top = 4.dp)
+                      .testTag("errorText"))
 
               if (isAddress) {
 
@@ -585,7 +395,9 @@ fun RegisterLayout(
                     onValueChange = { city = it },
                     label = { Text("city") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("cityTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("cityTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -603,7 +415,9 @@ fun RegisterLayout(
                     onValueChange = { state = it },
                     label = { Text("State") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("stateTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("stateTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -621,7 +435,9 @@ fun RegisterLayout(
                     onValueChange = { postalCode = it },
                     label = { Text("Postal Code") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("postalTag"),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("postalTag"),
                     colors =
                         OutlinedTextFieldDefaults.colors(
                             focusedBorderColor =
@@ -639,17 +455,23 @@ fun RegisterLayout(
                 Column(
                     modifier =
                         if (isKeyboardOpen().value) {
-                          Modifier.fillMaxWidth().padding(bottom = 50.dp, start = 16.dp)
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 50.dp, start = 16.dp)
                         } else {
-                          Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         },
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.End) {
                       Button(
                           onClick = { proceedWithNext() },
                           modifier =
-                              Modifier.wrapContentWidth()
-                                  .testTag("arrowButton"), // Make the button wrap its content
+                          Modifier
+                              .wrapContentWidth()
+                              .testTag("arrowButton"), // Make the button wrap its content
                           colors =
                               ButtonDefaults.buttonColors( // Set the button's background color
                                   containerColor = Color(0xFF2491DF))) {
@@ -672,7 +494,10 @@ fun RegisterLayout(
                           progress = { progress },
                           color = Color(0xFF2491DF),
                           modifier =
-                              Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(10.dp)))
+                          Modifier
+                              .fillMaxWidth()
+                              .height(8.dp)
+                              .clip(RoundedCornerShape(10.dp)))
                     }
               }
             }
@@ -697,51 +522,68 @@ fun isKeyboardOpen(): State<Boolean> {
   return rememberUpdatedState(newValue = keyboardOpen)
 }
 
-fun isValidName(name: String) = name.isNotBlank() // Add more conditions as necessary
+@Composable
+fun SuccessScreen(onClick: () -> Unit) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .testTag("BoxWithConstraints")) {
+        with(LocalDensity.current) { constraints.maxHeight.toDp() }
 
-fun isValidEmail(email: String) =
-    email.contains('@') && email.contains('.') // Simplified validation
-
-fun isValidEmail1(email: String): Pair<Boolean, Boolean> {
-  val firebaseConnection = FirebaseConnection.getInstance()
-  var alreadyinuse = false
-  var isValid = false
-  firebaseConnection
-      .verifyEmail(email, "groomer")
-      .addOnCompleteListener { isExist ->
-        if (isExist.isSuccessful) {
-          val emailExists = isExist.result
-          if (emailExists) {
-            alreadyinuse = true
-          } else {
-            alreadyinuse = false
-          }
-        } else {
-          alreadyinuse = false
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Congratulation! You successfully created an account.",
+                style =
+                TextStyle(
+                    fontSize = 20.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight(800),
+                    color = Color(0xFF2490DF),
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.testTag("SuccessfullMessage"))
+            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Image(
+                painter = painterResource(id = R.drawable.check_success),
+                contentDescription = "Success Icon",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End) {
+                Button(
+                    onClick = {
+                        //navController.navigate("LoginScreen")
+                        onClick()
+                              },
+                    modifier =
+                    Modifier.wrapContentWidth(), // Make the button wrap its content
+                    colors =
+                    ButtonDefaults.buttonColors( // Set the button's background color
+                        containerColor = Color(0xFF2491DF))) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Go forward",
+                        tint = Color.White // Set the icon color to blue
+                    )
+                }
+            }
         }
-      }
-      .addOnFailureListener { alreadyinuse = true }
-  isValid = email.contains('@') && email.contains('.')
-
-  return Pair(isValid, alreadyinuse)
+    }
 }
-
-// More robust validation
-fun isValidPhone(phone: String): Boolean {
-  var _phone = phone.replace(Regex("-|\\s"), "")
-  if (_phone.startsWith("+")) {
-    _phone = _phone.replaceFirst("+", "00")
-  }
-  return _phone.matches(Regex("\\d*")) && phone.isNotBlank()
-}
-
-fun isValidPassword(password: String) = password.length >= 8 // Basic condition for demonstration
 
 @Preview
 @Composable
 fun RegisterPreview() {
-  val viewModel = remember { SignUpViewModel() } // In actual app, provide this via ViewModel
-
   val navController = rememberNavController()
+    val viewModel = remember { SignUpViewModel(navController) } // In actual app, provide this via ViewModel
   Register(viewModel, navController)
 }

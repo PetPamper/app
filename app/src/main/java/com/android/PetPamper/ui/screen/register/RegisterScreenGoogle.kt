@@ -149,17 +149,17 @@ fun SignUpScreenLayoutGoogle(
 
     when (fieldname) {
       "Name" ->
-          if (!isValidName(textField)) {
+          if (!isValidName(textField).first) {
             errorText = "Please enter a valid name."
             isValidInput = false
           }
       "Email" ->
-          if (!isValidEmail(textField)) {
+          if (!isValidEmail(textField).first) {
             errorText = "Please enter a valid email."
             isValidInput = false
           }
       "Password" ->
-          if (!isValidPassword(textField)) {
+          if (!isValidPassword(textField).first) {
             errorText = "Password must be at least 8 characters."
             isValidInput = false
           }
