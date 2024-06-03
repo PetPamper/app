@@ -27,15 +27,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+
 import com.android.PetPamper.database.FirebaseConnection
 import com.google.firebase.storage.FirebaseStorage
+
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
+
 fun CaptureCamera(email: String) {
+
 
   val context = LocalContext.current
   val file = context.createImageFile()
@@ -77,6 +81,7 @@ fun CaptureCamera(email: String) {
             }
       }
 
+
   if (capturedImageUri.path?.isNotEmpty() == true) {
     val firebaseConnection = FirebaseConnection.getInstance()
     var uri = capturedImageUri
@@ -110,6 +115,7 @@ fun CaptureCamera(email: String) {
         painter = rememberImagePainter(capturedImageUri),
         contentDescription = null)
   }
+
 }
 
 fun Context.createImageFile(): File {
