@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -51,77 +50,68 @@ fun ReservationConfirmation(navController: NavController, backStackEntry: NavBac
         cost.value = it.price
       }
 
-    //review if the app UX isnt perf
-    val isLoading = remember { mutableStateOf(true) }
-    val errorMessage = remember { mutableStateOf("") }
-
+  // review if the app UX isnt perf
+  val isLoading = remember { mutableStateOf(true) }
+  val errorMessage = remember { mutableStateOf("") }
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp).background(Color.White),
       horizontalAlignment = Alignment.Start,
       verticalArrangement = Arrangement.Center) {
-      /* if (isLoading.value) {
-          CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-          Text("Loading...", modifier = Modifier.align(Alignment.CenterHorizontally))
-      } else if (errorMessage.value.isNotEmpty()) {
-          Text(
-              text = "Error: ${errorMessage.value}",
-              color = Color.Red,
-              modifier = Modifier.align(Alignment.CenterHorizontally)
-          )
-      } else { */
-          Image(
-              painter = painterResource(id = R.mipmap.confirmation),
-              contentDescription = "Confirmation Icon",
-              modifier = Modifier.size(100.dp).align(Alignment.CenterHorizontally)
-          )
+        /* if (isLoading.value) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text("Loading...", modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else if (errorMessage.value.isNotEmpty()) {
+            Text(
+                text = "Error: ${errorMessage.value}",
+                color = Color.Red,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        } else { */
+        Image(
+            painter = painterResource(id = R.mipmap.confirmation),
+            contentDescription = "Confirmation Icon",
+            modifier = Modifier.size(100.dp).align(Alignment.CenterHorizontally))
 
-          Text(
-              text = "Appointment confirmed:",
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-              modifier = Modifier.padding(top = 24.dp)
-          )
-          Text(
-              text = "Date: ${selectedDate} at ${selectedHour}",
-              fontSize = 18.sp,
-              modifier = Modifier.padding(top = 8.dp)
-          )
-          Text(
-              text = "Groomer: ${GroomerName.value}",
-              fontSize = 18.sp,
-              modifier = Modifier.padding(top = 8.dp)
-          )
-          Text(
-              text = "Services: ${GroomerServices.joinToString(", ")}",
-              fontSize = 18.sp,
-              modifier = Modifier.padding(top = 8.dp)
-          )
-          Text(
-              text = "Total: $${cost.value}",
-              fontSize = 18.sp,
-              modifier = Modifier.padding(top = 8.dp)
-          )
-          Text(
-              text = "We sent you a confirmation by email at this address: ${userEmail}",
-              fontSize = 16.sp,
-              modifier = Modifier.padding(top = 16.dp)
-          )
+        Text(
+            text = "Appointment confirmed:",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 24.dp))
+        Text(
+            text = "Date: ${selectedDate} at ${selectedHour}",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(top = 8.dp))
+        Text(
+            text = "Groomer: ${GroomerName.value}",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(top = 8.dp))
+        Text(
+            text = "Services: ${GroomerServices.joinToString(", ")}",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(top = 8.dp))
+        Text(
+            text = "Total: $${cost.value}",
+            fontSize = 18.sp,
+            modifier = Modifier.padding(top = 8.dp))
+        Text(
+            text = "We sent you a confirmation by email at this address: ${userEmail}",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 16.dp))
 
-          Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-          Button(
-              onClick = { navController.navigate(BarScreen.Groomers.route) },
-              modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
-              colors =
-              ButtonDefaults.buttonColors(
-                  backgroundColor = Color(0xFF2196F3),
-              ),
-              shape = RoundedCornerShape(8.dp)
-          ) {
+        Button(
+            onClick = { navController.navigate(BarScreen.Groomers.route) },
+            modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
+            colors =
+                ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xFF2196F3),
+                ),
+            shape = RoundedCornerShape(8.dp)) {
               Text("Make another reservation", fontSize = 18.sp, color = Color.White)
-          }
+            }
       }
-  }
+}
 
-//}
+// }
