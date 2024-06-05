@@ -27,13 +27,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+
+import com.android.PetPamper.database.FirebaseConnection
+import com.google.firebase.storage.FirebaseStorage
+
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun CaptureCamera() {
+
+fun CaptureCamera(email: String) {
+
 
   val context = LocalContext.current
   val file = context.createImageFile()
@@ -75,10 +81,41 @@ fun CaptureCamera() {
             }
       }
 
-  Image(
-      modifier = Modifier.padding(16.dp, 8.dp),
-      painter = rememberImagePainter(capturedImageUri),
-      contentDescription = null)
+
+  if (capturedImageUri.path?.isNotEmpty() == true) {
+    val firebaseConnection = FirebaseConnection.getInstance()
+    var uri = capturedImageUri
+    var imageUri = capturedImageUri.path
+    if (uri != null) {
+
+      // Get a reference to the storage service
+      val storageRef = FirebaseStorage.getInstance().reference
+
+      val fileRef = storageRef.child("images/${uri.lastPathSegment}")
+      val uploadTask = fileRef.putFile(uri)
+
+      uploadTask
+          .addOnSuccessListener { taskSnapshot ->
+            taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
+              imageUri = downloadUri.toString() // Store download URI instead of local URI
+              // viewModel.profilePicture = downloadUri.toString()
+              firebaseConnection.changeUserImage(email, downloadUri.toString())
+            }
+          }
+          .addOnFailureListener {
+            // Handle unsuccessful uploads
+            Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+          }
+    } else {
+      imageUri = null
+      // viewModel.profilePicture = imageUri.toString()
+    }
+    Image(
+        modifier = Modifier.padding(16.dp, 8.dp),
+        painter = rememberImagePainter(capturedImageUri),
+        contentDescription = null)
+  }
+
 }
 
 fun Context.createImageFile(): File {

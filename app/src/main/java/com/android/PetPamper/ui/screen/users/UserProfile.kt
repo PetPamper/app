@@ -47,7 +47,9 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
   var showCamera by remember { mutableStateOf(false) }
 
   if (showCamera) {
-    CaptureCamera()
+
+    CaptureCamera(user.email)
+
   } else {
     if (showEditProfile) {
       EditProfileDialog(
@@ -148,10 +150,10 @@ fun UserProfileScreen(navController: NavController, userVM: UserViewModel) {
                                           TextStyle(
                                               fontSize = 8.sp, // Adjusted for readability
                                               fontWeight = FontWeight.Bold, // Makes text bold
-                                              color =
-                                                  Color
-                                                      .Black // Changed for better visibility
-                                                             // against
+
+                                              color = Color.Black // Changed for better visibility
+                                              // against
+
                                               // likely dark images
                                               ))
                                 }

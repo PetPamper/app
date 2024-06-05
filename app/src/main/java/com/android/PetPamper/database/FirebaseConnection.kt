@@ -254,6 +254,10 @@ class FirebaseConnection private constructor() : Database() {
     return source.task
   }
 
+  fun changeUserImage(email: String, image: String) {
+    db.collection("users").document(email).update("profilePictureUrl", image)
+  }
+
   fun addGroomer(groomer: Groomer, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     db.collection("groomers")
         .document(groomer.email) // Using email as a unique identifier; adjust if needed
